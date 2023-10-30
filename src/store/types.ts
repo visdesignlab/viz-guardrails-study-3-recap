@@ -37,6 +37,7 @@ export interface TrrackedState {
 export interface UnTrrackedState {
   // Three identifiers given by the study platform
   steps: Record<string, Step>;
+  isRecording: boolean;
 
   config: StudyConfig;
 }

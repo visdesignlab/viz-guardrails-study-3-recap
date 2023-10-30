@@ -20,10 +20,10 @@ interface ClickAccuracyTest {
   speed: number;
   clickX: number;
   clickY: number;
-}
+} 
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const ClickAccuracyTest = ({ parameters, trialId }: { parameters: any, trialId: string }) => {
+const ClickAccuracyTest = ({ parameters, trialId,  }: { parameters: any, trialId: string }) => {
   const [ref, dms] = useChartDimensions(chartSettings);
   const [x, setX] = useState(100);
   const [y, setY] = useState(100);

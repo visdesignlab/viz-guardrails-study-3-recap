@@ -21,6 +21,7 @@ export type ProvenanceStorage = {
   startFirestore: () => void;
   saveNewProvenanceNode(trrack: StudyProvenance): void;
   saveStudyConfig(config: StudyConfig, studyId: string): Promise<{path: string, order: string[]}[]>;
+  saveAudioFile(stream: MediaRecorder, sessionId: string): Promise<void>;
   completeSession(sessionId: string): Promise<void>;
   abandonSession(sessionId: string): Promise<void>;
 };

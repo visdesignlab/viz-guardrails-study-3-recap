@@ -20,6 +20,8 @@ import { getFirestoreManager } from './firebase';
 import { FsSession, ProvenanceStorage } from './types';
 import { OrderObject, StudyConfig } from '../parser/types';
 import latinSquare from '@quentinroy/latin-square';
+import { getStorage, ref, uploadBytes } from 'firebase/storage';
+
 
 
 /**
@@ -121,6 +123,9 @@ export async function initFirebase(
     },
     saveStudyConfig(config, studyId) {
       return saveStudyConfig(firestore, config, studyId);
+    },
+    saveAudioFile(stream, sessionId) {
+      return Promise.resolve(saveAudioFile(firestore, sessionId, stream));
     },
     saveNewProvenanceNode(trrack: StudyProvenance) {
       return saveProvenanceNode(firestore, trrack.root.id, trrack.current);
@@ -316,6 +321,31 @@ async function saveProvenanceNode(
   await loadProvenance(store, sessionId, false);
 
   return addedNode;
+}
+
+async function saveAudioFile(
+  store: Firestore,
+  sessionId: string,
+  audioStream: MediaRecorder,
+) {
+
+  audioStream.addEventListener('dataavailable', (data) => {
+    console.log(data);
+    const storage = getStorage();
+
+    const storeRef = ref(storage, sessionId);
+
+    uploadBytes(storeRef, data.data).then((snapshot) => {
+      console.log('Uploaded a blob or file!');
+    });
+  });
+
+  console.log('stopping');
+
+
+  audioStream.stop();
+
+  audioStream.stream.getTracks().forEach((track) => track.stop());
 }
 
 async function saveStudyConfig(

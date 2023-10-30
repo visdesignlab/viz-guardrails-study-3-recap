@@ -7,7 +7,7 @@ import {
   useState,
 } from 'react';
 import { createSelectorHook, Provider } from 'react-redux';
-import { Outlet, RouteObject, useParams, useRoutes } from 'react-router-dom';
+import { Outlet, RouteObject, useMatch, useParams, useRoutes } from 'react-router-dom';
 import { parseStudyConfig } from '../parser/parser';
 import {
   GlobalConfig,
@@ -21,7 +21,9 @@ import {
   MainStoreContext,
   StudyStore,
   studyStoreCreator,
+  useAppDispatch,
   useCreatedStore,
+  useUntrrackedActions,
 } from '../store/store';
 import {
   flagsContext,
@@ -99,6 +101,7 @@ export function Shell({ globalConfig }: {
 
   const [orderSequence, setOrderSequence] = useState<string[] | null>(null);
 
+
   if (
     !studyId ||
     !globalConfig.configsList
@@ -113,6 +116,7 @@ export function Shell({ globalConfig }: {
   const [storeObj, setStoreObj] = useState<Nullable<StudyStore>>(null);
 
   useEffect(() => {
+    console.log(globalConfig);
     const configKey = globalConfig.configsList.find(
       (c) => sanitizeStringForUrl(c) === studyId
     );
@@ -120,6 +124,7 @@ export function Shell({ globalConfig }: {
     if (configKey) {
       const configJSON = globalConfig.configs[configKey];
       fetchStudyConfig(`${configJSON.path}`, configKey).then((config) => {
+        console.log('setting active config');
         setActiveConfig(config);
       });
     }
@@ -140,6 +145,8 @@ export function Shell({ globalConfig }: {
     }
 
     fn();
+
+
 
     return () => {
       active = false;
@@ -178,9 +185,7 @@ export function Shell({ globalConfig }: {
     };
   }, [activeConfig, studyId, firebase]);
 
-  const routing = useStudyRoutes(studyId, activeConfig, orderSequence, storeObj);
-
-  if (!routing || !storeObj || !firebase) return null;
+  if (!storeObj || !firebase) return null;
 
   const { trrackStore, store, trrack } = storeObj;
 
@@ -190,7 +195,7 @@ export function Shell({ globalConfig }: {
         <Provider store={trrackStore} context={trrackContext}>
           <Provider store={store}>
             <Provider store={flagsStore} context={flagsContext}>
-              {routing}
+              <StudyRoutes studyId={studyId} config={activeConfig} firebase={firebase} sequence={orderSequence} store={storeObj} />
             </Provider>
           </Provider>
         </Provider>
@@ -256,13 +261,59 @@ function StepRenderer() {
   );
 }
 
-function useStudyRoutes(
-  studyId: Nullable<string>,
+function StudyRoutes({
+  studyId,
+  config,
+  sequence,
+  store, // used only to detect if store is ready
+  firebase
+}: {  studyId: Nullable<string>,
   config: Nullable<StudyConfig>,
   sequence: Nullable<string[]>,
-  store: Nullable<StudyStore> // used only to detect if store is ready
-) {
+  store: Nullable<StudyStore>, // used only to detect if store is ready
+  firebase: Nullable<ProvenanceStorage>}) {
   const routes: RouteObject[] = [];
+
+  const [audioStream, setAudioStream] = useState<MediaRecorder | null>(null);
+  const dispatch = useAppDispatch();
+  const { setIsRecording } = useUntrrackedActions();
+
+
+  const atEnd = useMatch('/:studyId/end');
+
+  useEffect(() => {
+    let _stream: Promise<MediaStream> | null;
+    if(config && config.recordStudyAudio) {
+      console.log('creating');
+      _stream = navigator.mediaDevices.getUserMedia({
+        audio: true
+      });
+      
+      _stream.then((stream) => {
+        const mediaRecorder = new MediaRecorder(stream);
+        mediaRecorder.start();
+        setAudioStream(mediaRecorder);
+        dispatch(setIsRecording(true));
+      });
+    }
+
+    return () => {
+      console.log('cleaning', _stream);
+      if(_stream) {
+        _stream.then((data) => {
+          data.getTracks().forEach((track) => track.stop());
+        });
+      }
+    };
+  }, [config, dispatch, setIsRecording]);
+
+  useEffect(() => {
+    if(atEnd && config && config.recordStudyAudio && firebase && audioStream && store) {
+      console.log('calling stop');
+      firebase?.saveAudioFile(audioStream, store.trrack.root.id);
+      dispatch(setIsRecording(false));
+    }
+  }, [config, atEnd, audioStream, firebase, store, dispatch, setIsRecording]);
  
   if (studyId && config && store && sequence) {
     const enhancedSequence = [...sequence as string[], 'end'];

@@ -265,7 +265,6 @@ export interface InheritedStudyComponents {
   [key: string]: InheritedComponent;
 }
 
-
 export type PartialComponent = (Partial<IndividualComponent> & { baseComponent: string })
 export type InheritedComponent  = IndividualComponent | PartialComponent
 
@@ -275,6 +274,7 @@ export type InheritedComponent  = IndividualComponent | PartialComponent
 export interface StudyConfig {
   $schema: string;
   studyMetadata: StudyMetadata;
+  recordStudyAudio?: boolean;
   uiConfig: UIConfig;
   baseComponents?: StudyComponents;
   components: InheritedStudyComponents

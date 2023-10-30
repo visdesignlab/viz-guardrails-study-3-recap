@@ -33,7 +33,7 @@ async function fetchStudyConfigs(globalConfig: GlobalConfig) {
   return studyConfigs;
 }
 
-export default function AppShellDemo() {
+export function AppShellDemo() {
   const [globalConfig, setGlobalConfig] =
     useState<Nullable<GlobalConfig>>(null);
 
@@ -41,22 +41,17 @@ export default function AppShellDemo() {
     [key: string]: StudyConfig;
   }>({});
 
-  useEffect(() => {
-    const fetchData = async () => {
-      if (globalConfig) {
-        setStudyConfigs(await fetchStudyConfigs(globalConfig));
-      }
-    };
-    fetchData();
-  }, [globalConfig]);
 
   useEffect(() => {
-    if (globalConfig) return;
-
+    console.log('fetching');
     fetchGlobalConfigArray().then((gc) => {
       setGlobalConfig(gc);
+      fetchStudyConfigs(gc).then((sc) => {
+        setStudyConfigs(sc);
+      });
     });
-  }, [globalConfig]);
+  }, []);
+
 
   return globalConfig ? (
     <BrowserRouter basename={PREFIX}>

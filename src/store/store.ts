@@ -31,7 +31,7 @@ export async function studyStoreCreator(
   studyId: string,
   config: StudyConfig,
   order: string[],
-  firebase: ProvenanceStorage
+  firebase: ProvenanceStorage,
 ) {
 
   const lf = localforage.createInstance({
@@ -53,6 +53,7 @@ export async function studyStoreCreator(
 
   const initialUntrrackedState: UnTrrackedState = {
     steps,
+    isRecording: false,
     config,
   };
 
@@ -91,6 +92,9 @@ export async function studyStoreCreator(
     reducers: {
       setConfig (state, payload: PayloadAction<StudyConfig>) {
         state.config = payload.payload;
+      },
+      setIsRecording (state, payload: PayloadAction<boolean>) {
+        state.isRecording = payload.payload;
       },
       completeStep(state, step) {
         state.steps[step.payload].complete = true;
@@ -132,7 +136,8 @@ export async function studyStoreCreator(
     store,
     trrack,
     trrackStore,
-    actions: studySlice.actions,
+    trrackedActions: studySlice.actions,
+    untrrackedActions: configSlice.actions,
     async clearCache() {
       await terminate(firebase.firestore);
       await clearIndexedDbPersistence(firebase.firestore);
@@ -187,10 +192,13 @@ export function useCreatedStore() {
   return useContext(MainStoreContext);
 }
 
-export function useStoreActions() {
-  return useCreatedStore().actions;
+export function useTrrackedActions() {
+  return useCreatedStore().trrackedActions;
 }
 
+export function useUntrrackedActions() {
+  return useCreatedStore().untrrackedActions;
+}
 // Hooks
 type AppDispatch = StudyStore['store']['dispatch'];
 

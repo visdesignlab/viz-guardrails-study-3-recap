@@ -8,7 +8,7 @@ import {
   useFlagsDispatch,
 } from '../store/flags';
 import { useNextStep } from '../store/hooks/useNextStep';
-import {useStoreActions} from '../store/store';
+import {useTrrackedActions} from '../store/store';
 
 
 const PREFIX = '@REVISIT_COMMS';
@@ -26,7 +26,7 @@ type Props = {
 };
 
 export default function IframeController({path, parameters}: Props) {
-  const { saveTrialAnswer } = useStoreActions();
+  const { saveTrialAnswer } = useTrrackedActions();
 
   const flagDispatch = useFlagsDispatch();
   const dispatch = useDispatch();

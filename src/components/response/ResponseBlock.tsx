@@ -7,7 +7,7 @@ import {
   ResponseBlockLocation,
 } from '../../parser/types';
 import { useCurrentStep } from '../../routes';
-import { useAppDispatch, useStoreActions, useStudySelector } from '../../store/store';
+import { useAppDispatch, useStudySelector, useTrrackedActions } from '../../store/store';
 import {
   setIframeAnswers,
   updateResponseBlockValidation,
@@ -56,7 +56,7 @@ export default function ResponseBlock({
   ) || [];
   const savedSurvey = useSavedSurvey();
 
-  const { saveTrialAnswer } = useStoreActions();
+  const { saveTrialAnswer } = useTrrackedActions();
   const appDispatch = useAppDispatch();
   const flagDispatch = useFlagsDispatch();
   const answerValidator = useAnswerField(responses, id);

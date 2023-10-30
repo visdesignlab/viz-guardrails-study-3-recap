@@ -336,73 +336,7 @@
           "$ref": "#/definitions/IndividualComponent"
         },
         {
-          "additionalProperties": false,
-          "properties": {
-            "baseComponent": {
-              "type": "string"
-            },
-            "correctAnswer": {
-              "items": {
-                "$ref": "#/definitions/Answer"
-              },
-              "type": "array"
-            },
-            "description": {
-              "type": "string"
-            },
-            "instruction": {
-              "type": "string"
-            },
-            "instructionLocation": {
-              "$ref": "#/definitions/ResponseBlockLocation"
-            },
-            "meta": {
-              "additionalProperties": {},
-              "type": "object"
-            },
-            "nextButtonLocation": {
-              "$ref": "#/definitions/ResponseBlockLocation"
-            },
-            "nextButtonText": {
-              "type": "string"
-            },
-            "parameters": {
-              "additionalProperties": {},
-              "type": "object"
-            },
-            "path": {
-              "type": "string"
-            },
-            "response": {
-              "items": {
-                "$ref": "#/definitions/Response"
-              },
-              "type": "array"
-            },
-            "style": {
-              "additionalProperties": {
-                "type": "string"
-              },
-              "type": "object"
-            },
-            "title": {
-              "type": "string"
-            },
-            "type": {
-              "enum": [
-                "markdown",
-                "react-component",
-                "image",
-                "website",
-                "questionnaire"
-              ],
-              "type": "string"
-            }
-          },
-          "required": [
-            "baseComponent"
-          ],
-          "type": "object"
+          "$ref": "#/definitions/PartialComponent"
         }
       ]
     },
@@ -658,6 +592,75 @@
       "required": [
         "order",
         "components"
+      ],
+      "type": "object"
+    },
+    "PartialComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "baseComponent": {
+          "type": "string"
+        },
+        "correctAnswer": {
+          "items": {
+            "$ref": "#/definitions/Answer"
+          },
+          "type": "array"
+        },
+        "description": {
+          "type": "string"
+        },
+        "instruction": {
+          "type": "string"
+        },
+        "instructionLocation": {
+          "$ref": "#/definitions/ResponseBlockLocation"
+        },
+        "meta": {
+          "additionalProperties": {},
+          "type": "object"
+        },
+        "nextButtonLocation": {
+          "$ref": "#/definitions/ResponseBlockLocation"
+        },
+        "nextButtonText": {
+          "type": "string"
+        },
+        "parameters": {
+          "additionalProperties": {},
+          "type": "object"
+        },
+        "path": {
+          "type": "string"
+        },
+        "response": {
+          "items": {
+            "$ref": "#/definitions/Response"
+          },
+          "type": "array"
+        },
+        "style": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": "object"
+        },
+        "title": {
+          "type": "string"
+        },
+        "type": {
+          "enum": [
+            "markdown",
+            "react-component",
+            "image",
+            "website",
+            "questionnaire"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "baseComponent"
       ],
       "type": "object"
     },
@@ -949,6 +952,9 @@
         },
         "components": {
           "$ref": "#/definitions/InheritedStudyComponents"
+        },
+        "recordStudyAudio": {
+          "type": "boolean"
         },
         "sequence": {
           "$ref": "#/definitions/OrderObject"
