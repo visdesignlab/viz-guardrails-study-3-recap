@@ -1,3 +1,4 @@
+import { ProvenanceGraph } from '@trrack/core/graph/graph-slice';
 import { BaseIndividualComponent, OrderConfig, OrderObject, StudyConfig } from '../parser/types';
 import { StudyStore } from './store';
 
@@ -8,6 +9,7 @@ export interface TrialResult {
   answer: string | object | null;
   startTime: number;
   endTime: number;
+  provenanceGraph: ProvenanceGraph<any, any>;
 }
 
 export type PracticeResult = TrialResult;

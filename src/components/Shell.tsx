@@ -1,4 +1,4 @@
-import { AppShell, Button, Group, Modal, Text } from '@mantine/core';
+import { AppShell, Button, Group, Modal, Stack, Text } from '@mantine/core';
 import { TrrackStoreType } from '@trrack/redux';
 import {
   createContext,
@@ -46,6 +46,7 @@ import AppNavBar from './interface/AppNavBar';
 import HelpModal from './interface/HelpModal';
 import { StudyEnd } from './StudyEnd';
 import { deepCopy } from '../utils/deepCopy';
+import { Analysis } from './interface/audioAnalysis/Analysis';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-non-null-assertion
 const trrackContext: any = createContext<TrrackStoreType>(undefined!);
@@ -278,7 +279,6 @@ function StudyRoutes({
   const dispatch = useAppDispatch();
   const { setIsRecording } = useUntrrackedActions();
 
-
   const atEnd = useMatch('/:studyId/end');
 
   useEffect(() => {
@@ -325,6 +325,11 @@ function StudyRoutes({
       element: <NavigateWithParams to={`${enhancedSequence[0]}`} replace />,
     });
 
+    stepRoutes.push({
+      path: '/:trialName/analysis/:trrackId/',
+      element: <Stack><ComponentController /><Analysis/></Stack>
+    });
+
     enhancedSequence.forEach((step: string) => {
       if (step === 'end') {
         stepRoutes.push({
@@ -338,6 +343,8 @@ function StudyRoutes({
         });
       }
     });
+
+    console.log(stepRoutes);
 
     const studyRoute: RouteObject = {
       element: <StepRenderer />,

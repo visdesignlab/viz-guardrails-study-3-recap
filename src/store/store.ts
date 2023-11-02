@@ -70,7 +70,7 @@ export async function studyStoreCreator(
           trialId: string;
           answer: string | object;
           startTime: number;
-          provenanceGraph?: ProvenanceGraph<any, any, any>,
+          provenanceGraph?: ProvenanceGraph<any, any>,
           endTime: number;
         }>
       ) {
@@ -144,6 +144,9 @@ export async function studyStoreCreator(
       firebase.startFirestore();
       await lf.clear();
     },
+    getDb() {
+      return firebase;
+    },
     restoreSession() {
       if (!trrackExists) {
         return;
@@ -194,6 +197,10 @@ export function useCreatedStore() {
 
 export function useTrrackedActions() {
   return useCreatedStore().trrackedActions;
+}
+
+export function useFirebaseDb() {
+  return useCreatedStore().getDb();
 }
 
 export function useUntrrackedActions() {
