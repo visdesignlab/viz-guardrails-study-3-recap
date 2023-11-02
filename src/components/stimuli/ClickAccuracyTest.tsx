@@ -1,10 +1,10 @@
 import * as d3 from 'd3';
 import { useChartDimensions } from './hooks/useChartDimensions';
-import {useEffect, useMemo, useState} from 'react';
-import {updateResponseBlockValidation, useFlagsDispatch} from '../../store/flags';
-import {useLocation} from 'react-router-dom';
+import {useCallback, useEffect, useMemo, useState} from 'react';
 import {Box, Slider} from '@mantine/core';
-import {initializeProvenanceGraph, createAction, initializeTrrack, Registry} from '@trrack/core';
+import {initializeTrrack, Registry} from '@trrack/core';
+import { StimulusParams } from '../../store/types';
+import { useLocation } from 'react-router-dom';
 
 const chartSettings = {
   marginBottom: 40,
@@ -23,16 +23,15 @@ interface ClickAccuracyTest {
 } 
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const ClickAccuracyTest = ({ parameters, trialId,  }: { parameters: any, trialId: string }) => {
+const ClickAccuracyTest = ({ parameters, trialId, setAnswer }: StimulusParams) => {
   const [ref, dms] = useChartDimensions(chartSettings);
   const [x, setX] = useState(100);
   const [y, setY] = useState(100);
-  const [speed, setSpeed] = useState(300);
-  const flagDispatch = useFlagsDispatch();
   const id = useLocation().pathname;
+  const [speed, setSpeed] = useState(300);
   const taskid = parameters.taskid;
 
-  const { registry, actions } = useMemo(() => {
+  const { actions, trrack } = useMemo(() => {
     const reg = Registry.create();
 
     const click = reg.register('click', (state, click: {clickX: number, clickY: number, distance: number}) => {
@@ -42,44 +41,37 @@ const ClickAccuracyTest = ({ parameters, trialId,  }: { parameters: any, trialId
         return state;
     });
 
+    const trrackInst = initializeTrrack({registry: reg, initialState: {distance: 0, speed: 10, clickX: 0, clickY: 0} });
+
     return {
-        registry: reg,
         actions: {
           click
         },
+        trrack: trrackInst
     };
-}, []);
+  }, []);
 
-  const trrack = useMemo(() => {
-    return initializeTrrack({registry: registry, initialState: {distance: 0, speed: 10, clickX: 0, clickY: 0} });
-  }, [registry]);
+  const clickCallback = useCallback((e: React.MouseEvent)=> {
+    const circle = d3.select('#movingCircle');
+    const svg = d3.select('#clickAccuracySvg');
+    const pointer = d3.pointer(e, svg.node());
 
+    const circelPos = [+circle.attr('cx'), +circle.attr('cy')];
+    const distance = Math.round(Math.sqrt((pointer[0] - circelPos[0]) ** 2 + (pointer[1] - circelPos[1]) ** 2)) + 'px';
 
-  useEffect(()=>{
-    const svgElement = d3.select(ref.current);
-    svgElement.on('click', function(event) {
-      const clickPos = d3.pointer(event,svgElement.node());
-      const circle = svgElement.select('circle');
-      const circelPos = [+circle.attr('cx'), +circle.attr('cy')];
-      const distance = Math.round(Math.sqrt((clickPos[0] - circelPos[0]) ** 2 + (clickPos[1] - circelPos[1]) ** 2)) + 'px';
-      trrack.apply('Clicked', actions.click({distance: +distance, clickX: clickPos[0], clickY: clickPos[1]}));
-      flagDispatch(
-          updateResponseBlockValidation({
-            location: 'sidebar',
-            trialId: id,
-            status: true,
-            provenanceGraph: trrack.graph.backend,
-            answers: {
-                [`${id}/${taskid}`]: [
-                ...new Set([distance]),
-              ],
-            },
-          })
-      );
-
-
+    trrack.apply('Clicked', actions.click({distance: +distance, clickX: pointer[0], clickY: pointer[1]}));
+    
+    setAnswer({
+      trialId: id,
+      status: true,
+      provenanceGraph: trrack.graph.backend,
+      answers: {
+          [`${id}/${taskid}`]: [
+          ...new Set([distance]),
+        ],
+      },
     });
-  },[ref]);
+  },[actions, id, setAnswer, taskid, trrack]);
 
 
   useEffect(() => {
@@ -99,19 +91,19 @@ const ClickAccuracyTest = ({ parameters, trialId,  }: { parameters: any, trialId
           setY(nxtY);
         });
 
-  },[x,y]);
+  },[ref, speed, x, y]);
 
   return (
       <>
-          <div className="Chart__wrapper" ref={ref} style={{ height: '650px' }}>
-              <svg width={dms.width} height={dms.height}>
+          <div className="Chart__wrapper" ref={ref} onClick={clickCallback} style={{ height: '650px' }}>
+              <svg id="clickAccuracySvg" width={dms.width} height={dms.height}>
                   <g
                       transform={`translate(${[dms.marginLeft / 2, dms.marginTop / 2].join(
                           ','
                       )})`}
                   >
                       <rect width="800" height="600" stroke="black" strokeWidth="5" fill="none"/>
-                      <circle cx="100" cy="100" r="10" />
+                      <circle id='movingCircle' cx="100" cy="100" r="10" />
 
                   </g>
               </svg>

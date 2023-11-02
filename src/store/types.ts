@@ -43,3 +43,9 @@ export interface UnTrrackedState {
 
   config: StudyConfig;
 }
+
+export interface StimulusParams {
+  parameters: any;
+  trialId: string;
+  setAnswer: ({trialId, status, provenanceGraph, answers} : {trialId: string, status: boolean, provenanceGraph?: ProvenanceGraph<any, any, any>, answers: Record<string, any>}) => void
+}
