@@ -8,7 +8,8 @@
     "build": "tsc && vite build",
     "lint": "eslint src",
     "postinstall": "husky install",
-    "generate-schema": "ts-json-schema-generator --path src/parser/types.ts --out src/parser/schema.json",
+    "generate-schema:StudyConfig": "ts-json-schema-generator --path src/parser/types.ts --out src/parser/StudyConfigSchema.json --type StudyConfig",
+    "generate-schema:GlobalConfig": "ts-json-schema-generator --path src/parser/types.ts --out src/parser/GlobalConfigSchema.json --type GlobalConfig",
     "test": "playwright test"
   },
   "lint-staged": {
@@ -32,6 +33,7 @@
     "@types/howler": "^2.2.10",
     "@types/lodash": "^4.14.199",
     "ajv": "^8.12.0",
+    "arquero": "^5.2.0",
     "d3": "^7.8.2",
     "firebase": "^9.19.1",
     "hjson": "^3.2.2",
