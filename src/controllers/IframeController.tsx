@@ -1,14 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { PREFIX as BASE_PREFIX } from '../App';
+import { PREFIX as BASE_PREFIX } from '../components/GlobalConfigParser';
 import { useCurrentStep } from '../routes';
-import {
-  setIframeAnswers,
-  useFlagsDispatch,
-} from '../store/flags';
-import { useNextStep } from '../store/hooks/useNextStep';
-import {useTrrackedActions} from '../store/store';
+import { useStoreDispatch, useStoreActions } from '../store/store';
+import { WebsiteComponent } from '../parser/types';
 
 
 const PREFIX = '@REVISIT_COMMS';
@@ -20,15 +16,9 @@ const defaultStyle = {
   marginTop: '-50px'
 };
 
-type Props = {
-  path: string;
-  parameters?: Record<string, unknown>;
-};
-
-export default function IframeController({path, parameters}: Props) {
-  const { saveTrialAnswer } = useTrrackedActions();
-
-  const flagDispatch = useFlagsDispatch();
+export default function IframeController({ currentConfig }: { currentConfig: WebsiteComponent; }) {
+  const { setIframeAnswers } = useStoreActions();
+  const storeDispatch = useStoreDispatch();
   const dispatch = useDispatch();
 
   const ref = useRef<HTMLIFrameElement>(null);
@@ -38,11 +28,9 @@ export default function IframeController({path, parameters}: Props) {
     []
   );
 
-
   // navigation
   const currentStep = useCurrentStep();
   const navigate = useNavigate();
-  const computedTo = useNextStep();
 
   const sendMessage = useCallback(
     (tag: string, message: unknown) => {
@@ -65,8 +53,8 @@ export default function IframeController({path, parameters}: Props) {
       if (typeof data === 'object' && iframeId === data.iframeId) {
         switch (data.type) {
           case `${PREFIX}/WINDOW_READY`:
-            if (parameters) {
-              sendMessage('STUDY_DATA', parameters);
+            if (currentConfig.parameters) {
+              sendMessage('STUDY_DATA', currentConfig.parameters);
             }
             break;
           case `${PREFIX}/READY`:
@@ -75,10 +63,8 @@ export default function IframeController({path, parameters}: Props) {
             }
             break;
           case `${PREFIX}/ANSWERS`:
-              flagDispatch(setIframeAnswers(data.message.answer));
+            storeDispatch(setIframeAnswers(data.message.answer));
             break;
-
-
         }
       }
     };
@@ -87,22 +73,20 @@ export default function IframeController({path, parameters}: Props) {
 
     return () => window.removeEventListener('message', handler);
   }, [
-    flagDispatch,
-    computedTo,
+    storeDispatch,
     currentStep,
     dispatch,
     iframeId,
     navigate,
-    parameters,
+    currentConfig,
     sendMessage,
-    saveTrialAnswer,
   ]);
-  
+
   return (
     <div >
       <iframe
         ref={ref}
-        src={`${BASE_PREFIX}${path}?trialid=${currentStep}&id=${iframeId}`}
+        src={`${BASE_PREFIX}${currentConfig.path}?trialid=${currentStep}&id=${iframeId}`}
         style={defaultStyle}
       ></iframe>
     </div>

@@ -1,11 +1,11 @@
 import { Textarea } from '@mantine/core';
 import { LongTextResponse } from '../../parser/types';
-import { generateErrorMessage } from '../stimuli/inputcomponents/utils';
+import { generateErrorMessage } from './utils';
 
 type inputProps = {
   response: LongTextResponse;
   disabled: boolean;
-  answer: any;
+  answer: { value?: string };
 };
 
 export default function TextAreaInput({

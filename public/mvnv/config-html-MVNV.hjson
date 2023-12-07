@@ -7,7 +7,7 @@
             The reVISit Team
         ]
         date: 2023-04-26
-        description: "A replication of adjacency matrix tasks in a multi-variate network visualization (MVNV) study "
+        description: "A replication of adjacency matrix tasks in a multi-variate network visualization (MVNV) study by Nobre et al., CHI 2020 (doi:10.1145/3313831.3376381). This is meant to demonstrate complex studies, but is not necessarily suitable as a `learn-by` example."
         organizations: [
             University of Utah
             WPI
@@ -246,7 +246,7 @@
                 taskName: Attr. of Common Neighbors.
             }
             description: Jeffrey and Robert's common neighbor with most followers
-            instruction: Among all people who have interacted with both Jeffrey and Robert, who has the most followers?
+            instruction: **Question:** Among all people who have interacted with both Jeffrey and Robert, who has the most followers?
             type: website
             path: mvnv/index.html
             nextButtonLocation: sidebar

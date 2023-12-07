@@ -1,12 +1,12 @@
-import { Select } from '@mantine/core';
+import { Select, SelectItem } from '@mantine/core';
 import { DropdownResponse } from '../../parser/types';
-import { generateErrorMessage } from '../stimuli/inputcomponents/utils';
+import { generateErrorMessage } from './utils';
 
 
 type inputProps = {
   response: DropdownResponse;
   disabled: boolean;
-  answer: any;
+  answer: object;
 };
 
 export default function DropdownInput({
@@ -22,7 +22,7 @@ export default function DropdownInput({
         disabled={disabled}
         label={prompt}
         placeholder={placeholder}
-        data={options}
+        data={options as SelectItem[]}
         withAsterisk={required}
         radius={'md'}
         size={'md'}

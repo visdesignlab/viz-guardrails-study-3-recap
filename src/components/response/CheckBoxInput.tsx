@@ -1,11 +1,11 @@
 import { Checkbox, Group } from '@mantine/core';
 import { CheckboxResponse } from '../../parser/types';
-import { generateErrorMessage } from '../stimuli/inputcomponents/utils';
+import { generateErrorMessage } from './utils';
 
 type inputProps = {
   response: CheckboxResponse;
   disabled: boolean;
-  answer: any;
+  answer: object;
 };
 
 export default function CheckBoxInput({
