@@ -25,7 +25,7 @@ export async function getAllSessions(fs: Firestore, studyId: string) {
   const sessionDocs = (await getDocs(studySessions)).docs;
 
   const graphs: Array<{
-    graph: ProvenanceGraph<any, any, any>;
+    graph: ProvenanceGraph<any, any>;
     session: FsSession;
   }> = [];
 

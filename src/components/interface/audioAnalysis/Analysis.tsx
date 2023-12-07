@@ -1,4 +1,4 @@
-import { Box, Stack } from '@mantine/core';
+import { Box, Button, Center, Group, Stack, Text } from '@mantine/core';
 import { useParams } from 'react-router-dom';
 
 import { getDownloadURL, getStorage, ref } from 'firebase/storage';
@@ -12,8 +12,18 @@ import { StudyState, useFirebaseDb } from '../../../store/store';
 import { useElementSize } from '@mantine/hooks';
 import { TrialResult } from '../../../store/types';
 import * as d3 from 'd3';
+import { ProvenanceGraph } from '@trrack/core/graph/graph-slice';
+import { useEvent } from '../../../store/hooks/useEvent';
 
 
+export interface TranscribedAudioSnippet {
+    alternatives: {confidence: number, transcript: string}[]
+    languageCode: string;
+    resultEndTime: string;
+}
+export interface TranscribedAudio {
+    results: TranscribedAudioSnippet[]
+}
 
 async function getAudioFromFirebase(trrackId: string): Promise<string> {
     const storage = getStorage();
@@ -35,15 +45,64 @@ async function getAudioFromFirebase(trrackId: string): Promise<string> {
     });
 }
 
+async function getTranscriptionFromFirebase(trrackId: string): Promise<string> {
+    const storage = getStorage();
+
+    const url = await getDownloadURL(ref(storage, `${trrackId}.wav_transcription.txt`));
+    
+    return new Promise((resolve) => {
+        const xhr = new XMLHttpRequest();
+        xhr.responseType = 'blob';
+        xhr.onload = (event) => {
+            const blob = xhr.response;
+    
+            blob.text().then((text: string) => {
+                const json = text;
+    
+                resolve(json);
+            });
+        };
+        xhr.open('GET', url);
+        xhr.send();
+    });
+}
+
+async function getTrrackFromFirebase(studyName: string, trialName: string, trrackId: string): Promise<string> {
+    const storage = getStorage();
+
+    const url = await getDownloadURL(ref(storage, `${studyName}/${trialName}/${trrackId}`));
+    
+    return new Promise((resolve) => {
+        const xhr = new XMLHttpRequest();
+        xhr.responseType = 'blob';
+        xhr.onload = (event) => {
+            const blob = xhr.response;
+
+            blob.text().then((text: string) => {
+                const json = text;
+    
+                resolve(json);
+            });
+
+        };
+        xhr.open('GET', url);
+        xhr.send();
+    });
+}
+
+
 export function Analysis() {
-    const {trrackId, trialName} = useParams();
+    const {trrackId, trialName, studyId} = useParams();
 
     const {width, ref} = useElementSize<HTMLDivElement>();
 
     const db = useFirebaseDb().firestore;
 
     const [endState, setEndState] = useState<StudyState | null>(null);
+    const [provGraph, setProvGraph] = useState<ProvenanceGraph<any, any>['nodes'] | null>(null);
+    const [transcription, setTranscription] = useState<TranscribedAudio | null>(null);
 
+    const [currentShownTranscription, setCurrentShownTranscription] = useState<number | null>(null);
 
     useEffect(() => {
         const docRef = doc(db, 'dev-sessions', trrackId!);
@@ -59,7 +118,25 @@ export function Analysis() {
                 });
             }
         });
-    }, [db, trrackId]);
+
+
+    }, [db, studyId, trialName, trrackId]);
+
+    useEffect(() => {
+        if(studyId && trialName && trrackId && endState) {
+            getTrrackFromFirebase(studyId, trialName, (endState.trrackedSlice[trialName] as unknown as TrialResult).provenanceRoot).then((data) => {
+                setProvGraph(JSON.parse(data));
+            });
+        }
+    }, [endState, studyId, trialName, trrackId]);
+
+    useEffect(() => {
+        if(studyId && trialName && trrackId && endState) {
+            getTranscriptionFromFirebase(trrackId).then((data) => {
+                setTranscription(JSON.parse(data));
+            });
+        }
+    }, [endState, studyId, trialName, trrackId]);
 
     const xScale = useMemo(() => {
         if(endState && trialName) {
@@ -80,10 +157,7 @@ export function Analysis() {
             getAudioFromFirebase(trrackId!).then((url) => {
                 if(waveSurferRef.current) {
                     waveSurferRef.current.load(url);
-
-                    waveSurferRef.current.on('interaction', () => {
-                        waveSurferRef.current.play();
-                    });
+                    setCurrentShownTranscription(0);
                 }
                 
             });
@@ -92,19 +166,42 @@ export function Analysis() {
         [trrackId]
       );
 
-    const events = useMemo(() => {
-        if(endState && trialName && xScale) {
-            const trial = endState.trrackedSlice[trialName] as unknown as TrialResult;
+    const timeUpdateCallback = useEvent<(t: number) => void, any>((time: number) => {
+        if(transcription && currentShownTranscription !== null) {
+            const tempTime = transcription.results[currentShownTranscription].resultEndTime;
 
-            const nodes = trial.provenanceGraph.nodes;
+            const numTime = +tempTime.slice(0, tempTime.length - 2);
+
+            if(time > numTime && currentShownTranscription !== transcription.results.length - 1) {
+                setCurrentShownTranscription(currentShownTranscription + 1);
+            }
+            
+        }
+    });
+
+    useEffect(() => {
+        if(waveSurferRef.current) {
+            waveSurferRef.current.on('interaction', () => {
+                waveSurferRef.current.play();
+                setCurrentShownTranscription(0);
+            });
+
+            waveSurferRef.current.on('timeupdate', timeUpdateCallback);
+        }
+    }, [timeUpdateCallback]);
+
+    const events = useMemo(() => {
+        if(endState && trialName && xScale && provGraph) {
+
+            const nodes = Object.values(provGraph);
 
             return Object.values(nodes).filter((node) => node.label !== 'Root').map((node) => {
-                return <circle r={5} cy={150} cx={xScale(node.createdOn as unknown as number)} fill ="cornflowerblue" ></circle>;
+                return <circle key={node.id} r={5} cy={150} cx={xScale(node.createdOn as unknown as number)} fill ="cornflowerblue" ></circle>;
             });
         }
 
         return null;
-    }, [endState, trialName, xScale]);
+    }, [endState, provGraph, trialName, xScale]);
 
     return <Stack ref={ref} style={{width: '100%'}}>
         <svg style={{width: '100%', height: '300px'}}>
@@ -116,6 +213,26 @@ export function Analysis() {
                 <WaveForm id="waveform"/>
             </WaveSurfer>
         </Box>
+        <Group>
+            <Button onClick={() => {
+                if(waveSurferRef.current) {
+                    waveSurferRef.current.play();
+                }
+            }}>Play</Button>
+            <Button onClick={() => {
+                if(waveSurferRef.current) {
+                    waveSurferRef.current.pause();
+                }
+            }}>Pause</Button>
+
+        </Group>
+        <Group style={{width: '100%', height: '100px'}} align="center" position='center'>
+            <Center>
+                <Text color='dimmed' size={20} style={{width: '100%'}}>
+                    {transcription && currentShownTranscription !== null ? transcription.results[currentShownTranscription].alternatives[0].transcript : ''}
+                </Text>
+            </Center>
+        </Group>
     </Stack>;
 }
   

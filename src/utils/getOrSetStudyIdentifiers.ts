@@ -3,7 +3,7 @@ import { Nullable } from '../parser/types';
 import { PID, SESSION_ID } from '../store/store';
 
 export type StudySessionInfo = {
-  provenance: Nullable<ProvenanceGraph<unknown, string, any>>;
+  provenance: Nullable<ProvenanceGraph<unknown, string>>;
   lastStepOrTrial: Nullable<string>;
 };
 
@@ -52,7 +52,7 @@ function localStorageSession(studyId: string, pId: string, sessionId: string) {
   if (!sessionString) setter(info);
 
   function sync(opts: {
-    provenance?: ProvenanceGraph<any, any, any>;
+    provenance?: ProvenanceGraph<any, any>;
     lastStepOrTrial?: string;
   }) {
     const previous = getter()!;

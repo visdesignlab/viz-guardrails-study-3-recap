@@ -6,6 +6,7 @@ import { setAnswer } from '../store/flags';
 import { getStorage, ref, uploadBytes } from 'firebase/storage';
 import { ProvenanceGraph } from '@trrack/core/graph/graph-slice';
 import { debounce } from 'lodash';
+import { useParams } from 'react-router-dom';
 
 const modules = import.meta.glob(
   '../components/stimuli/**/*.{mjs,js,mts,ts,jsx,tsx}',
@@ -22,13 +23,14 @@ const ReactComponentController = ({
   trialId: string | null;
 }) => {
   const reactPath = `../components/stimuli/${path}`;
+  const { studyId } = useParams(); // get and set study identifiers from url
 
   const StimulusComponent = (modules[reactPath] as ModuleNamespace).default;
 
-  const updateProvenance = useCallback(debounce((graph: ProvenanceGraph<any, any, any>) => {
+  const updateProvenance = useCallback(debounce((graph: ProvenanceGraph<any, any>) => {
     const storage = getStorage();
 
-    const storageRef = ref(storage, `${trialId}/${graph.root}`);
+    const storageRef = ref(storage, `${studyId}/${trialId}/${graph.root}`);
 
     const blob = new Blob([JSON.stringify(graph.nodes)], { type: 'application/json' });
 

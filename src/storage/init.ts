@@ -212,7 +212,7 @@ async function createSession(
   sessionId: string,
   trrack: StudyProvenance
 ) {
-  const trk: ProvenanceGraph<any, any, any> = JSON.parse(trrack.export());
+  const trk: ProvenanceGraph<any, any> = JSON.parse(trrack.export());
 
   const sRef = doc(store, SESSIONS, sessionId);
 
@@ -253,7 +253,7 @@ export async function loadProvenance(
   store: Firestore,
   sessionId: string,
   restore = true
-): Promise<ProvenanceGraph<any, any, any>> {
+): Promise<ProvenanceGraph<any, any>> {
   const sessionRef = doc(store, SESSIONS, sessionId);
   const sessionDoc = await getDoc(sessionRef);
 
@@ -261,13 +261,13 @@ export async function loadProvenance(
 
   const { current, root, status } = sessionDoc.data() as FsSession;
 
-  const nodes: Nodes<any, any, any> = {};
+  const nodes: Nodes<any, any> = {};
 
   const nodesQuery = query(collection(sessionRef, NODES));
   const nodesList = await getDocs(nodesQuery);
 
   nodesList.forEach((nDoc) => {
-    const node = nDoc.data() as ProvenanceNode<any, any, any>;
+    const node = nDoc.data() as ProvenanceNode<any, any>;
 
     nodes[node.id] = node;
   });
@@ -320,9 +320,9 @@ async function getRandomOrders(store: Firestore, paths: string[], batch: WriteBa
 async function saveProvenanceNode(
   store: Firestore,
   sessionId: string,
-  _node: ProvenanceNode<any, any, any>
+  _node: ProvenanceNode<any, any>
 ) {
-  const node: ProvenanceNode<any, any, any> = JSON.parse(JSON.stringify(_node));
+  const node: ProvenanceNode<any, any> = JSON.parse(JSON.stringify(_node));
 
   const batch = writeBatch(store);
 

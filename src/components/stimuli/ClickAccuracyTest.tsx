@@ -5,6 +5,7 @@ import {Box, Slider} from '@mantine/core';
 import {initializeTrrack, Registry} from '@trrack/core';
 import { StimulusParams } from '../../store/types';
 import { useLocation } from 'react-router-dom';
+import { update } from 'lodash';
 
 const chartSettings = {
   marginBottom: 40,
@@ -23,7 +24,7 @@ interface ClickAccuracyTest {
 } 
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const ClickAccuracyTest = ({ parameters, trialId, setAnswer }: StimulusParams<any>) => {
+const ClickAccuracyTest = ({ parameters, trialId, setAnswer, updateProvenance }: StimulusParams<any>) => {
   const [ref, dms] = useChartDimensions(chartSettings);
   const [x, setX] = useState(100);
   const [y, setY] = useState(100);
@@ -71,6 +72,8 @@ const ClickAccuracyTest = ({ parameters, trialId, setAnswer }: StimulusParams<an
         ],
       },
     });
+
+    updateProvenance(trrack.graph.backend);
   },[actions, id, setAnswer, taskid, trrack]);
 
 

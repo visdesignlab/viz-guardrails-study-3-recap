@@ -85,7 +85,7 @@ function processToRow(
     session,
   }: {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    graph: ProvenanceGraph<any, any, any>;
+    graph: ProvenanceGraph<any, any>;
     session: FsSession;
   },
   trialIds: string[]

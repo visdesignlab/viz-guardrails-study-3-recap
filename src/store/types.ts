@@ -1,5 +1,5 @@
 import { ProvenanceGraph } from '@trrack/core/graph/graph-slice';
-import { BaseIndividualComponent, OrderConfig, OrderObject, StudyConfig } from '../parser/types';
+import { BaseIndividualComponent, StudyConfig } from '../parser/types';
 import { StudyStore } from './store';
 import { NodeId } from '@trrack/core';
 
@@ -10,7 +10,7 @@ export interface TrialResult {
   answer: string | object | null;
   startTime: number;
   endTime: number;
-  provenanceGraph: ProvenanceGraph<any, any>;
+  provenanceRoot: NodeId;
 }
 
 export type PracticeResult = TrialResult;
@@ -48,6 +48,6 @@ export interface UnTrrackedState {
 export interface StimulusParams<T> {
   parameters: T;
   trialId: string;
-  updateProvenance: (graph: ProvenanceGraph<any, any, any>) => void;
+  updateProvenance: (graph: ProvenanceGraph<any, any>) => void;
   setAnswer: ({trialId, status, provenanceRoot, answers} : {trialId: string, status: boolean, provenanceRoot?: NodeId, answers: Record<string, any>}) => void
 }
