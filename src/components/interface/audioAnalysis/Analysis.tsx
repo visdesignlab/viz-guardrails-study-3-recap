@@ -1,6 +1,6 @@
 import { Center, Group, Stack, Text } from '@mantine/core';
-import { useParams } from 'react-router-dom';
-import { useState } from 'react';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import { useResizeObserver } from '@mantine/hooks';
 import { useStorageEngine } from '../../../store/storageEngineHooks';
 import { useAsync } from '../../../store/hooks/useAsync';
@@ -69,6 +69,10 @@ function getParticipantData(trrackId: string | undefined, storageEngine: Storage
 export function Analysis() {
     const {trrackId} = useParams();
 
+    const navigate = useNavigate();
+
+    const location = useLocation();
+
     const { storageEngine } = useStorageEngine();
 
     const [ref, {width}] = useResizeObserver();
@@ -78,6 +82,17 @@ export function Analysis() {
 
     // const [currentShownTranscription, setCurrentShownTranscription] = useState<number | null>(null);
     const {value: participant, status } = useAsync(getParticipantData, [trrackId, storageEngine]);
+
+    useEffect(() => {
+        if(selectedTask) {
+            const splitArr = location.pathname.split('/');
+
+            console.log(splitArr);
+            splitArr[splitArr.length - 1] = selectedTask;
+            console.log(splitArr);
+            navigate(splitArr.join('/'));
+        }
+    }, [selectedTask]);
 
     // const xScale = useMemo(() => {
     //     if(endState && trialName) {

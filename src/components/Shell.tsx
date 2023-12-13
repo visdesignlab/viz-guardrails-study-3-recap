@@ -155,7 +155,7 @@ export function generateStudiesRoutes(
 
     stepRoutes.push({
       path: '/analysis/:trrackId/:trialName/',
-      element: <Stack><ComponentController /><Analysis/></Stack>
+      element: <Stack><Analysis/><ComponentController /></Stack>
     });
 
     stepRoutes.push({
