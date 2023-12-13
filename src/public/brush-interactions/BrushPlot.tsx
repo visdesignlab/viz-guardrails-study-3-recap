@@ -35,7 +35,7 @@ export function BrushPlot({ parameters, setAnswer }: StimulusParams<BrushParams>
 
     // load data
     useEffect(() => {
-        d3.csv(`./data/${parameters.dataset}.csv`).then((data) => {
+        d3.csv(`/brush-interactions/data/${parameters.dataset}.csv`).then((data) => {
             setData(data);
         });
     }, [parameters]);

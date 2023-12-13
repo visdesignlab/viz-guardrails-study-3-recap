@@ -1,19 +1,12 @@
-import { Box, Button, Center, Group, Stack, Text } from '@mantine/core';
+import { Center, Group, Stack, Text } from '@mantine/core';
 import { useParams } from 'react-router-dom';
-
-import { getDownloadURL, getStorage, ref } from 'firebase/storage';
-import { doc, getDoc } from 'firebase/firestore';
-
-
-
-import { WaveSurfer, WaveForm } from 'wavesurfer-react';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { StudyState, useFirebaseDb } from '../../../store/store';
-import { useElementSize } from '@mantine/hooks';
-import { TrialResult } from '../../../store/types';
-import * as d3 from 'd3';
-import { ProvenanceGraph } from '@trrack/core/graph/graph-slice';
-import { useEvent } from '../../../store/hooks/useEvent';
+import { useState } from 'react';
+import { useResizeObserver } from '@mantine/hooks';
+import { useStorageEngine } from '../../../store/storageEngineHooks';
+import { useAsync } from '../../../store/hooks/useAsync';
+import { StorageEngine } from '../../../storage/engines/StorageEngine';
+import { AllTasksTimeline } from './AllTasksTimeline';
+import { SingleTaskTimeline } from './SingleTaskTimeline';
 
 
 export interface TranscribedAudioSnippet {
@@ -25,195 +18,141 @@ export interface TranscribedAudio {
     results: TranscribedAudioSnippet[]
 }
 
-async function getAudioFromFirebase(trrackId: string): Promise<string> {
-    const storage = getStorage();
+// async function getAudioFromFirebase(trrackId: string): Promise<string> {
+//     const storage = getStorage();
 
-    const url = await getDownloadURL(ref(storage, trrackId));
+//     const url = await getDownloadURL(ref(storage, trrackId));
     
-    return new Promise((resolve) => {
-        const xhr = new XMLHttpRequest();
-        xhr.responseType = 'blob';
-        xhr.onload = (event) => {
-            const blob = xhr.response;
+//     return new Promise((resolve) => {
+//         const xhr = new XMLHttpRequest();
+//         xhr.responseType = 'blob';
+//         xhr.onload = (event) => {
+//             const blob = xhr.response;
     
-            const url = URL.createObjectURL( blob );
+//             const url = URL.createObjectURL( blob );
     
-            resolve(url);
-        };
-        xhr.open('GET', url);
-        xhr.send();
-    });
+//             resolve(url);
+//         };
+//         xhr.open('GET', url);
+//         xhr.send();
+//     });
+// }
+
+// async function getTranscriptionFromFirebase(trrackId: string): Promise<string> {
+//     const storage = getStorage();
+
+//     const url = await getDownloadURL(ref(storage, `${trrackId}.wav_transcription.txt`));
+    
+//     return new Promise((resolve) => {
+//         const xhr = new XMLHttpRequest();
+//         xhr.responseType = 'blob';
+//         xhr.onload = (event) => {
+//             const blob = xhr.response;
+    
+//             blob.text().then((text: string) => {
+//                 const json = text;
+    
+//                 resolve(json);
+//             });
+//         };
+//         xhr.open('GET', url);
+//         xhr.send();
+//     });
+// }
+
+function getParticipantData(trrackId: string | undefined, storageEngine: StorageEngine | undefined) {
+    if(storageEngine) {
+        return storageEngine.getParticipantData(trrackId);
+    }
 }
-
-async function getTranscriptionFromFirebase(trrackId: string): Promise<string> {
-    const storage = getStorage();
-
-    const url = await getDownloadURL(ref(storage, `${trrackId}.wav_transcription.txt`));
-    
-    return new Promise((resolve) => {
-        const xhr = new XMLHttpRequest();
-        xhr.responseType = 'blob';
-        xhr.onload = (event) => {
-            const blob = xhr.response;
-    
-            blob.text().then((text: string) => {
-                const json = text;
-    
-                resolve(json);
-            });
-        };
-        xhr.open('GET', url);
-        xhr.send();
-    });
-}
-
-async function getTrrackFromFirebase(studyName: string, trialName: string, trrackId: string): Promise<string> {
-    const storage = getStorage();
-
-    const url = await getDownloadURL(ref(storage, `${studyName}/${trialName}/${trrackId}`));
-    
-    return new Promise((resolve) => {
-        const xhr = new XMLHttpRequest();
-        xhr.responseType = 'blob';
-        xhr.onload = (event) => {
-            const blob = xhr.response;
-
-            blob.text().then((text: string) => {
-                const json = text;
-    
-                resolve(json);
-            });
-
-        };
-        xhr.open('GET', url);
-        xhr.send();
-    });
-}
-
 
 export function Analysis() {
-    const {trrackId, trialName, studyId} = useParams();
+    const {trrackId} = useParams();
 
-    const {width, ref} = useElementSize<HTMLDivElement>();
+    const { storageEngine } = useStorageEngine();
 
-    const db = useFirebaseDb().firestore;
+    const [ref, {width}] = useResizeObserver();
 
-    const [endState, setEndState] = useState<StudyState | null>(null);
-    const [provGraph, setProvGraph] = useState<ProvenanceGraph<any, any>['nodes'] | null>(null);
-    const [transcription, setTranscription] = useState<TranscribedAudio | null>(null);
+    const [selectedTask, setSelectedTask] = useState<string | null>(null);
+    const [currentNode, setCurrentNode] = useState<string | null>(null);
 
-    const [currentShownTranscription, setCurrentShownTranscription] = useState<number | null>(null);
+    // const [currentShownTranscription, setCurrentShownTranscription] = useState<number | null>(null);
+    const {value: participant, status } = useAsync(getParticipantData, [trrackId, storageEngine]);
 
-    useEffect(() => {
-        const docRef = doc(db, 'dev-sessions', trrackId!);
+    // const xScale = useMemo(() => {
+    //     if(endState && trialName) {
+    //         const trial = endState.trrackedSlice[trialName] as unknown as TrialResult;
+    //         return d3.scaleLinear([0, width]).domain([trial.startTime, trial.endTime]);
+    //     }
 
-        getDoc(docRef).then((snap) => {
-            if(snap.exists()) {
-                const currentNode = snap.data().current;
-                const nodeRef = doc(db, 'dev-sessions', trrackId!, 'nodes', currentNode);
-                getDoc(nodeRef).then((node) => {
-                    if(node.exists()) {
-                        setEndState(node.data().state.val);
-                    }
-                });
-            }
-        });
+    //     return null;
+    // }, [endState, trialName, width]);
 
+    // const waveSurferRef = useRef<any>();
 
-    }, [db, studyId, trialName, trrackId]);
-
-    useEffect(() => {
-        if(studyId && trialName && trrackId && endState) {
-            getTrrackFromFirebase(studyId, trialName, (endState.trrackedSlice[trialName] as unknown as TrialResult).provenanceRoot).then((data) => {
-                setProvGraph(JSON.parse(data));
-            });
-        }
-    }, [endState, studyId, trialName, trrackId]);
-
-    useEffect(() => {
-        if(studyId && trialName && trrackId && endState) {
-            getTranscriptionFromFirebase(trrackId).then((data) => {
-                setTranscription(JSON.parse(data));
-            });
-        }
-    }, [endState, studyId, trialName, trrackId]);
-
-    const xScale = useMemo(() => {
-        if(endState && trialName) {
-            const trial = endState.trrackedSlice[trialName] as unknown as TrialResult;
-            return d3.scaleLinear([0, width]).domain([trial.startTime, trial.endTime]);
-        }
-
-        return null;
-    }, [endState, trialName, width]);
-
-    const waveSurferRef = useRef<any>();
-
-    const handleWSMount = useCallback(
-        (waveSurfer: any) => {
-          waveSurferRef.current = waveSurfer;
+    // const handleWSMount = useCallback(
+    //     (waveSurfer: any) => {
+    //       waveSurferRef.current = waveSurfer;
     
-          if (waveSurferRef.current) {
-            getAudioFromFirebase(trrackId!).then((url) => {
-                if(waveSurferRef.current) {
-                    waveSurferRef.current.load(url);
-                    setCurrentShownTranscription(0);
-                }
+    //       if (waveSurferRef.current) {
+    //         getAudioFromFirebase(trrackId!).then((url) => {
+    //             if(waveSurferRef.current) {
+    //                 waveSurferRef.current.load(url);
+    //                 setCurrentShownTranscription(0);
+    //             }
                 
-            });
-          }
-        },
-        [trrackId]
-      );
+    //         });
+    //       }
+    //     },
+    //     [trrackId]
+    //   );
 
-    const timeUpdateCallback = useEvent<(t: number) => void, any>((time: number) => {
-        if(transcription && currentShownTranscription !== null) {
-            const tempTime = transcription.results[currentShownTranscription].resultEndTime;
+    // const timeUpdateCallback = useEvent<(t: number) => void, any>((time: number) => {
+    //     if(transcription && currentShownTranscription !== null) {
+    //         const tempTime = transcription.results[currentShownTranscription].resultEndTime;
 
-            const numTime = +tempTime.slice(0, tempTime.length - 2);
+    //         const numTime = +tempTime.slice(0, tempTime.length - 2);
 
-            if(time > numTime && currentShownTranscription !== transcription.results.length - 1) {
-                setCurrentShownTranscription(currentShownTranscription + 1);
-            }
+    //         if(time > numTime && currentShownTranscription !== transcription.results.length - 1) {
+    //             setCurrentShownTranscription(currentShownTranscription + 1);
+    //         }
             
-        }
-    });
+    //     }
+    // });
 
-    useEffect(() => {
-        if(waveSurferRef.current) {
-            waveSurferRef.current.on('interaction', () => {
-                waveSurferRef.current.play();
-                setCurrentShownTranscription(0);
-            });
+    // useEffect(() => {
+    //     if(waveSurferRef.current) {
+    //         waveSurferRef.current.on('interaction', () => {
+    //             waveSurferRef.current.play();
+    //             setCurrentShownTranscription(0);
+    //         });
 
-            waveSurferRef.current.on('timeupdate', timeUpdateCallback);
-        }
-    }, [timeUpdateCallback]);
+    //         waveSurferRef.current.on('timeupdate', timeUpdateCallback);
+    //     }
+    // }, [timeUpdateCallback]);
 
-    const events = useMemo(() => {
-        if(endState && trialName && xScale && provGraph) {
+    // const events = useMemo(() => {
+    //     if(endState && trialName && xScale && provGraph) {
 
-            const nodes = Object.values(provGraph);
+    //         const nodes = Object.values(provGraph);
 
-            return Object.values(nodes).filter((node) => node.label !== 'Root').map((node) => {
-                return <circle key={node.id} r={5} cy={150} cx={xScale(node.createdOn as unknown as number)} fill ="cornflowerblue" ></circle>;
-            });
-        }
+    //         return Object.values(nodes).filter((node) => node.label !== 'Root').map((node) => {
+    //             return <circle key={node.id} r={5} cy={150} cx={xScale(node.createdOn as unknown as number)} fill ="cornflowerblue" ></circle>;
+    //         });
+    //     }
 
-        return null;
-    }, [endState, provGraph, trialName, xScale]);
+    //     return null;
+    // }, [endState, provGraph, trialName, xScale]);
 
-    return <Stack ref={ref} style={{width: '100%'}}>
-        <svg style={{width: '100%', height: '300px'}}>
-            <line x1={0} x2={width} y1={150} y2={150} strokeWidth={1} stroke={'lightgray'}></line>
-            {events}
-        </svg>
-        <Box style={{width: '100%'}}>
+    return <Stack ref={ref} style={{width: '100%'}} spacing={0}>
+        {status === 'success' && participant ? <AllTasksTimeline selectedTask={selectedTask} setSelectedTask={setSelectedTask} participantData={participant} width={width} height={50}/> : null}
+        {status === 'success' && participant ? <SingleTaskTimeline currentNode={currentNode} setCurrentNode={setCurrentNode} selectedTask={selectedTask} participantData={participant} width={width} height={200}/> : null}
+        {/* <Box style={{width: '100%'}}>
             <WaveSurfer onMount={handleWSMount}>
                 <WaveForm id="waveform"/>
             </WaveSurfer>
-        </Box>
-        <Group>
+        </Box> */}
+        {/* <Group>
             <Button onClick={() => {
                 if(waveSurferRef.current) {
                     waveSurferRef.current.play();
@@ -225,11 +164,11 @@ export function Analysis() {
                 }
             }}>Pause</Button>
 
-        </Group>
+        </Group> */}
         <Group style={{width: '100%', height: '100px'}} align="center" position='center'>
             <Center>
                 <Text color='dimmed' size={20} style={{width: '100%'}}>
-                    {transcription && currentShownTranscription !== null ? transcription.results[currentShownTranscription].alternatives[0].transcript : ''}
+                    {/* {transcription && currentShownTranscription !== null ? transcription.results[currentShownTranscription].alternatives[0].transcript : ''} */}
                 </Text>
             </Center>
         </Group>

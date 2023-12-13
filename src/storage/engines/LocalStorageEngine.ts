@@ -24,49 +24,33 @@ export class LocalStorageEngine extends StorageEngine {
     await this.studyDatabase.setItem('config', config);
   }
 
-  async initializeParticipantSession(participantId: string, sequence: string[]) {
+  async initializeParticipantSession() {
     if (!this._verifyStudyDatabase(this.studyDatabase)) {
       throw new Error('Study database not initialized');
     }
+
+    // Ensure participantId
+    await this.getCurrentParticipantId();
+    if (!this.currentParticipantId) {
+      throw new Error('Participant not initialized');
+    }
     
     // Check if the participant has already been initialized
-    const participant: ParticipantData | null = await this.studyDatabase.getItem(participantId);
+    const participant: ParticipantData | null = await this.studyDatabase.getItem(this.currentParticipantId);
     if (participant) {
       // Participant already initialized
-      this.currentParticipantId = participantId;
       return participant;
     }
 
     // Initialize participant
     const participantData: ParticipantData = {
-      participantId,
-      sequence,
+      participantId: this.currentParticipantId,
+      sequence: await this.getSequence(),
       answers: {},
     };
-    await this.studyDatabase?.setItem(participantId, participantData);
-
-    // Set current participant id if updated
-    await this.studyDatabase.setItem('currentParticipant', participantId);
-    this.currentParticipantId = participantId;
+    await this.studyDatabase?.setItem(this.currentParticipantId, participantData);
 
     return participantData;
-  }
-
-  async getParticipantSession() {
-    if (!this._verifyStudyDatabase(this.studyDatabase)) {
-      throw new Error('Study database not initialized');
-    }
-
-    // Get currentParticipantId
-    this.getCurrentParticipantId();
-
-    // Get participant data
-    let participant: ParticipantData | null = null;
-    if (this.currentParticipantId !== null) {
-      participant = await this.studyDatabase.getItem(this.currentParticipantId);
-    }
-
-    return participant;
   }
 
   async getCurrentParticipantId() {
@@ -153,7 +137,7 @@ export class LocalStorageEngine extends StorageEngine {
     return await this.studyDatabase.getItem('sequenceArray') as string[][] | null;
   }
 
-  async getAllParticpantsData() {
+  async getAllParticipantsData() {
     if (!this._verifyStudyDatabase(this.studyDatabase)) {
       throw new Error('Study database not initialized');
     }
@@ -208,6 +192,28 @@ export class LocalStorageEngine extends StorageEngine {
     }
 
     return participant as ParticipantData;
+  }
+
+  async verifyCompletion() {
+    if (!this._verifyStudyDatabase(this.studyDatabase)) {
+      throw new Error('Study database not initialized');
+    }
+
+    // Get the participantData
+    const participantData = await this.getParticipantData();
+    if (!participantData) {
+      throw new Error('Participant not initialized');
+    }
+
+    // Loop over the sequence and check if all answers are present
+    const allAnswersPresent = participantData.sequence.every((step) => {
+      if (step === 'end') {
+        return true;
+      }
+      return participantData.answers[step] !== undefined;
+    });
+
+    return allAnswersPresent;
   }
 
   private _verifyStudyDatabase(db: LocalForage | undefined): db is LocalForage  {

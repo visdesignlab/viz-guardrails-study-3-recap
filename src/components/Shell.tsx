@@ -30,6 +30,7 @@ import { Analysis } from './interface/audioAnalysis/Analysis';
 import { useStorageEngine } from '../store/storageEngineHooks';
 import { generateSequenceArray } from '../utils/handleRandomSequences';
 import { StepRenderer } from './StepRenderer';
+import { Box, Center, Loader } from '@mantine/core';
 
 async function fetchStudyConfig(configLocation: string, configKey: string) {
   const config = await (await fetch(`${PREFIX}${configLocation}`)).text();
@@ -75,18 +76,9 @@ export function Shell({ globalConfig }: {
         await storageEngine.setSequenceArray(await generateSequenceArray(activeConfig));
       }
 
-      // Get or create a participant id and pull their session
-      const participantId = await storageEngine.getCurrentParticipantId();
-      let participantSession = await storageEngine.getParticipantSession(participantId);
 
-      if (!participantSession) {
         // If we don't have a user's session, we need to generate one
-        const sequence = await storageEngine.getSequence();
-        participantSession = await storageEngine.initializeParticipantSession(
-          participantId,
-          sequence,
-        );
-      }
+      const participantSession = await storageEngine.initializeParticipantSession();
 
       // Initialize the redux stores
       const store = await studyStoreCreator(studyId, activeConfig, participantSession.sequence, participantSession.answers);
@@ -100,9 +92,12 @@ export function Shell({ globalConfig }: {
 
   const routing = useRoutes(routes);
   
-  if (!routing || !store) return null;
-
-  return (
+  return !routing || !store ? 
+    (<Box style={{height: '100vh'}}>
+      <Center style={{height: '100%'}}>
+        <Loader style={{height: '100%'}} size={60} />
+      </Center>
+    </Box>) : (
     <StudyStoreContext.Provider value={store}>
       <Provider store={store.store}>
         {routing}
@@ -159,25 +154,19 @@ export function generateStudiesRoutes(
     });
 
     stepRoutes.push({
-      path: '/:trialName/analysis/:trrackId/',
+      path: '/analysis/:trrackId/:trialName/',
       element: <Stack><ComponentController /><Analysis/></Stack>
     });
 
-    sequence.forEach((step: string) => {
-      if (step === 'end') {
-        stepRoutes.push({
-          path: '/end',
-          element: <StudyEnd />,
-        });
-      } else {
-        stepRoutes.push({
-          path: `/${step}`,
-          element: <ComponentController />,
-        });
-      }
+    stepRoutes.push({
+      path: '/:trialName',
+      element: <ComponentController />,
     });
 
-    console.log(stepRoutes);
+    stepRoutes.push({
+      path: '/end',
+      element: <StudyEnd />,
+    });
 
     const studyRoute: RouteObject = {
       element: <StepRenderer />,

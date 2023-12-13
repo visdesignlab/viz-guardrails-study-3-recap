@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // Took this whole thing from https://github.com/datavisyn/visyn_core/blob/develop/src/hooks/useAsync.tsx
 import * as React from 'react';
 import useDeepCompareEffect from 'use-deep-compare-effect';

@@ -5,19 +5,20 @@ import ImageController from './ImageController';
 import ReactComponentController from './ReactComponentController';
 import MarkdownController from './MarkdownController';
 import { useStudyConfig } from '../store/hooks/useStudyConfig';
-import { useCurrentStep } from '../routes';
 import { useStoredAnswer } from '../store/hooks/useStoredAnswer';
 import ReactMarkdownWrapper from '../components/ReactMarkdownWrapper';
 import { isPartialComponent } from '../parser/parser';
 import merge from 'lodash.merge';
 import { IndividualComponent } from '../parser/types';
+import { useParams } from 'react-router-dom';
 
 // current active stimuli presented to the user
 export default function ComponentController() {
   // Get the config for the current step
   const studyConfig = useStudyConfig();
-  const currentStep = useCurrentStep();
-  const stepConfig = studyConfig.components[currentStep];
+  const {trialName: currentStep} = useParams();
+
+  const stepConfig = studyConfig.components[currentStep!];
   
   // If we have a trial, use that config to render the right component else use the step
   const status = useStoredAnswer();

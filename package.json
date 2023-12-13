@@ -11,7 +11,7 @@
     "postinstall": "husky install",
     "generate-schema:StudyConfig": "ts-json-schema-generator --path src/parser/types.ts --out src/parser/StudyConfigSchema.json --type StudyConfig",
     "generate-schema:GlobalConfig": "ts-json-schema-generator --path src/parser/types.ts --out src/parser/GlobalConfigSchema.json --type GlobalConfig",
-    "test": "playwright test"
+    "test": "VITE_STORAGE_ENGINE=localStorage playwright test"
   },
   "lint-staged": {
     "*.{tsx,jsx,ts,js}": "yarn lint"
@@ -46,14 +46,15 @@
     "react-markdown": "^8.0.5",
     "react-redux": "^8.0.5",
     "react-router-dom": "^6.10.0",
+    "react-spring": "^9.7.3",
     "ts-json-schema-generator": "^1.4.1",
     "typedoc": "^0.25.4",
     "typedoc-plugin-frontmatter": "^0.0.2",
-    "use-deep-compare-effect": "^1.8.1",
-    "wavesurfer-react": "^2.2.3",
-    "wavesurfer.js": "^7.4.2",
     "typedoc-plugin-markdown": "^3.17.1",
-    "uuid": "^9.0.1"
+    "use-deep-compare-effect": "^1.8.1",
+    "uuid": "^9.0.1",
+    "wavesurfer-react": "^2.2.3",
+    "wavesurfer.js": "^7.4.2"
   },
   "devDependencies": {
     "@playwright/test": "^1.35.1",

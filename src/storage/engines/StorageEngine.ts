@@ -23,8 +23,7 @@ export abstract class StorageEngine {
 
   abstract initializeStudyDb(studyId: string, config: object): Promise<void>;
 
-  abstract initializeParticipantSession(participantId: string, sequence: string[]): Promise<ParticipantData>;
-  abstract getParticipantSession(participantId: string): Promise<ParticipantData | null>;
+  abstract initializeParticipantSession(): Promise<ParticipantData>;
 
   abstract getCurrentParticipantId(): Promise<string>;
   abstract clearCurrentParticipantId(): Promise<void>;
@@ -35,8 +34,10 @@ export abstract class StorageEngine {
   abstract getSequenceArray(): Promise<string[][] | null>;
   abstract getSequence(): Promise<string[]>;
 
-  abstract getAllParticpantsData(): Promise<ParticipantData[]>;
-  abstract getParticipantData(): Promise<ParticipantData | null>;
+  abstract getAllParticipantsData(): Promise<ParticipantData[]>;
+  abstract getParticipantData(participantId?: string): Promise<ParticipantData | null>;
 
   abstract nextParticipant(): Promise<ParticipantData>;
+
+  abstract verifyCompletion(answers: Record<string, StoredAnswer>): Promise<boolean>;
 }

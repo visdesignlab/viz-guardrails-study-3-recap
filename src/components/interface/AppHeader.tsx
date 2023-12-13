@@ -68,7 +68,7 @@ export default function AppHeader() {
           <Group align="center">
             <Image maw={40} src={`${PREFIX}${logoPath}`} alt="Study Logo" />
             <Title order={4}>{studyConfig?.studyMetadata.title}</Title>
-            {isRecording ? <Group spacing={5}><IconMicrophone color='red'/><Text color ='red'>Recording audio</Text></Group> : null}
+            {studyConfig?.recordStudyAudio ? <Group spacing={5}><IconMicrophone color='red'/><Text color ='red'>Recording audio</Text></Group> : null}
           </Group>
         </Grid.Col>
 
