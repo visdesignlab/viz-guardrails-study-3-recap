@@ -124,6 +124,10 @@ export function Scatter({
                     d3.select(brushXRef.current).call(brushX.move, [xScale(new Date('2015-01-02')), xScale(new Date('2015-12-31'))]);
                     setBrushedSpace([[xScale(new Date('2015-01-02')), yScale(yMax)], [xScale(new Date('2015-12-31')), yScale(yMin)]], xScale, yScale, 'drag');
                 }
+
+                d3.select(brushXRef.current).call(brushX.move, [brushState.x1, brushState.x2]);
+                d3.select(brushYRef.current).call(brushY.move, [brushState.y1, brushState.y2]);
+
             }
 
             return () => {
@@ -146,6 +150,8 @@ export function Scatter({
             });
 
             d3.select(ref.current).call(brush);
+
+            d3.select(ref.current).call(brush.move, [[brushState.x1, brushState.y1], [brushState.x2, brushState.y2]]);
 
             return () => {
                 d3.select(ref.current).call(brush.move, null);

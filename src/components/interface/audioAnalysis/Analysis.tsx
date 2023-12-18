@@ -1,6 +1,6 @@
 import { Center, Group, Stack, Text } from '@mantine/core';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useResizeObserver } from '@mantine/hooks';
 import { useStorageEngine } from '../../../store/storageEngineHooks';
 import { useAsync } from '../../../store/hooks/useAsync';
@@ -8,7 +8,8 @@ import { StorageEngine } from '../../../storage/engines/StorageEngine';
 import { AllTasksTimeline } from './AllTasksTimeline';
 import { SingleTaskTimeline } from './SingleTaskTimeline';
 
-
+import {Registry, initializeTrrack} from '@trrack/core';
+import { deepCopy } from '../../../utils/deepCopy';
 export interface TranscribedAudioSnippet {
     alternatives: {confidence: number, transcript: string}[]
     languageCode: string;
@@ -87,16 +88,26 @@ export function Analysis({setProvState} : {setProvState: (state: any) => void}) 
         if(selectedTask) {
             const splitArr = location.pathname.split('/');
 
-            console.log(splitArr);
+            setCurrentNode(null);
             splitArr[splitArr.length - 1] = selectedTask;
-            console.log(splitArr);
             navigate(splitArr.join('/'));
         }
     }, [selectedTask]);
 
     useEffect(() => {
         if(currentNode && selectedTask && participant) {
-            setProvState(participant.answers[selectedTask].provenanceGraph?.nodes[currentNode].state);
+
+            const reg = Registry.create();
+    
+            const trrack = initializeTrrack({registry: reg, initialState: {} });
+
+            trrack.importObject(deepCopy(participant.answers[selectedTask].provenanceGraph!));
+
+            const state = trrack.getState(trrack.graph.backend.nodes[currentNode]);
+
+            console.log(state);
+
+            setProvState(state);
         }
     }, [currentNode, participant, selectedTask, setProvState]);
 

@@ -78,6 +78,6 @@ export function Paintbrush(
     }, [brushState.ids, data, isBrushing, isSelect, params, xScale, yScale]);
     
     return (
-        <circle style={{cursor: isBrushing ? 'pointer' : 'default'}} r={BRUSH_SIZE} fill={'darkgray'} opacity={.5} cx={brushPosition[0]} cy={brushPosition[1]}></circle>
+        <circle style={{cursor: isBrushing ? 'pointer' : 'default'}} r={BRUSH_SIZE} fill={'darkgray'} opacity={.5} cx={(brushState.x2 + brushState.x1) / 2} cy={(brushState.y1 + brushState.y2) / 2}></circle>
     );
 }

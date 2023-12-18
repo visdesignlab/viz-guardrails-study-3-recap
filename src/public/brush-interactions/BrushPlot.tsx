@@ -26,6 +26,8 @@ export type SelectionType = 'drag' | 'handle' | 'clear' | null
 export interface BrushParams {brushType: BrushNames, dataset: string, x: string, y: string, category: string, ids: string, dataType?: 'date'}
 export type BrushNames = 'Rectangular Selection' | 'Axis Selection' | 'Slider Selection' | 'Paintbrush Selection'
 export function BrushPlot({ parameters, setAnswer, provenanceState }: StimulusParams<BrushParams, {all: BrushState}>) {
+
+    console.log(provenanceState);
     const [filteredTable, setFilteredTable] = useState<ColumnTable | null>(null);
     const [brushState, setBrushState] = useState<BrushState>({hasBrush: false, x1: 0, y1: 0, x2: 0, y2: 0, ids: []});
 
