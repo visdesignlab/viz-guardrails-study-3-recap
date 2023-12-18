@@ -19,7 +19,7 @@ export function AllTasksTimeline({participantData, width, height, setSelectedTas
         {Object.entries(participantData.answers).map((entry) => {
             const [name, answer] = entry;
 
-            return <SingleTask isSelected={selectedTask === name} setSelectedTask={setSelectedTask} answer={answer} height={height} name={name} xScale={xScale}></SingleTask>;
+            return <SingleTask key={name} isSelected={selectedTask === name} setSelectedTask={setSelectedTask} answer={answer} height={height} name={name} xScale={xScale}></SingleTask>;
         })}
 
     </svg>;

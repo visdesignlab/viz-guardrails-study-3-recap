@@ -1,6 +1,6 @@
 import { Center, Group, Stack, Text } from '@mantine/core';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useResizeObserver } from '@mantine/hooks';
 import { useStorageEngine } from '../../../store/storageEngineHooks';
 import { useAsync } from '../../../store/hooks/useAsync';
@@ -67,6 +67,7 @@ function getParticipantData(trrackId: string | undefined, storageEngine: Storage
     }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function Analysis({setProvState} : {setProvState: (state: any) => void}) {
     const {trrackId} = useParams();
 
@@ -101,13 +102,17 @@ export function Analysis({setProvState} : {setProvState: (state: any) => void}) 
     
             const trrack = initializeTrrack({registry: reg, initialState: {} });
 
-            trrack.importObject(deepCopy(participant.answers[selectedTask].provenanceGraph!));
+            if(participant.answers[selectedTask].provenanceGraph) {
+                trrack.importObject(deepCopy(participant.answers[selectedTask].provenanceGraph!));
 
-            const state = trrack.getState(trrack.graph.backend.nodes[currentNode]);
+                const state = trrack.getState(trrack.graph.backend.nodes[currentNode]);
+    
+                setProvState(state);
+            }
+        }
 
-            console.log(state);
-
-            setProvState(state);
+        else {
+            setProvState(null);
         }
     }, [currentNode, participant, selectedTask, setProvState]);
 

@@ -65,7 +65,7 @@ export function Bar({ barsTable, parameters, data } : {barsTable: ColumnTable | 
                 return null;
             }
 
-            return <g>
+            return <g key={i}>
                     <rect key={i} x={margin.left} y={yScale(car[parameters.category])} fill={colorScale(car[parameters.category])} height={yScale.bandwidth()} width={xScale(car.count) - margin.left}/>
                     <text x={xScale(car.count) + 5} y={yScale(car[parameters.category])! + (yScale.bandwidth() / 2)} style={{textAlign: 'center', dominantBaseline: 'middle', fontSize: 14}}>{car.count}</text>
                 </g>;

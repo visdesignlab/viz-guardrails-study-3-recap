@@ -7,8 +7,6 @@ import { useState } from 'react';
 
 export function ProvenanceWrapper() {
     const [provState, setProvState] = useState<any>();
-
-    console.log(provState);
-
+    
     return <Stack><Analysis setProvState={setProvState}/><ComponentController provState={provState} /></Stack>;
 }
