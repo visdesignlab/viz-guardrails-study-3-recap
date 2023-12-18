@@ -66,7 +66,7 @@ function getParticipantData(trrackId: string | undefined, storageEngine: Storage
     }
 }
 
-export function Analysis() {
+export function Analysis({setProvState} : {setProvState: (state: any) => void}) {
     const {trrackId} = useParams();
 
     const navigate = useNavigate();
@@ -93,6 +93,12 @@ export function Analysis() {
             navigate(splitArr.join('/'));
         }
     }, [selectedTask]);
+
+    useEffect(() => {
+        if(currentNode && selectedTask && participant) {
+            setProvState(participant.answers[selectedTask].provenanceGraph?.nodes[currentNode].state);
+        }
+    }, [currentNode, participant, selectedTask, setProvState]);
 
     // const xScale = useMemo(() => {
     //     if(endState && trialName) {

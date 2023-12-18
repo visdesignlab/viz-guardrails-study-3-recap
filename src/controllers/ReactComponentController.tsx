@@ -10,7 +10,7 @@ const modules = import.meta.glob(
   { eager: true }
 );
 
-const ReactComponentController = ({ currentConfig }: { currentConfig: ReactComponent; }) => {
+const ReactComponentController = ({ currentConfig, provState }: { currentConfig: ReactComponent; provState?: any; }) => {
 
   const currentStep = useCurrentStep();
 
@@ -19,7 +19,7 @@ const ReactComponentController = ({ currentConfig }: { currentConfig: ReactCompo
 
   const storeDispatch = useStoreDispatch();
   const { updateResponseBlockValidation, setIframeAnswers } = useStoreActions();
-  function setAnswer({status, provenanceGraph, answers}: Parameters<StimulusParams<unknown>['setAnswer']>[0]) {
+  function setAnswer({status, provenanceGraph, answers}: Parameters<StimulusParams<unknown, unknown>['setAnswer']>[0]) {
     storeDispatch(updateResponseBlockValidation({
       location: 'sidebar',
       currentStep,
@@ -38,6 +38,7 @@ const ReactComponentController = ({ currentConfig }: { currentConfig: ReactCompo
       <StimulusComponent
         parameters={currentConfig.parameters}
         setAnswer={setAnswer}
+        provenanceState={provState}
       />
     </Suspense>
   );

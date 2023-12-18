@@ -13,7 +13,7 @@ import { IndividualComponent } from '../parser/types';
 import { useParams } from 'react-router-dom';
 
 // current active stimuli presented to the user
-export default function ComponentController() {
+export default function ComponentController({provState} : {provState?: any}) {
   // Get the config for the current step
   const studyConfig = useStudyConfig();
   const {trialName: currentStep} = useParams();
@@ -43,7 +43,7 @@ export default function ComponentController() {
         {currentConfig.type === 'markdown' && <MarkdownController currentConfig={currentConfig} />}
         {currentConfig.type === 'website' && <IframeController currentConfig={currentConfig} />}
         {currentConfig.type === 'image' && <ImageController  currentConfig={currentConfig}/>}
-        {currentConfig.type === 'react-component' && <ReactComponentController currentConfig={currentConfig} />}
+        {currentConfig.type === 'react-component' && <ReactComponentController currentConfig={currentConfig} provState={provState}  />}
       </Suspense>
 
       {(instructionLocation === 'belowStimulus' || (instructionLocation === undefined && !instructionInSideBar)) && <ReactMarkdownWrapper text={instruction} />}
