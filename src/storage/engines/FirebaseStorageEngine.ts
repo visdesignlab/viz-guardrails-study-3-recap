@@ -104,7 +104,6 @@ export class FirebaseStorageEngine extends StorageEngine {
     const currentParticipantId = await this.localForage.getItem('currentParticipantId');
 
     if (currentParticipantId) {
-      console.log(this);
       this.currentParticipantId = currentParticipantId as string;
       return currentParticipantId as string;
     } else {
@@ -240,7 +239,6 @@ export class FirebaseStorageEngine extends StorageEngine {
   }
 
   async getParticipantData(participantId?: string) {
-    console.log(this);
     if (!this._verifyStudyDatabase(this.studyCollection)) {
       throw new Error('Study database not initialized');
     }
@@ -251,11 +249,8 @@ export class FirebaseStorageEngine extends StorageEngine {
     // Get participant data
     let participant: ParticipantData | null = null;
     if (this.currentParticipantId !== null) {
-      console.log(participantId);
       const participantDoc = doc(this.studyCollection, participantId ? participantId : this.currentParticipantId);
       participant = (await getDoc(participantDoc)).data() as ParticipantData | null;
-
-      console.log(participant);
 
       // Get provenance data
       if (participant !== null) {

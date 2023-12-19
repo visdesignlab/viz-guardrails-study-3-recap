@@ -48,7 +48,6 @@ export function Shell({ globalConfig }: {
   }
   const [activeConfig, setActiveConfig] = useState<Nullable<StudyConfig>>(null);
   useEffect(() => {
-    console.log(globalConfig);
     const configKey = globalConfig.configsList.find(
       (c) => sanitizeStringForUrl(c) === studyId
     );
