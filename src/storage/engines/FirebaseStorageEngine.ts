@@ -153,6 +153,72 @@ export class FirebaseStorageEngine extends StorageEngine {
     }
   }
 
+  async saveAudio(
+    audioStream: MediaRecorder,
+  ) {
+  
+    audioStream.addEventListener('dataavailable', (data) => {
+      console.log(data);
+      const storage = getStorage();
+  
+      const storeRef = ref(storage, `${this.studyId}/audio/${this.currentParticipantId}`);
+  
+      uploadBytes(storeRef, data.data).then(() => {
+        console.log('Uploaded a blob or file!');
+      });
+    });
+
+    audioStream.stop();
+  
+    audioStream.stream.getTracks().forEach((track) => track.stop());
+  }
+
+  async getAudio(
+    participantId: string,
+  ) {
+    const storage = getStorage();
+
+    const url = await getDownloadURL(ref(storage, `${this.studyId}/audio/${participantId}`));
+    
+    return new Promise<string>((resolve) => {
+        const xhr = new XMLHttpRequest();
+        xhr.responseType = 'blob';
+        xhr.onload = () => {
+            const blob = xhr.response;
+    
+            const url = URL.createObjectURL( blob );
+    
+            resolve(url);
+        };
+        xhr.open('GET', url);
+        xhr.send();
+    });
+  }
+
+  async getTranscription(
+    participantId: string,
+  ) {
+    const storage = getStorage();
+
+    const url = await getDownloadURL(ref(storage, `${this.studyId}/audio/${participantId}.wav_transcription.txt`));
+    
+    return new Promise<string>((resolve) => {
+        const xhr = new XMLHttpRequest();
+        xhr.responseType = 'blob';
+        xhr.onload = () => {
+            const blob = xhr.response;
+    
+            blob.text().then((text: string) => {
+                const json = text;
+    
+                resolve(json);
+            });
+        };
+        xhr.open('GET', url);
+        xhr.send();
+    });
+  }
+
   async setSequenceArray(latinSquare: string[][]) {
     if (!this._verifyStudyDatabase(this.studyCollection)) {
       throw new Error('Study database not initialized');
@@ -183,6 +249,7 @@ export class FirebaseStorageEngine extends StorageEngine {
   }
 
   async getSequence() {
+    console.log(this);
     if (!this._verifyStudyDatabase(this.studyCollection)) {
       throw new Error('Study database not initialized');
     }

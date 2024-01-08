@@ -36,8 +36,11 @@ export abstract class StorageEngine {
 
   abstract getAllParticipantsData(): Promise<ParticipantData[]>;
   abstract getParticipantData(participantId?: string): Promise<ParticipantData | null>;
+  abstract getAudio(participantId?: string): Promise<string>;
+  abstract getTranscription(participantId?: string): Promise<string>;
 
   abstract nextParticipant(): Promise<ParticipantData>;
+  abstract saveAudio(audioStream: MediaRecorder): Promise<void>;
 
   abstract verifyCompletion(answers: Record<string, StoredAnswer>): Promise<boolean>;
 }

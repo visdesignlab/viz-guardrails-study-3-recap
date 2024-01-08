@@ -14,6 +14,7 @@
             "University of Toronto"
         ]
     },
+    recordStudyAudio: true,
     "uiConfig": {
         "contactEmail": "cnobre@cs.toronto.edu",
         "helpTextPath": "brush-interactions/help.md",

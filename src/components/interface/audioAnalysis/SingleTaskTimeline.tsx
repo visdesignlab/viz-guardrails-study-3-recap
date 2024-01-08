@@ -14,7 +14,6 @@ export function SingleTaskTimeline({participantData, width, height, selectedTask
     const [taskIndex, setTaskIndex] = useState<number>(0);
     const [provNodeIndex, setProvNodeIndex] = useState<number>(0);
 
-
     const xScale = useMemo(() => {
         const allStartTimes = selectedTask ? [participantData.answers[selectedTask].startTime, participantData.answers[selectedTask].endTime] : Object.values(participantData.answers).map((answer) => [answer.startTime, answer.endTime]).flat();
 
@@ -66,6 +65,7 @@ export function SingleTaskTimeline({participantData, width, height, selectedTask
     }, [participantData.answers, width]);
 
     const currentNodeCallback = useCallback((node: string) => {
+        console.log(allTaskTimes, node);
         setPlayTime(allTaskTimes[taskIndex].nodes.find((n) => n.name === node)!.time);
         setProvNodeIndex(allTaskTimes[taskIndex].nodes.indexOf(allTaskTimes[taskIndex].nodes.find((n) => n.name === node)!));
 
