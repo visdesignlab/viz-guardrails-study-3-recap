@@ -7,6 +7,7 @@ import { SingleTask } from './SingleTask';
 
 const margin = {left: 5, top: 0, right: 5, bottom: 0};
 export function AllTasksTimeline({participantData, width, height, setSelectedTask, selectedTask} : {participantData: ParticipantData, width: number, height: number, setSelectedTask: (task: string | null) => void, selectedTask: string | null}) {
+    console.log(width);
     const xScale = useMemo(() => {
         const allStartTimes = Object.values(participantData.answers).map((answer) => [answer.startTime, answer.endTime]).flat();
 

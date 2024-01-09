@@ -1,7 +1,8 @@
-import { Affix, AppShell, Box, Button, Center, Group, MantineProvider, Stack, Text } from '@mantine/core';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Box, Button, Center, Group, Stack, Text } from '@mantine/core';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useResizeObserver } from '@mantine/hooks';
+import { useDebouncedState, useDebouncedValue, useResizeObserver } from '@mantine/hooks';
 import { useStorageEngine } from '../../../store/storageEngineHooks';
 import { useAsync } from '../../../store/hooks/useAsync';
 import { StorageEngine } from '../../../storage/engines/StorageEngine';
@@ -14,10 +15,10 @@ import { useEvent } from '../../../store/hooks/useEvent';
 
 // import WaveSurfer from 'wavesurfer.js'; 
 
-import {WaveSurfer, WaveForm} from 'wavesurfer-react';
+import { WaveForm, useWavesurfer} from 'wavesurfer-react';
+import WaveSurferContext from 'wavesurfer-react/dist/contexts/WaveSurferContext';
+
 import { createPortal } from 'react-dom';
-import { CacheProvider } from '@emotion/react';
-import createCache from '@emotion/cache';
 export interface TranscribedAudioSnippet {
     alternatives: {confidence: number, transcript: string}[]
     languageCode: string;
@@ -34,13 +35,13 @@ function getParticipantData(trrackId: string | undefined, storageEngine: Storage
 }
 
 
-function copyStyles(sourceDoc, targetDoc) {
-    Array.from(sourceDoc.styleSheets).forEach((styleSheet) => {
+function copyStyles(sourceDoc: any, targetDoc: any) {
+    Array.from(sourceDoc.styleSheets).forEach((styleSheet: any) => {
 
       if (styleSheet.cssRules) { // for <style> elements
         const newStyleEl = sourceDoc.createElement('style');
   
-        Array.from(styleSheet.cssRules).forEach((cssRule) => {
+        Array.from(styleSheet.cssRules).forEach((cssRule: any) => {
           // write the text of each rule into the body of the style element
           newStyleEl.appendChild(sourceDoc.createTextNode(cssRule.cssText));
         });
@@ -75,6 +76,9 @@ export function Analysis({setProvState} : {setProvState: (state: any) => void}) 
     const [currentShownTranscription, setCurrentShownTranscription] = useState<number | null>(null);
     const {value: participant, status } = useAsync(getParticipantData, [trrackId, storageEngine]);
 
+    const [isPlaying, setIsPlaying] = useState<boolean>(false);
+    const [playTime, setPlayTime] = useState<number>(0);
+    
     useEffect(() => {
         if(selectedTask) {
             const splitArr = location.pathname.split('/');
@@ -83,8 +87,9 @@ export function Analysis({setProvState} : {setProvState: (state: any) => void}) 
             splitArr[splitArr.length - 1] = selectedTask;
             navigate(splitArr.join('/'));
         }
-    }, [selectedTask]);
+    }, [location.pathname, navigate, selectedTask]);
 
+    // Create an instance of trrack to ensure getState works, incase the saved state is not a full state node. 
     useEffect(() => {
         if(currentNode && selectedTask && participant) {
 
@@ -100,22 +105,49 @@ export function Analysis({setProvState} : {setProvState: (state: any) => void}) 
                 setProvState(state);
             }
         }
-
         else {
             setProvState(null);
         }
     }, [currentNode, participant, selectedTask, setProvState]);
 
-    // const xScale = useMemo(() => {
-    //     if(endState && trialName) {
-    //         const trial = endState.trrackedSlice[trialName] as unknown as TrialResult;
-    //         return d3.scaleLinear([0, width]).domain([trial.startTime, trial.endTime]);
-    //     }
 
-    //     return null;
-    // }, [endState, trialName, width]);
+    const handleWSMount = useCallback(
+        (waveSurfer: any) => {
+          if (waveSurfer) {
+            storageEngine?.getAudio(trrackId!).then((url) => {
+                if(waveSurfer) {
+                    waveSurfer.load(url);
+                    setCurrentShownTranscription(0);
+                }
+                
+            });
+          }
+        },
+        [storageEngine, trrackId]
+    );
 
-    const waveSurferRef = useRef<any>();
+    const containerEl = useMemo(() => document.createElement('div'), []);
+
+    const waveSurferDiv = useRef(null);
+
+    const wavesurfer = useWavesurfer({ container: waveSurferDiv.current, plugins: [], onMount: handleWSMount });
+
+    const _setPlayTime = useCallback((n: number, percent: number) => {
+        setPlayTime(n);
+        
+        if(wavesurfer && percent) {
+            console.log(percent);
+            wavesurfer?.seekTo(percent);
+        }
+    }, [wavesurfer]);
+
+    const _setIsPlaying = useCallback((b: boolean) => {
+        setIsPlaying(b);
+        
+        if(wavesurfer) {
+            b ? wavesurfer.play() : wavesurfer.pause();
+        }
+    }, [wavesurfer]);
 
     useEffect(() => {
         if(studyId && trialName && trrackId) {
@@ -125,59 +157,38 @@ export function Analysis({setProvState} : {setProvState: (state: any) => void}) 
         }
     }, [storageEngine, studyId, trialName, trrackId]);
 
-    const handleWSMount = useCallback(
-        (waveSurfer: any) => {
-            console.log('mounted handle');
-          waveSurferRef.current = waveSurfer;
-          console.log(transcription);
-    
-          if (waveSurferRef.current) {
-            storageEngine?.getAudio(trrackId!).then((url) => {
-                if(waveSurferRef.current) {
-                    waveSurferRef.current.load(url);
-                    setCurrentShownTranscription(0);
-                }
-                
-            });
-          }
-        },
-        [storageEngine, trrackId]
-      );
-
     const timeUpdateCallback = useEvent<(t: number) => void, any>((time: number) => {
         if(transcription && currentShownTranscription !== null) {
             const tempTime = transcription.results[currentShownTranscription].resultEndTime;
 
             const numTime = +tempTime.slice(0, tempTime.length - 2);
 
-            console.log(time, numTime);
-
             if(time > numTime && currentShownTranscription !== transcription.results.length - 1) {
                 setCurrentShownTranscription(currentShownTranscription + 1);
             }
             
         }
+
+        setPlayTime(time * 1000);
     });
 
     useEffect(() => {
         
-        if(waveSurferRef.current) {
-            waveSurferRef.current.on('interaction', () => {
-                waveSurferRef.current.play();
+        if(wavesurfer) {
+            wavesurfer.on('interaction', () => {
+                wavesurfer.play();
                 setCurrentShownTranscription(0);
             });
 
-            waveSurferRef.current.on('timeupdate', timeUpdateCallback);
+            wavesurfer.on('timeupdate', timeUpdateCallback);
         }
-    }, [timeUpdateCallback]);
-
-    const containerEl = useMemo(() => document.createElement('div'), []);
+    }, [timeUpdateCallback, wavesurfer]);
 
     useEffect(() => {
         const externalWindow = window.open(
             'about:blank',
             'newWin',
-            `width=20000,height=500,left=${window.screen.availWidth / 3 -
+            `width=2000,height=700,left=${window.screen.availWidth / 3 -
                 200},top=${window.screen.availHeight / 3 - 150}`
             )!;
     
@@ -189,41 +200,16 @@ export function Analysis({setProvState} : {setProvState: (state: any) => void}) 
         };
       }, []);
 
-    // const events = useMemo(() => {
-    //     if(endState && trialName && xScale && provGraph) {
-
-    //         const nodes = Object.values(provGraph);
-
-    //         return Object.values(nodes).filter((node) => node.label !== 'Root').map((node) => {
-    //             return <circle key={node.id} r={5} cy={150} cx={xScale(node.createdOn as unknown as number)} fill ="cornflowerblue" ></circle>;
-    //         });
-    //     }
-
-    //     return null;
-    // }, [endState, provGraph, trialName, xScale]);
-
     const children = useMemo(() =>{
         return <Stack ref={ref} style={{width: '100%'}} spacing={0}>
         {status === 'success' && participant ? <AllTasksTimeline selectedTask={selectedTask} setSelectedTask={setSelectedTask} participantData={participant} width={width} height={50}/> : null}
-        {status === 'success' && participant ? <SingleTaskTimeline currentNode={currentNode} setCurrentNode={setCurrentNode} selectedTask={selectedTask} participantData={participant} width={width} height={200}/> : null}
-        <Box style={{width: '100%'}}>
-            {/* <WaveSurfer onMount={handleWSMount}>
-                <WaveForm id="waveform"/>
-            </WaveSurfer> */}
-        </Box>
-        <Group>
-            <Button onClick={() => {
-                if(waveSurferRef.current) {
-                    waveSurferRef.current.play();
-                }
-            }}>Play</Button>
-            <Button onClick={() => {
-                if(waveSurferRef.current) {
-                    waveSurferRef.current.pause();
-                }
-            }}>Pause</Button>
+        {status === 'success' && participant ? <SingleTaskTimeline setSelectedTask={setSelectedTask} playTime={playTime} setPlayTime={_setPlayTime} isPlaying={isPlaying} setIsPlaying={_setIsPlaying} currentNode={currentNode} setCurrentNode={setCurrentNode} selectedTask={selectedTask} participantData={participant} width={width} height={50}/> : null}
+        <Box ref={waveSurferDiv} style={{width: '100%'}}>
 
-        </Group>
+        <WaveSurferContext.Provider value={wavesurfer}>
+            <WaveForm id="waveform"/>
+        </WaveSurferContext.Provider>
+        </Box>
         <Group style={{width: '100%', height: '100px'}} align="center" position='center'>
             <Center>
                 <Text color='dimmed' size={20} style={{width: '100%'}}>
@@ -231,11 +217,16 @@ export function Analysis({setProvState} : {setProvState: (state: any) => void}) 
                 </Text>
             </Center>
         </Group>
+        <Group>
+            <Button onClick={() => _setIsPlaying(true)}>Play</Button>
+            <Button onClick={() => _setIsPlaying(false)}>Pause</Button>
+            <Text>{new Date(playTime).toLocaleString()}</Text>
+        </Group>
     </Stack>;
-    }, [containerEl, currentNode, currentShownTranscription, handleWSMount, participant, ref, selectedTask, status, transcription, width]);
+    }, [_setIsPlaying, _setPlayTime, currentNode, currentShownTranscription, isPlaying, participant, playTime, ref, selectedTask, status, transcription, wavesurfer, width]);
 
     return <div>
-        {/* <div id="waveform"></div> */}
+
             {/* {children} */}
         {createPortal(<div>{children}</div>, containerEl)}
     </div>;

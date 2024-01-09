@@ -34,6 +34,7 @@ import { StepRenderer } from './StepRenderer';
 import { Box, Center, Loader } from '@mantine/core';
 import { ProvenanceWrapper } from './interface/audioAnalysis/ProvenanceWrapper';
 import { StorageEngine } from '../storage/engines/StorageEngine';
+import { AnalysisHome } from './interface/audioAnalysis/AnalysisHome';
 
 async function fetchStudyConfig(configLocation: string, configKey: string) {
   const config = await (await fetch(`${PREFIX}${configLocation}`)).text();
@@ -160,6 +161,11 @@ export function GenerateStudiesRoutes({studyId, config, storage}: {
       stepRoutes.push({
         path: '/analysis/:trrackId/:trialName/',
         element: <ProvenanceWrapper/>
+      });
+
+      stepRoutes.push({
+        path: '/analysis',
+        element: <AnalysisHome/>
       });
   
       stepRoutes.push({
