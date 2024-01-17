@@ -21,7 +21,7 @@ export function DataExplorer({ parameters }: StimulusParams<ChartParams>) {
     const [range, setRange] = useState<[Date, Date]>([new Date('2020-01-01'), new Date('2023-12-31')]);
 
     useEffect(() => {
-        d3.csv(`../data/${parameters.dataset}.csv`)
+        d3.csv(`./data/${parameters.dataset}.csv`)
         .then((data) => {
             setData(data);
             setItems(Array.from(new Set(data.map((row) => row['country']))));
