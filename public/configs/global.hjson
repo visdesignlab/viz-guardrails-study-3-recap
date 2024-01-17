@@ -12,6 +12,7 @@
         MVNV
         brush-interactions
         fairness-jnd
+        viz-guardrails
     ],
     configs: {
         fairness-jnd: {
@@ -46,6 +47,9 @@
         },
         brush-interactions: {
             path: brush-interactions/config.hjson
+        },
+        viz-guardrails: {
+            path: viz-guardrails/config-viz-guardrails.hjson
         }
     }
 }
