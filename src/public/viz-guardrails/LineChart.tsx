@@ -12,15 +12,17 @@ const margin = {
     top: 15,
     left: 70,
     right: 100,
-    bottom: 70
+    bottom: 50
 };
 
 export function LineChart({ 
     data, 
-    selection 
+    selection,
+    range
 } : {
     data: any[],
-    selection: string[] | null
+    selection: string[] | null,
+    range: [Date, Date] | null
 }) {
 
     // Handle hovering
@@ -61,7 +63,7 @@ export function LineChart({
             yMax
         };
 
-    }, [data, selection]);
+    }, [data, selection, range]);
 
     const xScale = useMemo(() => {
         //const range = xMax - xMin;
@@ -73,9 +75,13 @@ export function LineChart({
         //    return d3.scaleTime([margin.left, width + margin.left]).domain([new Date('2014-12-20'), new Date('2016-01-10')]);
         //}
 
+        if (range) {
+            return d3.scaleTime([margin.left, width + margin.left]).domain(range);
+        }
+        
         return d3.scaleTime([margin.left, width + margin.left]).domain([new Date('2020-01-01'), new Date('2023-12-31')]);
         //return d3.scaleLinear([margin.left, width + margin.left]).domain([xMin, xMax]).nice();
-    }, [width, xMax, xMin]);
+    }, [width, xMax, xMin, range]);
 
     const yScale = useMemo(() => {
         //const range = yMax - yMin;
@@ -105,8 +111,9 @@ export function LineChart({
         const paths = selection?.map((x) => ({ 
             country: x as string, 
             label_pos: data.filter((val) => val['country'] == x).slice(-1).map((val) => yScale(val['value']))[0] as number,
-            path: lineGenerator(data.filter((val) => val['country'] == x)) as string
+            path: lineGenerator(data.filter((val) => (val['country'] == x))) as string
         }));
+        //console.log(range[0]);
 
         return paths;
 
@@ -114,25 +121,13 @@ export function LineChart({
 
     return (
             selection?.length==0 ? (
-                <Center ref={ref} style={{ width: '800px', height: '500px' }}>
+                <Center ref={ref} style={{ width: '800px', height: '400px' }}>
                     <Text fs="italic" c="dimmed">Select an item to view the chart.</Text>
                 </Center>
             ) : (
-            <svg id={'baseLineChart'} ref={ref} style={{ height: '500px', width: '800px', fontFamily: '"Helvetica Neue", "Helvetica", "Arial", sans-serif'}} >
+            <svg id={'baseLineChart'} ref={ref} style={{ height: '400px', width: '800px', fontFamily: '"Helvetica Neue", "Helvetica", "Arial", sans-serif'}} >
 
-                <XAxis 
-                isDate={true} 
-                xScale={xScale} 
-                yRange={yScale.range() as [number, number]} 
-                vertPosition={height + margin.top} 
-                showLines={false} 
-                ticks={xScale.ticks(6).map((value) => ({
-                    value: value.toString(),
-                    offset: xScale(value),
-                }))} />
-
-                <YAxis yScale={yScale} horizontalPosition={margin.left} xRange={xScale.range()} />
-
+                <svg style={{ width: `${width}` }}>
                 {linePaths?.map((x) => {
                     return (
                         <g key={`${x.country}`}>
@@ -161,6 +156,22 @@ export function LineChart({
                         </g>
                     );
                 })}
+                </svg>
+
+                <g id={'axes'}>
+                    <XAxis
+                        isDate={true}
+                        xScale={xScale}
+                        yRange={yScale.range() as [number, number]}
+                        vertPosition={height + margin.top}
+                        showLines={false}
+                        ticks={xScale.ticks(5).map((value) => ({
+                            value: value.toString(),
+                            offset: xScale(value),
+                        }))} />
+
+                    <YAxis yScale={yScale} horizontalPosition={margin.left} xRange={xScale.range()} />
+                </g>
 
             </svg>
             )

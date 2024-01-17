@@ -3,11 +3,12 @@
 
 import { Loader } from '@mantine/core';
 import { StimulusParams } from '../../store/types';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import * as d3 from 'd3';
-import { Group } from '@mantine/core';
+import { Group, Stack } from '@mantine/core';
 import LineChart from './LineChart';
 import Sidebar from './Sidebar';
+import RangeSelector from './RangeSelector';
 
 export interface ChartParams { dataset: string, x: string, y: string, guardrail: string }
 
@@ -17,6 +18,7 @@ export function DataExplorer({ parameters }: StimulusParams<ChartParams>) {
     const [ data, setData ] = useState<any[] | null>(null);
     const [ selection, setSelection ] = useState<string[] | null>(null);
     const [ items, setItems ] = useState<any[] | null>(null);
+    const [range, setRange] = useState<[Date, Date]>([new Date('2020-01-01'), new Date('2023-12-31')]);
 
     useEffect(() => {
         d3.csv(`../data/${parameters.dataset}.csv`)
@@ -27,10 +29,26 @@ export function DataExplorer({ parameters }: StimulusParams<ChartParams>) {
         });
     }, [parameters]);
 
-    return data&&items ? (
+    const filteredData = useMemo(() => {
+
+        if (data && range) {
+            return data
+                .filter((val) => (new Date(val['date'])).getTime() >= range[0].getTime())
+                .filter((val) => (new Date(val['date'])).getTime() <= range[1].getTime());
+        }
+        return data;
+        
+    }, [data, selection, range]);
+
+    return filteredData&&items ? (
         <Group>
             <Sidebar items={items} setSelection={setSelection} />
-            <LineChart data={data} selection={selection} />
+            <Stack align='center'>
+                <LineChart data={filteredData} selection={selection} range={range} />
+                <div style={{ width: '600px'}}>
+                    <RangeSelector setRange={setRange} />
+                </div>
+            </Stack>
         </Group>
     ) : <Loader/>;
 }
