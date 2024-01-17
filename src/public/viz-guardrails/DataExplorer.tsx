@@ -15,7 +15,7 @@ export function DataExplorer({ parameters }: StimulusParams<ChartParams>) {
 
     ///////////// Loading data
     const [ data, setData ] = useState<any[] | null>(null);
-    const [ selection, setSelection ] = useState<any[] | null>(null);
+    const [ selection, setSelection ] = useState<string[] | null>(null);
     const [ items, setItems ] = useState<any[] | null>(null);
 
     useEffect(() => {
@@ -29,7 +29,7 @@ export function DataExplorer({ parameters }: StimulusParams<ChartParams>) {
 
     return data&&items ? (
         <Group>
-            <Sidebar items={items} selection={selection} setSelection={setSelection} />
+            <Sidebar items={items} setSelection={setSelection} />
             <LineChart data={data} selection={selection} />
         </Group>
     ) : <Loader/>;

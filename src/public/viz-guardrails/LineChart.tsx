@@ -20,17 +20,17 @@ export function LineChart({
     selection 
 } : {
     data: any[],
-    selection: any[]
+    selection: string[] | null
 }) {
 
     // Handle hovering
-    const [ hover, setHover ] = useState<any[] | null>(null);
+    const [ hover, setHover ] = useState<string[] | null>(null);
 
-    const shouldBeColor = ((country) => {
+    const shouldBeColor = ((country: string) => {
         if (!hover || hover.length == 0) {
             return true;
         } 
-        return hover == country;
+        return hover.includes(country);
     });
 
     ///////////// Setting sizing
@@ -47,10 +47,10 @@ export function LineChart({
     ///////////// Setting scales
     const { xMin, yMin, xMax, yMax } = useMemo(() => {
 
-        const xData: number[] = data.filter((val) => selection.includes(val['country'])).map((d) => +d['date']).filter((val) => val !== null) as number[];
+        const xData: number[] = data.filter((val) => selection?.includes(val['country'])).map((d) => +d['date']).filter((val) => val !== null) as number[];
         const [xMin, xMax] = d3.extent(xData) as [number, number];
 
-        const yData: number[] = data.filter((val) => selection.includes(val['country'])).map((d) => +d['value']).filter((val) => val !== null) as number[];
+        const yData: number[] = data.filter((val) => selection?.includes(val['country'])).map((d) => +d['value']).filter((val) => val !== null) as number[];
         const [yMin, yMax] = d3.extent(yData) as [number, number];
 
 
@@ -100,12 +100,12 @@ export function LineChart({
         }
 
         const lineGenerator = d3.line();
-        lineGenerator.x((d) => xScale(d3.timeParse('%Y-%m-%d')(d['date'])));
-        lineGenerator.y((d) => yScale(d['value']));
-        const paths = selection.map((x) => ({ 
-            country: x, 
-            label_pos: data.filter((val) => val['country'] == x).slice(-1).map((val) => yScale(val['value'])),
-            path: lineGenerator(data.filter((val) => val['country'] == x)) 
+        lineGenerator.x((d: any) => xScale(d3.timeParse('%Y-%m-%d')(d['date']) as Date));
+        lineGenerator.y((d: any) => yScale(d['value']));
+        const paths = selection?.map((x) => ({ 
+            country: x as string, 
+            label_pos: data.filter((val) => val['country'] == x).slice(-1).map((val) => yScale(val['value']))[0] as number,
+            path: lineGenerator(data.filter((val) => val['country'] == x)) as string
         }));
 
         return paths;
@@ -113,7 +113,7 @@ export function LineChart({
     }, [data, xScale, yScale, selection, xMax]);
 
     return (
-            selection.length==0 ? (
+            selection?.length==0 ? (
                 <Center ref={ref} style={{ width: '800px', height: '500px' }}>
                     <Text fs="italic" c="dimmed">Select an item to view the chart.</Text>
                 </Center>
@@ -133,7 +133,7 @@ export function LineChart({
 
                 <YAxis yScale={yScale} horizontalPosition={margin.left} xRange={xScale.range()} />
 
-                {linePaths.map((x) => {
+                {linePaths?.map((x) => {
                     return (
                         <g key={`${x.country}`}>
                         <path 
@@ -149,7 +149,10 @@ export function LineChart({
                                 px={2} 
                                 size={10} 
                                 color={shouldBeColor(x.country) ? colorScale(x.country) : 'gainsboro'}
-                                onMouseOver={(e) => setHover([e.target.innerText])}
+                                onMouseOver={(e) => {
+                                    const t = e.target as HTMLElement;
+                                    setHover([t.innerText]);
+                                }}
                                 onMouseOut={() => setHover([])}
                             >
                                 {x.country}
