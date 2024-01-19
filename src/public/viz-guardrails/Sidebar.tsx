@@ -1,44 +1,34 @@
-import { MultiSelect } from '@mantine/core';
+import { Chip } from '@mantine/core';
 
 export function Sidebar({
     items,
-    //selection,
     setSelection
 } : {
     items: string[];
-    //selection: Array<any>;
     setSelection: (value: Array<string>) => void
 }) {
 
-    // const isSelected = ((item) => {
-    //     if(!selection) {
-    //         return false;
-    //     }
-
-    //     return selection.includes(item);
-    // })
-
-    // const toggleItem = ((event) => {
-    //     const item = event.target.innerText;
-    //     console.log(event.target);
-    //     if (isSelected(item)) {
-    //         setSelection(selection.filter((x) => x!=item));
-    //     } else {
-    //         setSelection([...selection, item]);
-    //     }
-    // });
-
     return (
         <div style={{ width:'150px', height:'500px'}}>
-        <MultiSelect
-            data={items}
-            initiallyOpened={true}
-            clearable
-            placeholder='Pick items to plot'
-            defaultValue={[]}
+        <Chip.Group
+            key='chip_group'
             onChange={(xs) => setSelection(xs)}
-            maxDropdownHeight={400}
-        />
+            spacing={0}
+            multiple
+            align='stretch'
+        >
+            {items.map((item) => {
+                return (
+                    <Chip 
+                        key={item} 
+                        value={item} 
+                        variant='filled' 
+                        radius='xs'
+                        styles={{label: {'width':'150px'}}}
+                    >{item}</Chip>
+                );
+            })}
+        </Chip.Group>
         </div >
     );
 
