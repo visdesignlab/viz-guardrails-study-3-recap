@@ -133,6 +133,39 @@ export function LineChart({
 
     }, [data, xScale, yScale, selection, xMax]);
 
+    const labelPos = useMemo(() => {
+
+        const min_dist = 12;
+
+        const pos = selection?.map((x) => ({
+            country:   x as string,
+            label_pos: data.filter((val) => val['country'] == x).slice(-1).map((val) => yScale(val['value']))[0] as number
+        })).sort((a,b) => 
+            a.label_pos < b.label_pos ? 1 : -1
+        );
+
+        if (!pos) {
+            return pos;
+        }
+
+        for (let i=0; i < pos?.length; i++) {
+            if (!pos[i-1]) {
+                console.log('1st' + pos[i].country);
+                continue;
+            }
+            const diff = pos[i-1].label_pos - pos[i].label_pos;
+            if (diff >= min_dist) {
+                console.log('2nd' + pos[i].country + `diff ${diff} ${pos[i - 1].label_pos} ${pos[i].label_pos}`);
+                continue;
+            }
+            console.log('3rd' + pos[i].country + `diff ${diff} ${pos[i - 1].label_pos} ${pos[i].label_pos}`);
+            pos[i].label_pos = pos[i].label_pos - min_dist + diff ;
+        }
+        console.log(pos);
+        return pos;
+            
+    }, [data, selection, yScale]);
+
     return (
             selection?.length==0 ? (
                 <Center ref={ref} style={{ width: '800px', height: '400px' }}>
@@ -153,10 +186,15 @@ export function LineChart({
                             strokeWidth={hover?.includes(x.country) ? 1.5 : 1}
                             d={x.path} 
                         />
-                        <foreignObject x={width+margin.left+5} y={x.label_pos} width={margin.left} height={20}>
-                            <Text 
-                                px={2} 
-                                size={10} 
+                        </g>
+                    );
+                })}
+                {labelPos?.map((x) => {
+                    return (
+                        <foreignObject x={width + margin.left + 5} y={x.label_pos} width={margin.left} height={20}>
+                            <Text
+                                px={2}
+                                size={10}
                                 color={shouldBeColor(x.country) ? colorScale(x.country) : 'gainsboro'}
                                 onMouseOver={(e) => {
                                     const t = e.target as HTMLElement;
@@ -167,7 +205,6 @@ export function LineChart({
                                 {x.country}
                             </Text>
                         </foreignObject>
-                        </g>
                     );
                 })}
                 </svg>
