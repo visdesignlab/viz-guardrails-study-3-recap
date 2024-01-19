@@ -9,10 +9,10 @@ import { XAxis } from './XAxis';
 import { YAxis } from './YAxis';
 
 const margin = {
-    top: 15,
-    left: 70,
-    right: 100,
-    bottom: 50
+    top: 30,
+    left: 30,
+    right: 70,
+    bottom: 60
 };
 
 export function LineChart({ 
@@ -122,6 +122,7 @@ export function LineChart({
         const lineGenerator = d3.line();
         lineGenerator.x((d: any) => xScale(d3.timeParse('%Y-%m-%d')(d['date']) as Date));
         lineGenerator.y((d: any) => yScale(d['value']));
+        lineGenerator.curve(d3.curveBasis);
         const paths = selection?.map((x) => ({ 
             country: x as string, 
             label_pos: data.filter((val) => val['country'] == x).slice(-1).map((val) => yScale(val['value']))[0] as number,
@@ -174,6 +175,21 @@ export function LineChart({
             ) : (
             <svg id={'baseLineChart'} ref={ref} style={{ height: '400px', width: '800px', fontFamily: '"Helvetica Neue", "Helvetica", "Arial", sans-serif'}} >
 
+                <g id={'axes'}>
+                    <XAxis
+                        isDate={true}
+                        xScale={xScale}
+                        yRange={yScale.range() as [number, number]}
+                        vertPosition={height + margin.top}
+                        showLines={false}
+                        ticks={xScale.ticks(5).map((value) => ({
+                            value: value.toString(),
+                            offset: xScale(value),
+                        }))} />
+
+                    <YAxis yScale={yScale} horizontalPosition={margin.left} xRange={xScale.range()} />
+                </g>
+
                 <svg style={{ width: `${width}` }}>
                 {linePaths?.map((x) => {
                     return (
@@ -191,7 +207,7 @@ export function LineChart({
                 })}
                 {labelPos?.map((x) => {
                     return (
-                        <foreignObject x={width + margin.left + 5} y={x.label_pos} width={margin.left} height={20}>
+                        <foreignObject x={width + margin.left + 5} y={x.label_pos} width={75} height={20}>
                             <Text
                                 px={2}
                                 size={10}
@@ -208,21 +224,6 @@ export function LineChart({
                     );
                 })}
                 </svg>
-
-                <g id={'axes'}>
-                    <XAxis
-                        isDate={true}
-                        xScale={xScale}
-                        yRange={yScale.range() as [number, number]}
-                        vertPosition={height + margin.top}
-                        showLines={false}
-                        ticks={xScale.ticks(5).map((value) => ({
-                            value: value.toString(),
-                            offset: xScale(value),
-                        }))} />
-
-                    <YAxis yScale={yScale} horizontalPosition={margin.left} xRange={xScale.range()} />
-                </g>
 
             </svg>
             )

@@ -5,7 +5,7 @@ import { Loader } from '@mantine/core';
 import { StimulusParams } from '../../store/types';
 import { useEffect, useState, useMemo } from 'react';
 import * as d3 from 'd3';
-import { Group, Stack } from '@mantine/core';
+import { Group, Stack, Paper } from '@mantine/core';
 import LineChart from './LineChart';
 import Sidebar from './Sidebar';
 import RangeSelector from './RangeSelector';
@@ -42,12 +42,14 @@ export function DataExplorer({ parameters }: StimulusParams<ChartParams>) {
 
     return filteredData&&items ? (
         <Group>
-            <Sidebar items={items} setSelection={setSelection} />
+            <Paper shadow='sm' radius='md' p='md'>
+                <Sidebar items={items} setSelection={setSelection} />
+            </Paper>
             <Stack align='center'>
-                <LineChart data={filteredData} selection={selection} range={range} />
-                <div style={{ width: '600px'}}>
-                    <RangeSelector setRange={setRange} />
-                </div>
+                <Paper shadow='sm' radius='md' p='md'>
+                    <LineChart data={filteredData} selection={selection} range={range} />
+                    <div><RangeSelector setRange={setRange} /></div>
+                </Paper>
             </Stack>
         </Group>
     ) : <Loader/>;

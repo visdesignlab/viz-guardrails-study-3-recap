@@ -1,4 +1,4 @@
-import { Chip } from '@mantine/core';
+import { Checkbox } from '@mantine/core';
 
 export function Sidebar({
     items,
@@ -9,27 +9,23 @@ export function Sidebar({
 }) {
 
     return (
-        <div style={{ width:'150px', height:'500px'}}>
-        <Chip.Group
-            key='chip_group'
-            onChange={(xs) => setSelection(xs)}
-            spacing={0}
-            multiple
-            align='stretch'
-        >
-            {items.map((item) => {
-                return (
-                    <Chip 
-                        key={item} 
-                        value={item} 
-                        variant='filled' 
-                        radius='xs'
-                        styles={{label: {'width':'150px'}}}
-                    >{item}</Chip>
-                );
-            })}
-        </Chip.Group>
-        </div >
+            <Checkbox.Group
+                key='chip_group'
+                orientation='vertical'
+                onChange={(xs) => setSelection(xs)}
+                spacing={0}
+                offset='sm'
+            >
+                {items.map((item) => {
+                    return (
+                        <Checkbox 
+                            key={item} 
+                            value={item} 
+                            label={item}
+                        >{item}</Checkbox>
+                    );
+                })}
+            </Checkbox.Group>
     );
 
 }
