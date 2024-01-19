@@ -95,7 +95,21 @@ export function LineChart({
 
     const colorScale = useMemo(() => {
         const cats = Array.from(new Set(data.map((d) => d['country'])));
-        return d3.scaleOrdinal(d3.schemeTableau10).domain(cats);
+        return d3.scaleOrdinal(['#d34373',
+            '#7cb643',
+            '#c451ba',
+            '#61bd84',
+            '#7964cf',
+            '#caa94a',
+            '#6484c8',
+            '#cf4734',
+            '#48bcc6',
+            '#cf7a36',
+            '#d48cc9',
+            '#457f44',
+            '#9b4e80',
+            '#837631',
+            '#c56f63']).domain(cats);
     }, [data]);
 
     //////////// Draw
@@ -122,7 +136,7 @@ export function LineChart({
     return (
             selection?.length==0 ? (
                 <Center ref={ref} style={{ width: '800px', height: '400px' }}>
-                    <Text fs="italic" c="dimmed">Select an item to view the chart.</Text>
+                    <Text fs='italic' c='dimmed'>Select an item to view the chart.</Text>
                 </Center>
             ) : (
             <svg id={'baseLineChart'} ref={ref} style={{ height: '400px', width: '800px', fontFamily: '"Helvetica Neue", "Helvetica", "Arial", sans-serif'}} >
