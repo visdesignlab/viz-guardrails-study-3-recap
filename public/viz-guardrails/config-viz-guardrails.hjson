@@ -36,15 +36,16 @@
                 end_date: "2023-12-31"
                 x_var: date
                 y_var: value
-                cat_var: location
-                guardrail: none
+                cat_var: country_name
+                group_var: region
+                guardrail: super_data
             }
             nextButtonLocation: sidebar
             response: [
                 {
                     id: exploration-response
                     prompt: "Do you enjoy exploring the data?:"
-                    required: true
+                    required: false
                     location: sidebar
                     type: radio
                     options: [

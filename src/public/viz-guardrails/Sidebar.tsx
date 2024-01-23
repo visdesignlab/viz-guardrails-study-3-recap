@@ -1,10 +1,11 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Checkbox } from '@mantine/core';
 
 export function Sidebar({
     items,
     setSelection
 } : {
-    items: string[];
+    items: any[];
     setSelection: (value: Array<string>) => void
 }) {
 
@@ -16,13 +17,13 @@ export function Sidebar({
                 spacing={0}
                 offset='sm'
             >
-                {items.map((item) => {
+                {items?.map((item) => {
                     return (
                         <Checkbox 
-                            key={item} 
-                            value={item} 
-                            label={item}
-                        >{item}</Checkbox>
+                            key={item.name} 
+                            value={item.name} 
+                            label={item.name}
+                        >{item.name}</Checkbox>
                     );
                 })}
             </Checkbox.Group>

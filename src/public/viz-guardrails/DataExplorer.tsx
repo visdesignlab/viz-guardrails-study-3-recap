@@ -17,7 +17,9 @@ export interface ChartParams {
     x_var: string, 
     y_var: string, 
     cat_var: string,
-    guardrail: string }
+    group_var: string,
+    guardrail: string 
+}
 
 export function DataExplorer({ parameters }: StimulusParams<ChartParams>) {
 
@@ -25,15 +27,17 @@ export function DataExplorer({ parameters }: StimulusParams<ChartParams>) {
     const [ data, setData ] = useState<any[] | null>(null);
     const [ selection, setSelection ] = useState<string[] | null>(null);
     const [ items, setItems ] = useState<any[] | null>(null);
-    const [range, setRange] = useState<[Date, Date] | null>([new Date(parameters.start_date), new Date(parameters.end_date)]);
+    const [ range, setRange ] = useState<[Date, Date] | null>([new Date(parameters.start_date), new Date(parameters.end_date)]);
 
     useEffect(() => {
         d3.csv(`./data/${parameters.dataset}.csv`)
         .then((data) => {
             setData(data);
-            setItems(Array.from(new Set(data.map((row) => row[parameters.cat_var]))));
+            setItems(Array.from(new Set(data.map((row) => (JSON.stringify({
+                name: row[parameters.cat_var],
+                group: row[parameters.group_var]
+            }))))).map((row) => JSON.parse(row)));
             setSelection([]);
-            console.log(range);
         });
     }, [parameters]);
 
@@ -56,7 +60,7 @@ export function DataExplorer({ parameters }: StimulusParams<ChartParams>) {
             </Paper>
             <Paper shadow='sm' radius='md' p='md'>
                 <Stack align='center'>
-                    <LineChart parameters={parameters} data={filteredData} selection={selection} range={range} />
+                    <LineChart parameters={parameters} data={filteredData} items={items} selection={selection} range={range} />
                     <div style={{ width: '500px' }}><RangeSelector parameters={parameters} setRange={setRange} /></div>
                 </Stack>
             </Paper>

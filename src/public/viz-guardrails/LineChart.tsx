@@ -12,19 +12,21 @@ import { ChartParams } from './DataExplorer';
 const margin = {
     top: 30,
     left: 30,
-    right: 70,
+    right: 100,
     bottom: 50
 };
 
 export function LineChart({ 
     parameters,
     data, 
+    items,
     selection,
     range
 } : {
     parameters: ChartParams,
     data: any[],
-    selection: string[] | null,
+    items: any[],
+    selection: any[] | null,
     range: [Date, Date] | null
 }) {
 
@@ -32,6 +34,9 @@ export function LineChart({
     const [ hover, setHover ] = useState<string[] | null>(null);
 
     const shouldBeColor = ((country: string) => {
+        if (!selection?.includes(country)) {
+            return false;
+        }
         if (!hover || hover.length == 0) {
             return true;
         } 
@@ -135,17 +140,39 @@ export function LineChart({
 
     }, [data, xScale, yScale, selection, xMax]);
 
+    const superimposeDatapoints = useMemo(() => {
+
+        if(parameters.guardrail != 'super_data') {
+            return null;
+        }
+
+        const selected_groups = items.filter((val) => selection?.includes(val.name)).map((val) => val.group);
+        const controls_selection = items.filter((val) => selected_groups?.includes(val.group)).filter((val) => !selection?.includes(val.name)).map((val) => val.name);
+
+        const lineGenerator = d3.line();
+        lineGenerator.x((d: any) => xScale(d3.timeParse('%Y-%m-%d')(d[parameters.x_var]) as Date));
+        lineGenerator.y((d: any) => yScale(d[parameters.y_var]));
+        lineGenerator.curve(d3.curveBasis);
+        const paths = controls_selection?.map((x) => ({
+            country: x as string,
+            path: lineGenerator(data.filter((val) => (val[parameters.cat_var] == x))) as string
+        }));
+
+        return paths;
+
+    }, [data, xScale, yScale, selection, xMax]);
+
     const labelPos = useMemo(() => {
 
         const min_dist = 12;
+        const labels = (parameters.guardrail == 'super_data') ? selection?.concat(superimposeDatapoints?.map((val) => val.country)) : selection;
 
-        const pos = selection?.map((x) => ({
+        const pos = labels?.map((x) => ({
             country:   x as string,
             label_pos: data.filter((val) => val[parameters.cat_var] == x).slice(-1).map((val) => yScale(val[parameters.y_var]))[0] as number
         })).sort((a,b) => 
             a.label_pos < b.label_pos ? 1 : -1
         );
-        console.log(data);
 
         if (!pos) {
             return pos;
@@ -189,6 +216,25 @@ export function LineChart({
                     <YAxis yScale={yScale} horizontalPosition={margin.left} xRange={xScale.range()} />
                 </g>
 
+                <svg key={'control_lines'} style={{ width: `${width}` }}>
+                {superimposeDatapoints?.map((x) => {
+                    return (
+                        <g key={`${x.country}_g`}>
+                            <path
+                                id={`${x.country}`}
+                                key={`${x.country}_key`}
+                                fill='none'
+                                opacity={0.75}
+                                stroke={shouldBeColor(x.country) ? colorScale(x.country) : 'gainsboro'}
+                                strokeDasharray={'4,1'}
+                                strokeWidth={hover?.includes(x.country) ? 1.5 : 1}
+                                d={x.path}
+                            />
+                        </g>
+                    );
+                })}
+                </svg>
+
                 <svg key={'lines'} style={{ width: `${width}` }}>
                 {linePaths?.map((x) => {
                     return (
@@ -206,13 +252,16 @@ export function LineChart({
                 })}
                 {labelPos?.map((x) => {
                     return (
-                        <foreignObject key={`${x.country}_label`} x={width + margin.left + 5} y={x.label_pos} width={75} height={20}>
+                        <foreignObject key={`${x.country}_label`} x={width + margin.left + 5} y={x.label_pos-7} width={100} height={20}>
                             <Text
                                 px={2}
                                 size={10}
                                 color={shouldBeColor(x.country) ? colorScale(x.country) : 'gainsboro'}
                                 onMouseOver={(e) => {
                                     const t = e.target as HTMLElement;
+                                    if (!selection?.includes(t.innerText)) {
+                                        return;
+                                    }
                                     setHover([t.innerText]);
                                 }}
                                 onMouseOut={() => setHover([])}
