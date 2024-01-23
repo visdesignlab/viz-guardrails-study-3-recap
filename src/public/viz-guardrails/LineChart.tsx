@@ -7,19 +7,22 @@ import * as d3 from 'd3';
 import { Center, Text } from '@mantine/core';
 import { XAxis } from './XAxis';
 import { YAxis } from './YAxis';
+import { ChartParams } from './DataExplorer';
 
 const margin = {
     top: 30,
     left: 30,
     right: 70,
-    bottom: 60
+    bottom: 50
 };
 
 export function LineChart({ 
+    parameters,
     data, 
     selection,
     range
 } : {
+    parameters: ChartParams,
     data: any[],
     selection: string[] | null,
     range: [Date, Date] | null
@@ -49,10 +52,10 @@ export function LineChart({
     ///////////// Setting scales
     const { xMin, yMin, xMax, yMax } = useMemo(() => {
 
-        const xData: number[] = data.filter((val) => selection?.includes(val['country'])).map((d) => +d['date']).filter((val) => val !== null) as number[];
+        const xData: number[] = data.filter((val) => selection?.includes(val[parameters.cat_var])).map((d) => +d[parameters.x_var]).filter((val) => val !== null) as number[];
         const [xMin, xMax] = d3.extent(xData) as [number, number];
 
-        const yData: number[] = data.filter((val) => selection?.includes(val['country'])).map((d) => +d['value']).filter((val) => val !== null) as number[];
+        const yData: number[] = data.filter((val) => selection?.includes(val[parameters.cat_var])).map((d) => +d[parameters.y_var]).filter((val) => val !== null) as number[];
         const [yMin, yMax] = d3.extent(yData) as [number, number];
 
 
@@ -79,7 +82,7 @@ export function LineChart({
             return d3.scaleTime([margin.left, width + margin.left]).domain(range);
         }
         
-        return d3.scaleTime([margin.left, width + margin.left]).domain([new Date('2020-01-01'), new Date('2023-12-31')]);
+        return d3.scaleTime([margin.left, width + margin.left]).domain([new Date(parameters.start_date), new Date(parameters.end_date)]);
         //return d3.scaleLinear([margin.left, width + margin.left]).domain([xMin, xMax]).nice();
     }, [width, xMax, xMin, range]);
 
@@ -94,7 +97,7 @@ export function LineChart({
     }, [height, yMax, yMin]);
 
     const colorScale = useMemo(() => {
-        const cats = Array.from(new Set(data.map((d) => d['country'])));
+        const cats = Array.from(new Set(data.map((d) => d[parameters.cat_var])));
         return d3.scaleOrdinal(['#d34373',
             '#7cb643',
             '#c451ba',
@@ -120,15 +123,13 @@ export function LineChart({
         }
 
         const lineGenerator = d3.line();
-        lineGenerator.x((d: any) => xScale(d3.timeParse('%Y-%m-%d')(d['date']) as Date));
-        lineGenerator.y((d: any) => yScale(d['value']));
+        lineGenerator.x((d: any) => xScale(d3.timeParse('%Y-%m-%d')(d[parameters.x_var]) as Date));
+        lineGenerator.y((d: any) => yScale(d[parameters.y_var]));
         lineGenerator.curve(d3.curveBasis);
         const paths = selection?.map((x) => ({ 
             country: x as string, 
-            label_pos: data.filter((val) => val['country'] == x).slice(-1).map((val) => yScale(val['value']))[0] as number,
-            path: lineGenerator(data.filter((val) => (val['country'] == x))) as string
+            path: lineGenerator(data.filter((val) => (val[parameters.cat_var] == x))) as string
         }));
-        //console.log(range[0]);
 
         return paths;
 
@@ -140,10 +141,11 @@ export function LineChart({
 
         const pos = selection?.map((x) => ({
             country:   x as string,
-            label_pos: data.filter((val) => val['country'] == x).slice(-1).map((val) => yScale(val['value']))[0] as number
+            label_pos: data.filter((val) => val[parameters.cat_var] == x).slice(-1).map((val) => yScale(val[parameters.y_var]))[0] as number
         })).sort((a,b) => 
             a.label_pos < b.label_pos ? 1 : -1
         );
+        console.log(data);
 
         if (!pos) {
             return pos;
@@ -151,18 +153,15 @@ export function LineChart({
 
         for (let i=0; i < pos?.length; i++) {
             if (!pos[i-1]) {
-                console.log('1st' + pos[i].country);
                 continue;
             }
             const diff = pos[i-1].label_pos - pos[i].label_pos;
             if (diff >= min_dist) {
-                console.log('2nd' + pos[i].country + `diff ${diff} ${pos[i - 1].label_pos} ${pos[i].label_pos}`);
                 continue;
             }
-            console.log('3rd' + pos[i].country + `diff ${diff} ${pos[i - 1].label_pos} ${pos[i].label_pos}`);
             pos[i].label_pos = pos[i].label_pos - min_dist + diff ;
         }
-        console.log(pos);
+    
         return pos;
             
     }, [data, selection, yScale]);
@@ -182,7 +181,7 @@ export function LineChart({
                         yRange={yScale.range() as [number, number]}
                         vertPosition={height + margin.top}
                         showLines={false}
-                        ticks={xScale.ticks(5).map((value) => ({
+                        ticks={xScale.ticks(6).map((value) => ({
                             value: value.toString(),
                             offset: xScale(value),
                         }))} />
@@ -190,10 +189,10 @@ export function LineChart({
                     <YAxis yScale={yScale} horizontalPosition={margin.left} xRange={xScale.range()} />
                 </g>
 
-                <svg style={{ width: `${width}` }}>
+                <svg key={'lines'} style={{ width: `${width}` }}>
                 {linePaths?.map((x) => {
                     return (
-                        <g key={`${x.country}`}>
+                        <g key={`${x.country}_g`}>
                         <path 
                             id={`${x.country}`} 
                             key={`${x.country}_key`} 
@@ -207,7 +206,7 @@ export function LineChart({
                 })}
                 {labelPos?.map((x) => {
                     return (
-                        <foreignObject x={width + margin.left + 5} y={x.label_pos} width={75} height={20}>
+                        <foreignObject key={`${x.country}_label`} x={width + margin.left + 5} y={x.label_pos} width={75} height={20}>
                             <Text
                                 px={2}
                                 size={10}

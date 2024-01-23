@@ -26,7 +26,7 @@ export function XAxis({
         if (ticks.length > 1) {
             return Math.abs(ticks[1].offset - ticks[0].offset);
         }
-
+        
         return xScale.range()[0] - xScale.range()[1];
     }, [ticks, xScale]);
 

@@ -32,8 +32,11 @@
             path: viz-guardrails/DataExplorer.tsx
             parameters: {
                 dataset: clean_data
-                x: date
-                y: value
+                start_date: "2020-01-01"
+                end_date: "2023-12-31"
+                x_var: date
+                y_var: value
+                cat_var: location
                 guardrail: none
             }
             nextButtonLocation: sidebar
