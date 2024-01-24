@@ -1,12 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { useNavigate } from 'react-router-dom';
 import { useStorageEngine } from '../../../store/storageEngineHooks';
 import { useAsync } from '../../../store/hooks/useAsync';
 import { StorageEngine } from '../../../storage/engines/StorageEngine';
-import { Anchor, Loader, Stack } from '@mantine/core';
-import { AllTasksTimeline } from './AllTasksTimeline';
-import { useResizeObserver } from '@mantine/hooks';
+import { Loader, Stack } from '@mantine/core';
+import { AnalysisSingleParticipant } from './AnalysisSingleParticipant';
 
 function getParticipantData(storageEngine: StorageEngine | undefined) {
     if(storageEngine) {
@@ -18,20 +16,11 @@ function getParticipantData(storageEngine: StorageEngine | undefined) {
 export function AnalysisHome() {
     const { storageEngine } = useStorageEngine();
 
-    const navigate = useNavigate();
-
     const {value: allPartsData, status} = useAsync(getParticipantData, [storageEngine]);
 
-    const [ref, {width}] = useResizeObserver();
-
-    console.log(allPartsData, status, width);
-
-    return status === 'success' && allPartsData ? <Stack spacing={20} style={{width: '100%'}} ref={ref}>
+    return status === 'success' && allPartsData ? <Stack spacing={50} style={{width: '100%'}}>
         {allPartsData?.map((participant) => {
-            return (<Stack key={participant.participantId}>
-                <Anchor onClick={() => navigate(`${participant.participantId}/${participant.sequence[0]}`)}>{participant.participantId}</Anchor>
-                <AllTasksTimeline selectedTask={null} setSelectedTask={() => null} participantData={participant} width={500} height={50}/>
-            </Stack>);
+            return <AnalysisSingleParticipant key={participant.participantId} participant={participant}/>;
         })}
     </Stack> : <Loader/>;
 }

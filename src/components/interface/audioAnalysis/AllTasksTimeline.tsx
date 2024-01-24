@@ -7,11 +7,10 @@ import { SingleTask } from './SingleTask';
 
 const margin = {left: 5, top: 0, right: 5, bottom: 0};
 export function AllTasksTimeline({participantData, width, height, setSelectedTask, selectedTask} : {participantData: ParticipantData, width: number, height: number, setSelectedTask: (task: string | null) => void, selectedTask: string | null}) {
-    console.log(width);
     const xScale = useMemo(() => {
         const allStartTimes = Object.values(participantData.answers).map((answer) => [answer.startTime, answer.endTime]).flat();
 
-        const scale = d3.scaleLinear([margin.left, width + margin.left + margin.right]).domain(d3.extent(allStartTimes));
+        const scale = d3.scaleLinear([margin.left, width + margin.left + margin.right]).domain(d3.extent(allStartTimes) as [number, number]);
 
         return scale;
     }, [participantData.answers, width]);

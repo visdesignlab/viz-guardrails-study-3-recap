@@ -2,7 +2,7 @@
 import { Box, Button, Center, Group, Stack, Text } from '@mantine/core';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useDebouncedState, useDebouncedValue, useResizeObserver } from '@mantine/hooks';
+import { useResizeObserver } from '@mantine/hooks';
 import { useStorageEngine } from '../../../store/storageEngineHooks';
 import { useAsync } from '../../../store/hooks/useAsync';
 import { StorageEngine } from '../../../storage/engines/StorageEngine';
@@ -130,7 +130,7 @@ export function Analysis({setProvState} : {setProvState: (state: any) => void}) 
 
     const waveSurferDiv = useRef(null);
 
-    const wavesurfer = useWavesurfer({ container: waveSurferDiv.current, plugins: [], onMount: handleWSMount });
+    const wavesurfer = useWavesurfer({ container: waveSurferDiv.current!, plugins: [], onMount: handleWSMount });
 
     const _setPlayTime = useCallback((n: number, percent: number) => {
         setPlayTime(n);

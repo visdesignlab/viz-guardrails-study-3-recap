@@ -407,7 +407,7 @@ export class FirebaseStorageEngine extends StorageEngine {
   
   private async _getFirebaseProvenance(participantId: string) {
     const storage = getStorage();
-    const storageRef = ref(storage, `${this.studyId}/${participantId}`);
+    const storageRef = ref(storage, `${this.studyId}/${participantId}_provenance`);
 
     let fullProvObj: Record<string, TrrackedProvenance> = {};
     try {

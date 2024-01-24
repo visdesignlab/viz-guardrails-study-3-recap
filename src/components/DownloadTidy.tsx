@@ -87,6 +87,8 @@ function processToRow(session: ParticipantData, studyConfig: StudyConfig, proper
 
     const duration = trialAnswer.endTime - trialAnswer.startTime;
 
+    console.log(completeComponent);
+
     const rows = Object.entries(trialAnswer.answer).map(([key, value]) => {
       const tidyRow: TidyRow = {
         participantId: session.participantId,
