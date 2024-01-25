@@ -23,7 +23,7 @@ interface ClickAccuracyTest {
 } 
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const ClickAccuracyTest = ({ parameters, setAnswer }: StimulusParams<any>) => {
+const ClickAccuracyTest = ({ parameters, setAnswer }: StimulusParams<{speed: number, taskid: string}>) => {
   const [ref, dms] = useChartDimensions(chartSettings);
   const [x, setX] = useState(100);
   const [y, setY] = useState(100);

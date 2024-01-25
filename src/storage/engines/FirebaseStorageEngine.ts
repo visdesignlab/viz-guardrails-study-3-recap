@@ -249,7 +249,6 @@ export class FirebaseStorageEngine extends StorageEngine {
   }
 
   async getSequence() {
-    console.log(this);
     if (!this._verifyStudyDatabase(this.studyCollection)) {
       throw new Error('Study database not initialized');
     }
@@ -408,6 +407,23 @@ export class FirebaseStorageEngine extends StorageEngine {
   private async _getFirebaseProvenance(participantId: string) {
     const storage = getStorage();
     const storageRef = ref(storage, `${this.studyId}/${participantId}_provenance`);
+
+    let fullProvObj: Record<string, TrrackedProvenance> = {};
+    try {
+      const url = await getDownloadURL(storageRef);
+      const response = await fetch(url);
+      const fullProvStr = await response.text();
+      fullProvObj = JSON.parse(fullProvStr);
+    } catch {
+      console.info(`Participant ${participantId} does not have a provenance graph for ${this.studyId}.`);
+    }
+
+    return fullProvObj;
+  }
+
+  private async _getFirebaseWindowEvents(participantId: string) {
+    const storage = getStorage();
+    const storageRef = ref(storage, `${this.studyId}/${participantId}_windowEvents`);
 
     let fullProvObj: Record<string, TrrackedProvenance> = {};
     try {

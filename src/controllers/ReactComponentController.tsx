@@ -10,7 +10,7 @@ const modules = import.meta.glob(
   { eager: true }
 );
 
-const ReactComponentController = ({ currentConfig, provState }: { currentConfig: ReactComponent; provState?: any; }) => {
+const ReactComponentController = ({ currentConfig, provState }: { currentConfig: ReactComponent; provState?: unknown; }) => {
 
   const currentStep = useCurrentStep();
 

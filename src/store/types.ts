@@ -22,10 +22,11 @@ export interface StoredAnswer {
   answer: Record<string, Record<string, unknown>>;
   startTime: number;
   endTime: number;
+  correctAnswer?: Record<string, Record<string, unknown>>;
   provenanceGraph?: TrrackedProvenance,
 }
 
-export interface StimulusParams<T, S> {
+export interface StimulusParams<T, S = never> {
   parameters: T;
   provenanceState?: S;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

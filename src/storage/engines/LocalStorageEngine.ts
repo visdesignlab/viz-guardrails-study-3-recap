@@ -5,6 +5,19 @@ import { v4 as uuidv4 } from 'uuid';
 import { StoredAnswer } from '../../store/types';
 
 export class LocalStorageEngine extends StorageEngine {
+
+  getAudio(participantId?: string | undefined): Promise<string> {
+    console.log('not yet implemented', participantId);
+    return Promise.resolve('not implemented');
+  }
+  getTranscription(participantId?: string | undefined): Promise<string> {
+    console.log('not yet implemented', participantId);
+    return Promise.resolve('not implemented');
+  }
+  saveAudio(audioStream: MediaRecorder): Promise<void> {
+    console.log('not yet implemented', audioStream);
+    return Promise.resolve();
+  }
   private studyDatabase: LocalForage | undefined = undefined;
 
   constructor() {

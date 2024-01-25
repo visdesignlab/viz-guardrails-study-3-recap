@@ -23,7 +23,7 @@ function humanReadableDuration(msDuration: number): string {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function AnalysisSingleParticipant({participant} : {participant: ParticipantData}) {
+export function AnalysisSingleParticipant({participant, maxDuration} : {participant: ParticipantData, maxDuration?: number | undefined}) {
     const navigate = useNavigate();
 
     console.log(participant);
@@ -47,7 +47,7 @@ export function AnalysisSingleParticipant({participant} : {participant: Particip
     return (
         <Center><Stack spacing={25} ref={ref} style={{width: '75%'}} key={participant.participantId}>
             <Group position="apart" ><Anchor size={25} onClick={() => navigate(`${participant.participantId}/${participant.sequence[0]}`)}>{participant.participantId}</Anchor> <Text size="xl">{`${humanReadableDuration(duration)}`}</Text> </Group>
-            <AllTasksTimeline selectedTask={null} setSelectedTask={() => null} participantData={participant} width={width} height={50}/>
+            <AllTasksTimeline maxDuration={maxDuration} selectedTask={null} setSelectedTask={() => null} participantData={participant} width={width} height={250}/>
         </Stack></Center>
             );
 }

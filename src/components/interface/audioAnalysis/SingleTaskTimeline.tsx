@@ -13,7 +13,7 @@ export function SingleTaskTimeline({participantData, width, height, selectedTask
     const xScale = useMemo(() => {
         const allStartTimes = selectedTask ? [participantData.answers[selectedTask].startTime, participantData.answers[selectedTask].endTime] : Object.values(participantData.answers).map((answer) => [answer.startTime, answer.endTime]).flat();
 
-        const scale = d3.scaleLinear([margin.left, width + margin.left + margin.right]).domain(d3.extent(allStartTimes));
+        const scale = d3.scaleLinear([margin.left, width + margin.left + margin.right]).domain(d3.extent(allStartTimes) as [number, number]);
 
         return scale;
     }, [participantData.answers, selectedTask, width]);
@@ -26,7 +26,7 @@ export function SingleTaskTimeline({participantData, width, height, selectedTask
     const wholeXScale = useMemo(() => {
         const allStartTimes = Object.values(participantData.answers).map((answer) => [answer.startTime, answer.endTime]).flat();
 
-        const scale = d3.scaleLinear([margin.left, width + margin.left + margin.right]).domain(d3.extent(allStartTimes));
+        const scale = d3.scaleLinear([margin.left, width + margin.left + margin.right]).domain(d3.extent(allStartTimes) as [number, number]);
 
         return scale;
     }, [participantData.answers, width]);
@@ -82,7 +82,7 @@ export function SingleTaskTimeline({participantData, width, height, selectedTask
                 // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 const [name, answer] = entry;
 
-                return <SingleTaskProvenance lineLoc={xScale(playTime + wholeXScale.domain()[0])} key={name}  answer={answer} height={height} currentNode={currentNode} setCurrentNode={currentNodeCallback} xScale={xScale}></SingleTaskProvenance>;
+                return <SingleTaskProvenance key={name}  answer={answer} height={height} currentNode={currentNode} setCurrentNode={currentNodeCallback} xScale={xScale}></SingleTaskProvenance>;
             })}
 
         </svg>

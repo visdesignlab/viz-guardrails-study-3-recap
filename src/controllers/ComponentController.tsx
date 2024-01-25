@@ -13,7 +13,7 @@ import { IndividualComponent } from '../parser/types';
 import { useParams } from 'react-router-dom';
 
 // current active stimuli presented to the user
-export default function ComponentController({provState} : {provState?: any}) {
+export default function ComponentController({provState} : {provState?: unknown}) {
   // Get the config for the current step
   const studyConfig = useStudyConfig();
   const {trialName: currentStep} = useParams();

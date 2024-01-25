@@ -5,6 +5,8 @@ import { useAsync } from '../../../store/hooks/useAsync';
 import { StorageEngine } from '../../../storage/engines/StorageEngine';
 import { Loader, Stack } from '@mantine/core';
 import { AnalysisSingleParticipant } from './AnalysisSingleParticipant';
+import * as d3 from 'd3';
+import { useMemo } from 'react';
 
 function getParticipantData(storageEngine: StorageEngine | undefined) {
     if(storageEngine) {
@@ -18,9 +20,31 @@ export function AnalysisHome() {
 
     const {value: allPartsData, status} = useAsync(getParticipantData, [storageEngine]);
 
+    const maxDuration = useMemo(() => {
+        if(status !== 'success' || !allPartsData)
+        {
+            return undefined;
+        }
+
+        return d3.max(allPartsData?.map((participant) => {
+            if(!participant.answers || Object.entries(participant.answers).length === 0) {
+                return 0;
+            }
+    
+            const answersSorted = Object.values(participant.answers).sort((a, b) => {
+                return a.startTime - b.startTime;
+            });
+        
+            return new Date(answersSorted[answersSorted.length - 1].endTime - answersSorted[0].startTime).getTime();
+        }));
+
+    }, [allPartsData, status]);
+
+    console.log(allPartsData);
+
     return status === 'success' && allPartsData ? <Stack spacing={50} style={{width: '100%'}}>
         {allPartsData?.map((participant) => {
-            return <AnalysisSingleParticipant key={participant.participantId} participant={participant}/>;
+            return <AnalysisSingleParticipant maxDuration={maxDuration} key={participant.participantId} participant={participant}/>;
         })}
     </Stack> : <Loader/>;
 }
