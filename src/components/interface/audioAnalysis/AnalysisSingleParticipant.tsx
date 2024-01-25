@@ -26,8 +26,6 @@ function humanReadableDuration(msDuration: number): string {
 export function AnalysisSingleParticipant({participant, maxDuration} : {participant: ParticipantData, maxDuration?: number | undefined}) {
     const navigate = useNavigate();
 
-    console.log(participant);
-
     const duration = useMemo(() => {
         if(!participant.answers || Object.entries(participant.answers).length === 0) {
             return 0;
