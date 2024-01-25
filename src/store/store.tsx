@@ -28,6 +28,7 @@ export async function studyStoreCreator(
     config,
     showAdmin: false,
     showHelpText: false,
+    alertModal: { show: false, message: '' },
     trialValidation: answers ? allValid : emptyValidation,
     iframeAnswers: [] as string[],
   };
@@ -47,6 +48,9 @@ export async function studyStoreCreator(
       },
       toggleShowHelpText: (state) => {
         state.showHelpText = !state.showHelpText;
+      },
+      setAlertModal: (state, action: PayloadAction<{ show: boolean; message: string }>) => {
+        state.alertModal = action.payload;
       },
       setIframeAnswers: (state, action: PayloadAction<string[]>) => {
         state.iframeAnswers = action.payload;
@@ -83,21 +87,16 @@ export async function studyStoreCreator(
         state,
         {
           payload,
-        }: PayloadAction<{
-          currentStep: string;
-          answer: Record<string, Record<string, unknown>>;
-          startTime: number;
-          endTime: number;
-          provenanceGraph?: TrrackedProvenance;
-        }>
+        }: PayloadAction<{ currentStep: string } & StoredAnswer>
       ) {
-        const { currentStep, answer, startTime, endTime, provenanceGraph } = payload;
+        const { currentStep, answer, startTime, endTime, provenanceGraph, windowEvents } = payload;
 
         state.answers[currentStep] = {
           answer: answer,
           startTime: startTime,
           endTime: endTime,
           provenanceGraph,
+          windowEvents,
         };
       },
     },

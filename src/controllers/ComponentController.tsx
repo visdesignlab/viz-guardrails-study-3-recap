@@ -1,4 +1,4 @@
-import { Suspense } from 'react';
+import { Suspense, useEffect } from 'react';
 import ResponseBlock from '../components/response/ResponseBlock';
 import IframeController from './IframeController';
 import ImageController from './ImageController';
@@ -7,10 +7,13 @@ import MarkdownController from './MarkdownController';
 import { useStudyConfig } from '../store/hooks/useStudyConfig';
 import { useStoredAnswer } from '../store/hooks/useStoredAnswer';
 import ReactMarkdownWrapper from '../components/ReactMarkdownWrapper';
-import { isPartialComponent } from '../parser/parser';
+import { isInheritedComponent } from '../parser/parser';
 import merge from 'lodash.merge';
 import { IndividualComponent } from '../parser/types';
 import { useParams } from 'react-router-dom';
+import { disableBrowserBack } from '../utils/disableBrowserBack';
+import { useStorageEngine } from '../store/storageEngineHooks';
+import { useStoreActions, useStoreDispatch } from '../store/store';
 
 // current active stimuli presented to the user
 export default function ComponentController({provState} : {provState?: unknown}) {
@@ -23,11 +26,27 @@ export default function ComponentController({provState} : {provState?: unknown})
   // If we have a trial, use that config to render the right component else use the step
   const status = useStoredAnswer();
 
-  const currentConfig = isPartialComponent(stepConfig) && studyConfig.baseComponents ? merge({}, studyConfig.baseComponents?.[stepConfig.baseComponent], stepConfig) as IndividualComponent : stepConfig as IndividualComponent;
+  const currentConfig = isInheritedComponent(stepConfig) && studyConfig.baseComponents ? merge({}, studyConfig.baseComponents?.[stepConfig.baseComponent], stepConfig) as IndividualComponent : stepConfig as IndividualComponent;
 
   const instruction = (currentConfig.instruction || '');
   const instructionLocation = currentConfig.instructionLocation;
   const instructionInSideBar = studyConfig.uiConfig.sidebar && (instructionLocation === 'sidebar' || instructionLocation === undefined);
+
+  // Disable browser back button from all stimuli
+  disableBrowserBack();
+
+  // Check if we have issues connecting to the database, if so show alert modal
+  const { storageEngine } = useStorageEngine();
+  const storeDispatch = useStoreDispatch();
+  const { setAlertModal } = useStoreActions();
+  useEffect(() => {
+    if (storageEngine?.getEngine() !== import.meta.env.VITE_STORAGE_ENGINE) {
+      storeDispatch(setAlertModal({
+        show: true,
+        message: `There was an issue connecting to the ${import.meta.env.VITE_STORAGE_ENGINE} database. This could be caused by a network issue or your adblocker. If you are using an adblocker, please disable it for this website and refresh.`,
+      }));
+    }
+  }, [setAlertModal, storageEngine, storeDispatch]);
 
   return (
     <>

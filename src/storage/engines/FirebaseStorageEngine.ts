@@ -1,4 +1,4 @@
-import { StoredAnswer, TrrackedProvenance } from '../../store/types';
+import { EventType, StoredAnswer, TrrackedProvenance } from '../../store/types';
 import { ParticipantData } from '../types';
 import { StorageEngine } from './StorageEngine';
 import { parse as hjsonParse } from 'hjson';
@@ -20,6 +20,7 @@ export class FirebaseStorageEngine extends StorageEngine {
   private localForage = localforage.createInstance({ name: 'currentParticipantId' });
 
   private localProvenanceCopy: Record<string, TrrackedProvenance> = {};
+  private localWindowEvents: Record<string, EventType[]> = {};
 
   constructor() {
     super('firebase');
@@ -49,7 +50,12 @@ export class FirebaseStorageEngine extends StorageEngine {
       const auth = getAuth();
       await signInAnonymously(auth);
       if (!auth.currentUser) throw new Error('Login failed with firebase');
-      enableNetwork(this.firestore);
+      await enableNetwork(this.firestore);
+
+      // Check the connection to the database
+      const connectedRef = await doc(this.firestore, '.info/connected');
+      await getDoc(connectedRef);
+
       this.connected = true;
     } catch (e) {
       console.warn('Failed to connect to Firebase');
@@ -80,7 +86,19 @@ export class FirebaseStorageEngine extends StorageEngine {
     const participant = (await getDoc(participantDoc)).data() as ParticipantData | null;
 
     // Restore localProvenanceCopy
-    this.localProvenanceCopy = await this._getFirebaseProvenance(this.currentParticipantId);
+    this.localProvenanceCopy = await this._getFromFirebaseStorage(this.currentParticipantId, 'provenance');
+
+    // Restore localWindowEvents
+    this.localWindowEvents = await this._getFromFirebaseStorage(this.currentParticipantId, 'windowEvents');
+    Object.entries(this.localWindowEvents).forEach(([step, events]) => {
+      if (participant === null) return;
+
+      if (events === undefined || events.length === 0) {
+        participant.answers[step].windowEvents = [];
+      } else {
+        participant.answers[step].windowEvents = events;
+      }
+    });
 
     if (participant) {
       // Participant already initialized
@@ -149,8 +167,11 @@ export class FirebaseStorageEngine extends StorageEngine {
 
     if (answer.provenanceGraph) {
       this.localProvenanceCopy[currentStep] = answer.provenanceGraph;
-      await this._uploadLocalProvenance();
+      await this._pushToFirebaseStorage('provenance');
     }
+
+    this.localWindowEvents[currentStep] = answer.windowEvents;
+    await this._pushToFirebaseStorage('windowEvents');
   }
 
   async saveAudio(
@@ -288,13 +309,15 @@ export class FirebaseStorageEngine extends StorageEngine {
       
       const participantDataItem = participant.data() as ParticipantData;
 
-      const fullProvObj = await this._getFirebaseProvenance(participantDataItem.participantId);
+      const fullProvObj = await this._getFromFirebaseStorage(participantDataItem.participantId, 'provenance');
+      const fullWindowEventsObj = await this._getFromFirebaseStorage(participantDataItem.participantId, 'windowEvents');
 
       // Rehydrate the provenance graphs
       participantDataItem.answers = Object.fromEntries(Object.entries(participantDataItem.answers).map(([key, value]) => {
         if (value === undefined) return [key, value];
         const provenanceGraph = fullProvObj[key];
-        return [key, { ...value, provenanceGraph }];
+        const windowEvents = fullWindowEventsObj[key];
+        return [key, { ...value, provenanceGraph, windowEvents }];
       }));
       participantData.push(participantDataItem);
     });
@@ -320,12 +343,14 @@ export class FirebaseStorageEngine extends StorageEngine {
 
       // Get provenance data
       if (participant !== null) {
-        const fullProvObj = await this._getFirebaseProvenance(participantId ? participantId : this.currentParticipantId);
+        const fullProvObj = await this._getFromFirebaseStorage(this.currentParticipantId, 'provenance');
+        const fullWindowEventsObj = await this._getFromFirebaseStorage(this.currentParticipantId, 'windowEvents');
 
         // Iterate over the participant answers and add the provenance graph
         Object.entries(participant.answers).forEach(([step, answer]) => {
           if (answer === undefined) return;
           answer.provenanceGraph = fullProvObj[step];
+          answer.windowEvents = fullWindowEventsObj[step];
         });
       }
     }
@@ -392,12 +417,30 @@ export class FirebaseStorageEngine extends StorageEngine {
     return db !== undefined;
   }
 
-  private async _uploadLocalProvenance() {
-    // If we have provenance graphs, upload them to storage
-    if (Object.entries(this.localProvenanceCopy).length > 0) {
+  private async _getFromFirebaseStorage<T extends 'provenance' | 'windowEvents'>(participantId: string, type: T) {
+    const storage = getStorage();
+    const storageRef = ref(storage, `${this.studyId}/${participantId}_${type}`);
+
+    let storageObj: Record<string, T extends 'provenance' ? TrrackedProvenance : EventType[]> = {};
+    try {
+      const url = await getDownloadURL(storageRef);
+      const response = await fetch(url);
+      const fullProvStr = await response.text();
+      storageObj = JSON.parse(fullProvStr);
+    } catch {
+      console.warn(`Participant ${participantId} does not have ${type} for ${this.studyId}.`);
+    }
+
+    return storageObj;
+  }
+
+  private async _pushToFirebaseStorage<T extends 'provenance' | 'windowEvents'>(type: T) {
+    const objectToUpload = type === 'provenance' ? this.localProvenanceCopy : this.localWindowEvents;
+  
+    if (Object.keys(objectToUpload).length > 0) {
       const storage = getStorage();
-      const storageRef = ref(storage, `${this.studyId}/${this.currentParticipantId}`); // Provenance graphs are saved to study/partipant
-      const blob = new Blob([JSON.stringify(this.localProvenanceCopy)], {
+      const storageRef = ref(storage, `${this.studyId}/${this.currentParticipantId}_${type}`);
+      const blob = new Blob([JSON.stringify(objectToUpload)], {
         type: 'application/json',
       });
       await uploadBytes(storageRef, blob);
