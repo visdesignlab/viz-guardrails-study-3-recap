@@ -15,6 +15,7 @@ export interface ChartParams {
     dataset: string, 
     start_date: string,
     end_date: string,
+    allow_time_slider: boolean,
     x_var: string, 
     y_var: string, 
     cat_var: string,
@@ -77,7 +78,9 @@ export function DataExplorer({ parameters }: StimulusParams<ChartParams>) {
                             range={range} 
                             guardrail={guardrail}
                         />
-                        <div style={{ width: '500px' }}><RangeSelector parameters={parameters} setRange={setRange} /></div>
+                        <div style={{ width: '500px' }}>
+                            <RangeSelector parameters={parameters} setRange={setRange} />
+                        </div>
                     </Stack>
                 </Paper>
             </Group>

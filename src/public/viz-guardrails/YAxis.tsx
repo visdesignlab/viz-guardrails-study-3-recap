@@ -21,7 +21,11 @@ export function YAxis({ yScale, xRange, horizontalPosition }: { yScale: any, xRa
             {ticks.map(({ value, yOffset }: { value: number, yOffset: number }) => (
                 <g key={value} transform={`translate(${horizontalPosition}, ${yOffset})`}>
                     
-                    <line x2={`${xRange[1] - xRange[0]}`} stroke={`${value === 0 ? 'black' : 'gainsboro'}`} />
+                    <line 
+                        x2={`${xRange[1] - xRange[0]}`} 
+                        stroke={`${value === 0 ? 'black' : 'gainsboro'}`} 
+                        strokeWidth={value === 0 ? 1 : 0.4}
+                    />
                     <text
                         key={value}
                         style={{

@@ -296,7 +296,7 @@ export function LineChart({
                             key={`${x.country}_key`} 
                             fill='none' 
                             stroke={shouldBeColor(x.country) ? colorScale(x.country) : 'gainsboro'} 
-                            strokeWidth={hover?.includes(x.country) ? 1.5 : 1}
+                            strokeWidth={hover?.includes(x.country) ? 2 : 1.5}
                             d={x.path} 
                         />
                         </g>

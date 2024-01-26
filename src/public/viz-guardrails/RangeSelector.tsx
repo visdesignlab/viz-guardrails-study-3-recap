@@ -24,6 +24,7 @@ export function RangeSelector({
             defaultValue={[0, 100]} 
             label={numToRangeLabel}
             labelAlwaysOn
+            disabled={!parameters.allow_time_slider}
             onChange={([min, max]) => setRange([numToRange(min), numToRange(max) ])}
         />
     );
