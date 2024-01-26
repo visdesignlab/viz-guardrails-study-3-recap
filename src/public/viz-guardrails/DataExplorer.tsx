@@ -9,6 +9,7 @@ import { Group, Stack, Paper } from '@mantine/core';
 import LineChart from './LineChart';
 import Sidebar from './Sidebar';
 import RangeSelector from './RangeSelector';
+import Selector from './Selector';
 
 export interface ChartParams { 
     dataset: string, 
@@ -21,6 +22,9 @@ export interface ChartParams {
     guardrail: string 
 }
 
+// dropdown with guardrail?
+// add parameter for time slider on/off
+
 export function DataExplorer({ parameters }: StimulusParams<ChartParams>) {
 
     ///////////// Loading data
@@ -28,6 +32,7 @@ export function DataExplorer({ parameters }: StimulusParams<ChartParams>) {
     const [ selection, setSelection ] = useState<string[] | null>(null);
     const [ items, setItems ] = useState<any[] | null>(null);
     const [ range, setRange ] = useState<[Date, Date] | null>([new Date(parameters.start_date), new Date(parameters.end_date)]);
+    const [ guardrail, setGuardrail ] = useState<string>(parameters.guardrail);
 
     useEffect(() => {
         d3.csv(`./data/${parameters.dataset}.csv`)
@@ -54,17 +59,29 @@ export function DataExplorer({ parameters }: StimulusParams<ChartParams>) {
     }, [data, range]);
 
     return filteredData&&items&&range&&selection ? (
-        <Group>
-            <Paper shadow='sm' radius='md' p='md'>
-                <Sidebar items={items} setSelection={setSelection} />
+        <Stack>
+            <Paper shadow='sm' radius='md' p='md' style={{ width: '500px' }}>
+                <Selector guardrail={guardrail} setGuardrail={setGuardrail} />
             </Paper>
-            <Paper shadow='sm' radius='md' p='md'>
-                <Stack align='center'>
-                    <LineChart parameters={parameters} data={filteredData} items={items} selection={selection} range={range} />
-                    <div style={{ width: '500px' }}><RangeSelector parameters={parameters} setRange={setRange} /></div>
-                </Stack>
-            </Paper>
-        </Group>
+            <Group>
+                <Paper shadow='sm' radius='md' p='md'>
+                    <Sidebar items={items} setSelection={setSelection} />
+                </Paper>
+                <Paper shadow='sm' radius='md' p='md'>
+                    <Stack align='center'>
+                        <LineChart 
+                            parameters={parameters} 
+                            data={filteredData} 
+                            items={items} 
+                            selection={selection} 
+                            range={range} 
+                            guardrail={guardrail}
+                        />
+                        <div style={{ width: '500px' }}><RangeSelector parameters={parameters} setRange={setRange} /></div>
+                    </Stack>
+                </Paper>
+            </Group>
+        </Stack>
     ) : <Loader/>;
 }
 

@@ -21,13 +21,15 @@ export function LineChart({
     data, 
     items,
     selection,
-    range
+    range,
+    guardrail
 } : {
     parameters: ChartParams,
     data: any[],
     items: any[],
     selection: any[] | null,
-    range: [Date, Date] | null
+    range: [Date, Date] | null,
+    guardrail: string
 }) {
 
     // Handle hovering
@@ -189,11 +191,11 @@ export function LineChart({
 
         return paths;
 
-    }, [data, xScale, yScale, selection, xMax]);
+    }, [data, xScale, yScale, selection, xMax, guardrail]);
 
     const superimposeDatapoints = useMemo(() => {
 
-        if(parameters.guardrail != 'super_data') {
+        if(guardrail != 'super_data') {
             return null;
         }
 
@@ -211,12 +213,12 @@ export function LineChart({
 
         return paths;
 
-    }, [data, xScale, yScale, selection, xMax]);
+    }, [data, xScale, yScale, selection, xMax, guardrail]);
 
     const labelPos = useMemo(() => {
 
         const min_dist = 12;
-        const labels = (parameters.guardrail == 'super_data') ? selection?.concat(superimposeDatapoints?.map((val) => val.country)) : selection;
+        const labels = (guardrail == 'super_data') ? selection?.concat(superimposeDatapoints?.map((val) => val.country)) : selection;
 
         const pos = labels?.map((x) => ({
             country:   x as string,
@@ -242,7 +244,7 @@ export function LineChart({
     
         return pos;
             
-    }, [data, selection, yScale]);
+    }, [data, selection, yScale, guardrail]);
 
     return (
             selection?.length==0 ? (
