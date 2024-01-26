@@ -277,9 +277,9 @@ export function LineChart({
                                 id={`${x.country}`}
                                 key={`${x.country}_key`}
                                 fill='none'
-                                stroke={shouldBeColor(x.country) ? colorScale(x.country) : 'gainsboro'}
+                                stroke={shouldBeColor(x.country) ? colorScale(x.country) : 'gray'}
                                 strokeDasharray={'4,1'}
-                                strokeWidth={hover?.includes(x.country) ? 1.5 : 1}
+                                strokeWidth={0.5}
                                 d={x.path}
                             />
                         </g>
@@ -308,7 +308,7 @@ export function LineChart({
                             <Text
                                 px={2}
                                 size={10}
-                                color={shouldBeColor(x.country) ? colorScale(x.country) : 'gainsboro'}
+                                color={shouldBeColor(x.country) ? colorScale(x.country) : 'silver'}
                                 onMouseOver={(e) => {
                                     const t = e.target as HTMLElement;
                                     if (!selection?.includes(t.innerText)) {
