@@ -101,23 +101,74 @@ export function LineChart({
         return d3.scaleLinear([height + margin.top, margin.top]).domain([yMin, yMax]).nice();
     }, [height, yMax, yMin]);
 
+    // Color scheme borrowed from OWID:
+    // https://github.com/owid/owid-grapher/blob/master/packages/%40ourworldindata/grapher/src/color/CustomSchemes.ts
+    const OwidDistinctColors: Record<string, string> = {
+        Purple: '#6D3E91',
+        DarkOrange: '#C05917',
+        LightTeal: '#58AC8C',
+        Blue: '#286BBB',
+        Maroon: '#883039',
+        Camel: '#BC8E5A',
+        MidnightBlue: '#00295B',
+        DustyCoral: '#C15065',
+        DarkOliveGreen: '#18470F',
+        DarkCopper: '#9A5129',
+        Peach: '#E56E5A',
+        Mauve: '#A2559C',
+        Turquoise: '#38AABA',
+        OliveGreen: '#578145',
+        Cherry: '#970046',
+        Teal: '#00847E',
+        RustyOrange: '#B13507',
+        Denim: '#4C6A9C',
+        Fuchsia: '#CF0A66',
+        TealishGreen: '#00875E',
+        Copper: '#B16214',
+        DarkMauve: '#8C4569',
+        Lime: '#3B8E1D',
+        Coral: '#D73C50',
+    };
+
+    const DarkerOwidDistinctColors: Record<string, string> = {
+        DarkOrangeDarker: '#BE5915',
+        PeachDarker: '#C4523E',
+        LightTealDarker: '#2C8465',
+        TurquoiseDarker: '#008291',
+        CamelDarker: '#996D39',
+        LimeDarker: '#338711',
+    };
+
+    const OwidDistinctLinesPalette = [
+        OwidDistinctColors.DustyCoral,
+        DarkerOwidDistinctColors.LightTealDarker,
+        DarkerOwidDistinctColors.DarkOrangeDarker,
+        OwidDistinctColors.Purple,
+        OwidDistinctColors.Fuchsia,
+        OwidDistinctColors.DarkOliveGreen,
+        OwidDistinctColors.Blue,
+        OwidDistinctColors.Maroon,
+        DarkerOwidDistinctColors.CamelDarker,
+        OwidDistinctColors.MidnightBlue,
+        OwidDistinctColors.DarkCopper,
+        DarkerOwidDistinctColors.PeachDarker,
+        OwidDistinctColors.Mauve,
+        DarkerOwidDistinctColors.TurquoiseDarker,
+        OwidDistinctColors.OliveGreen,
+        OwidDistinctColors.Cherry,
+        OwidDistinctColors.Teal,
+        OwidDistinctColors.RustyOrange,
+        OwidDistinctColors.Denim,
+        OwidDistinctColors.TealishGreen,
+        OwidDistinctColors.Copper,
+        OwidDistinctColors.DarkMauve,
+        DarkerOwidDistinctColors.LimeDarker,
+        OwidDistinctColors.Coral,
+    ];
+
     const colorScale = useMemo(() => {
         const cats = Array.from(new Set(data.map((d) => d[parameters.cat_var])));
-        return d3.scaleOrdinal(['#d34373',
-            '#7cb643',
-            '#c451ba',
-            '#61bd84',
-            '#7964cf',
-            '#caa94a',
-            '#6484c8',
-            '#cf4734',
-            '#48bcc6',
-            '#cf7a36',
-            '#d48cc9',
-            '#457f44',
-            '#9b4e80',
-            '#837631',
-            '#c56f63']).domain(cats);
+        return d3.scaleOrdinal(OwidDistinctLinesPalette).domain(cats);
     }, [data]);
 
     //////////// Draw
@@ -224,7 +275,6 @@ export function LineChart({
                                 id={`${x.country}`}
                                 key={`${x.country}_key`}
                                 fill='none'
-                                opacity={0.75}
                                 stroke={shouldBeColor(x.country) ? colorScale(x.country) : 'gainsboro'}
                                 strokeDasharray={'4,1'}
                                 strokeWidth={hover?.includes(x.country) ? 1.5 : 1}
