@@ -95,5 +95,7 @@ export const useAsync = <F extends (...args: any[]) => any, E = Error, T = Await
     }
   }, [execute, immediate]);
 
-  return { execute, status, value, error };
+  return {
+    execute, status, value, error,
+  };
 };

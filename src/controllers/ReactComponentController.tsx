@@ -7,11 +7,10 @@ import { StimulusParams } from '../store/types';
 
 const modules = import.meta.glob(
   '../public/**/*.{mjs,js,mts,ts,jsx,tsx}',
-  { eager: true }
+  { eager: true },
 );
 
-const ReactComponentController = ({ currentConfig, provState }: { currentConfig: ReactComponent; provState?: unknown; }) => {
-
+function ReactComponentController({ currentConfig, provState }: { currentConfig: ReactComponent; provState?: unknown; }) {
   const currentStep = useCurrentStep();
 
   const reactPath = `../public/${currentConfig.path}`;
@@ -19,7 +18,7 @@ const ReactComponentController = ({ currentConfig, provState }: { currentConfig:
 
   const storeDispatch = useStoreDispatch();
   const { updateResponseBlockValidation, setIframeAnswers } = useStoreActions();
-  function setAnswer({status, provenanceGraph, answers}: Parameters<StimulusParams<unknown, unknown>['setAnswer']>[0]) {
+  function setAnswer({ status, provenanceGraph, answers }: Parameters<StimulusParams<unknown, unknown>['setAnswer']>[0]) {
     storeDispatch(updateResponseBlockValidation({
       location: 'sidebar',
       currentStep,
@@ -29,7 +28,7 @@ const ReactComponentController = ({ currentConfig, provState }: { currentConfig:
     }));
 
     storeDispatch(setIframeAnswers(
-      Object.values(answers).map((value) => value)
+      Object.values(answers).map((value) => value),
     ));
   }
 
@@ -37,11 +36,12 @@ const ReactComponentController = ({ currentConfig, provState }: { currentConfig:
     <Suspense fallback={<div>Loading...</div>}>
       <StimulusComponent
         parameters={currentConfig.parameters}
+        // eslint-disable-next-line react/jsx-no-bind
         setAnswer={setAnswer}
         provenanceState={provState}
       />
     </Suspense>
   );
-};
+}
 
 export default ReactComponentController;

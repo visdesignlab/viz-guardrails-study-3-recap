@@ -1,4 +1,6 @@
 import { Suspense, useEffect } from 'react';
+import merge from 'lodash.merge';
+import { useParams } from 'react-router-dom';
 import ResponseBlock from '../components/response/ResponseBlock';
 import IframeController from './IframeController';
 import ImageController from './ImageController';
@@ -8,28 +10,26 @@ import { useStudyConfig } from '../store/hooks/useStudyConfig';
 import { useStoredAnswer } from '../store/hooks/useStoredAnswer';
 import ReactMarkdownWrapper from '../components/ReactMarkdownWrapper';
 import { isInheritedComponent } from '../parser/parser';
-import merge from 'lodash.merge';
 import { IndividualComponent } from '../parser/types';
-import { useParams } from 'react-router-dom';
 import { disableBrowserBack } from '../utils/disableBrowserBack';
 import { useStorageEngine } from '../store/storageEngineHooks';
 import { useStoreActions, useStoreDispatch } from '../store/store';
 
 // current active stimuli presented to the user
-export default function ComponentController({provState} : {provState?: unknown}) {
+export default function ComponentController({ provState } : {provState?: unknown}) {
   // Get the config for the current step
   const studyConfig = useStudyConfig();
-  const {trialName: currentStep} = useParams();
+  const { trialName: currentStep } = useParams();
 
   const stepConfig = studyConfig.components[currentStep!];
-  
+
   // If we have a trial, use that config to render the right component else use the step
   const status = useStoredAnswer();
 
   const currentConfig = isInheritedComponent(stepConfig) && studyConfig.baseComponents ? merge({}, studyConfig.baseComponents?.[stepConfig.baseComponent], stepConfig) as IndividualComponent : stepConfig as IndividualComponent;
 
   const instruction = (currentConfig.instruction || '');
-  const instructionLocation = currentConfig.instructionLocation;
+  const { instructionLocation } = currentConfig;
   const instructionInSideBar = studyConfig.uiConfig.sidebar && (instructionLocation === 'sidebar' || instructionLocation === undefined);
 
   // Disable browser back button from all stimuli
@@ -61,8 +61,8 @@ export default function ComponentController({provState} : {provState?: unknown})
       <Suspense key={`${currentStep}-stimulus`} fallback={<div>Loading...</div>}>
         {currentConfig.type === 'markdown' && <MarkdownController currentConfig={currentConfig} />}
         {currentConfig.type === 'website' && <IframeController currentConfig={currentConfig} />}
-        {currentConfig.type === 'image' && <ImageController  currentConfig={currentConfig}/>}
-        {currentConfig.type === 'react-component' && <ReactComponentController currentConfig={currentConfig} provState={provState}  />}
+        {currentConfig.type === 'image' && <ImageController currentConfig={currentConfig} />}
+        {currentConfig.type === 'react-component' && <ReactComponentController currentConfig={currentConfig} provState={provState} />}
       </Suspense>
 
       {(instructionLocation === 'belowStimulus' || (instructionLocation === undefined && !instructionInSideBar)) && <ReactMarkdownWrapper text={instruction} />}

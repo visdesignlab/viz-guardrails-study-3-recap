@@ -1,14 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import {useSpring, animated} from 'react-spring';
+import { useSpring, animated } from 'react-spring';
 
-export function AnimatedCircle({cx, cy, r, color} : {cx: number, cy: number, r: number, color: string}) {
+export function AnimatedCircle({
+  cx, cy, r, color,
+} : {cx: number, cy: number, r: number, color: string}) {
+  const styles = useSpring({
+    cx,
+    cy,
+    r,
+  });
 
-    const styles = useSpring({
-        cx,
-        cy,
-        r
-      });
-
-    return <animated.circle {...styles} fill={color}></animated.circle>;
+  return <animated.circle {...styles} fill={color} />;
 }
-  
