@@ -23,9 +23,6 @@ export interface ChartParams {
     guardrail: string 
 }
 
-// dropdown with guardrail?
-// add parameter for time slider on/off
-
 export function DataExplorer({ parameters }: StimulusParams<ChartParams>) {
 
     ///////////// Loading data
