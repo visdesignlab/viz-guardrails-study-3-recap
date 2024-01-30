@@ -8,6 +8,7 @@ import { Center, Text } from '@mantine/core';
 import { XAxis } from './XAxis';
 import { YAxis } from './YAxis';
 import { ChartParams } from './DataExplorer';
+import { OwidDistinctLinesPalette } from './Color';
 
 const margin = {
     top: 30,
@@ -45,6 +46,8 @@ export function LineChart({
         return hover.includes(country);
     });
 
+    // ---------------------------- Setup ----------------------------
+
     ///////////// Setting sizing
     const [ref, { height: originalHeight, width: originalWidth }] = useResizeObserver();
 
@@ -65,7 +68,6 @@ export function LineChart({
         const yData: number[] = data.filter((val) => selection?.includes(val[parameters.cat_var])).map((d) => +d[parameters.y_var]).filter((val) => val !== null) as number[];
         const [yMin, yMax] = d3.extent(yData) as [number, number];
 
-
         return {
             xMin,
             xMax,
@@ -76,104 +78,24 @@ export function LineChart({
     }, [data, selection, range]);
 
     const xScale = useMemo(() => {
-        //const range = xMax - xMin;
-        // if (width <= 0) {
-        //     return null;
-        // }
-
-        //if (params.dataType === 'date') {
-        //    return d3.scaleTime([margin.left, width + margin.left]).domain([new Date('2014-12-20'), new Date('2016-01-10')]);
-        //}
-
         if (range) {
             return d3.scaleTime([margin.left, width + margin.left]).domain(range);
         }
         
         return d3.scaleTime([margin.left, width + margin.left]).domain([new Date(parameters.start_date), new Date(parameters.end_date)]);
-        //return d3.scaleLinear([margin.left, width + margin.left]).domain([xMin, xMax]).nice();
     }, [width, xMax, xMin, range]);
 
     const yScale = useMemo(() => {
-        //const range = yMax - yMin;
-
-        // if (height <= 0) {
-        //     return null;
-        // }
-
         return d3.scaleLinear([height + margin.top, margin.top]).domain([yMin, yMax]).nice();
     }, [height, yMax, yMin]);
 
-    // Color scheme borrowed from OWID:
-    // https://github.com/owid/owid-grapher/blob/master/packages/%40ourworldindata/grapher/src/color/CustomSchemes.ts
-    const OwidDistinctColors: Record<string, string> = {
-        Purple: '#6D3E91',
-        DarkOrange: '#C05917',
-        LightTeal: '#58AC8C',
-        Blue: '#286BBB',
-        Maroon: '#883039',
-        Camel: '#BC8E5A',
-        MidnightBlue: '#00295B',
-        DustyCoral: '#C15065',
-        DarkOliveGreen: '#18470F',
-        DarkCopper: '#9A5129',
-        Peach: '#E56E5A',
-        Mauve: '#A2559C',
-        Turquoise: '#38AABA',
-        OliveGreen: '#578145',
-        Cherry: '#970046',
-        Teal: '#00847E',
-        RustyOrange: '#B13507',
-        Denim: '#4C6A9C',
-        Fuchsia: '#CF0A66',
-        TealishGreen: '#00875E',
-        Copper: '#B16214',
-        DarkMauve: '#8C4569',
-        Lime: '#3B8E1D',
-        Coral: '#D73C50',
-    };
-
-    const DarkerOwidDistinctColors: Record<string, string> = {
-        DarkOrangeDarker: '#BE5915',
-        PeachDarker: '#C4523E',
-        LightTealDarker: '#2C8465',
-        TurquoiseDarker: '#008291',
-        CamelDarker: '#996D39',
-        LimeDarker: '#338711',
-    };
-
-    const OwidDistinctLinesPalette = [
-        OwidDistinctColors.DustyCoral,
-        DarkerOwidDistinctColors.LightTealDarker,
-        DarkerOwidDistinctColors.DarkOrangeDarker,
-        OwidDistinctColors.Purple,
-        OwidDistinctColors.Fuchsia,
-        OwidDistinctColors.DarkOliveGreen,
-        OwidDistinctColors.Blue,
-        OwidDistinctColors.Maroon,
-        DarkerOwidDistinctColors.CamelDarker,
-        OwidDistinctColors.MidnightBlue,
-        OwidDistinctColors.DarkCopper,
-        DarkerOwidDistinctColors.PeachDarker,
-        OwidDistinctColors.Mauve,
-        DarkerOwidDistinctColors.TurquoiseDarker,
-        OwidDistinctColors.OliveGreen,
-        OwidDistinctColors.Cherry,
-        OwidDistinctColors.Teal,
-        OwidDistinctColors.RustyOrange,
-        OwidDistinctColors.Denim,
-        OwidDistinctColors.TealishGreen,
-        OwidDistinctColors.Copper,
-        OwidDistinctColors.DarkMauve,
-        DarkerOwidDistinctColors.LimeDarker,
-        OwidDistinctColors.Coral,
-    ];
 
     const colorScale = useMemo(() => {
         const cats = Array.from(new Set(data.map((d) => d[parameters.cat_var])));
         return d3.scaleOrdinal(OwidDistinctLinesPalette).domain(cats);
     }, [data]);
 
-    //////////// Draw
+    // ---------------------------- Draw ----------------------------
     const linePaths = useMemo(() => {
 
         if (!xScale || !yScale) {
@@ -215,14 +137,70 @@ export function LineChart({
 
     }, [data, xScale, yScale, selection, xMax, guardrail]);
 
+    const superimposeSummary = useMemo(() => {
+
+        if (guardrail != 'super_summ') {
+            return null;
+        }
+
+        const selected_groups = items.filter((val) => selection?.includes(val.name)).map((val) => val.group);
+        const controls_data = data.filter((val) => selected_groups?.includes(val[parameters.group_var]));
+        // Current control data: all study data from selected regions
+        const avg_data = d3.rollup(
+            controls_data, 
+            (v) => ({
+                mean: d3.mean(v, (d) => d[parameters.y_var]) as number,
+                q95: d3.quantile(v, 0.95, (d) => d[parameters.y_var]) as number,
+                q05: d3.quantile(v, 0.05, (d) => d[parameters.y_var]) as number
+            }), 
+            (d) => d[parameters.x_var]);
+        const avg_data2 : any[] = [...avg_data].flatMap(([k, v]) => ({ date: k as string, mean: v.mean, q95: v.q95, q05: v.q05 }));
+
+        // Mean line
+        const lineGenerator = d3.line();
+        lineGenerator.x((d: any) => xScale(d3.timeParse('%Y-%m-%d')(d.date) as Date));
+        lineGenerator.y((d: any) => yScale(d.mean));
+        lineGenerator.curve(d3.curveBasis);
+        const meanLine = lineGenerator(avg_data2) as string;
+        
+        // Confidence bands
+        const areaGenerator = d3.area();
+        areaGenerator.x((d: any) => xScale(d3.timeParse('%Y-%m-%d')(d.date) as Date));
+        areaGenerator.y0((d: any) => yScale(d.q05));
+        areaGenerator.y1((d: any) => yScale(d.q95));
+        areaGenerator.curve(d3.curveBasis);
+        const confidenceBands = areaGenerator(avg_data2) as string;
+
+        return {
+            meanLine: meanLine as string,
+            confidenceBands: confidenceBands as string,
+            data: avg_data2 as any[]
+        };
+
+    }, [data, xScale, yScale, selection, xMax, guardrail]);
+
+    // Function to place labels s.t. they don't overlap
     const labelPos = useMemo(() => {
 
-        const min_dist = 12;
-        const labels = (guardrail == 'super_data') ? selection?.concat(superimposeDatapoints?.map((val) => val.country)) : selection;
+        const min_dist = 10;
+        let labels = null;
+        switch(guardrail) {
+            case 'super_data':
+                labels = selection?.concat(superimposeDatapoints?.map((val) => val.country));
+                break;
+            case 'super_summ':
+                labels = selection?.concat(['Mean']);
+                break;
+            default:
+                labels = selection;
+                break;
+        }
 
         const pos = labels?.map((x) => ({
             country:   x as string,
-            label_pos: data.filter((val) => val[parameters.cat_var] == x).slice(-1).map((val) => yScale(val[parameters.y_var]))[0] as number
+            label_pos: (x == 'Mean' 
+            ? (superimposeSummary?.data.slice(-1).map((val) => yScale(val.mean))[0]) as number 
+            : (data.filter((val) => val[parameters.cat_var] == x).slice(-1).map((val) => yScale(val[parameters.y_var]))[0]) as number)
         })).sort((a,b) => 
             a.label_pos < b.label_pos ? 1 : -1
         );
@@ -246,6 +224,7 @@ export function LineChart({
             
     }, [data, selection, yScale, guardrail]);
 
+    // ---------------------------- Render ----------------------------
     return (
             selection?.length==0 ? (
                 <Center ref={ref} style={{ width: '800px', height: '400px' }}>
@@ -285,6 +264,30 @@ export function LineChart({
                         </g>
                     );
                 })}
+                </svg>
+
+                <svg key={'control_bands'} style={{ width: `${width}` }}>
+                    {superimposeSummary ? (
+                        <g key={'summary_g'}>
+                            <path
+                                id={'confidenceBands'}
+                                key={'confidenceBands_key'}
+                                fill='lightgray'
+                                opacity={0.25}
+                                stroke='none'
+                                d={superimposeSummary.confidenceBands}
+                            />
+                            <path
+                                id={'meanLine'}
+                                key={'meanLine_key'}
+                                fill='none'
+                                stroke='gray'
+                                strokeDasharray={'4,1'}
+                                strokeWidth={0.5}
+                                d={superimposeSummary.meanLine}
+                            />
+                        </g>
+                    ) : null}
                 </svg>
 
                 <svg key={'lines'} style={{ width: `${width}` }}>
