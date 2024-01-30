@@ -64,15 +64,13 @@ export function AllTasksTimeline({
       }
 
       return (
-        <SingleTaskLabelLines labelHeight={currentHeight * LABEL_GAP} key={name} isSelected={selectedTask === name} setSelectedTask={setSelectedTask} answer={answer} height={height} name={name} xScale={xScale} />
+        <SingleTaskLabelLines labelHeight={currentHeight * LABEL_GAP} key={name} answer={answer} height={height} xScale={xScale} />
       );
     });
   }, [height, participantData.answers, selectedTask, setSelectedTask, xScale]);
 
   const browsedAway = useMemo(() => {
     const sortedEntries = Object.entries(participantData.answers).sort((a, b) => a[1].startTime - b[1].startTime);
-
-    console.log(participantData.answers);
 
     return sortedEntries.map((entry) => {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -96,8 +94,6 @@ export function AllTasksTimeline({
           }
         }
       }
-
-      console.log(browsedAwayList, participantData.participantId);
 
       return (
         browsedAwayList.map((browse, i) => <Tooltip withinPortal key={i} label="Browsed away"><rect x={xScale(browse[0])} width={xScale(browse[1]) - xScale(browse[0])} y={height - 5} height={10} /></Tooltip>)

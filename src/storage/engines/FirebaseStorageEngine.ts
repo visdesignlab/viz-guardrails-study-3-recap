@@ -99,7 +99,7 @@ export class FirebaseStorageEngine extends StorageEngine {
     // Restore localWindowEvents
     this.localWindowEvents = await this._getFromFirebaseStorage(this.currentParticipantId, 'windowEvents');
     Object.entries(this.localWindowEvents).forEach(([step, events]) => {
-      if (participant === null) return;
+      if (participant === null || !participant.answers[step]) return;
 
       if (events === undefined || events.length === 0) {
         participant.answers[step].windowEvents = [];
