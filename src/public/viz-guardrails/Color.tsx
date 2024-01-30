@@ -41,7 +41,7 @@ export const OwidDistinctLinesPalette = [
     DarkerOwidDistinctColors.LightTealDarker,
     DarkerOwidDistinctColors.DarkOrangeDarker,
     OwidDistinctColors.Purple,
-    OwidDistinctColors.Fuchsia,
+    //OwidDistinctColors.Fuchsia,
     OwidDistinctColors.DarkOliveGreen,
     OwidDistinctColors.Blue,
     OwidDistinctColors.Maroon,

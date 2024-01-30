@@ -13,8 +13,8 @@ export function YAxis({ yScale, xRange, horizontalPosition }: { yScale: any, xRa
     }, [yScale]);
 
     const format = useMemo(() => {
-        return d3.format(',.2r');
-    }, []);
+        return (yScale.domain()[1]) < 5 ? d3.format(',.2r') : d3.format(',.0f');
+    }, [yScale]);
 
     return (
         <>

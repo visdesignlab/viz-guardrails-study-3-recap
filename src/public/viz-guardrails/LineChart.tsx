@@ -145,7 +145,7 @@ export function LineChart({
 
         const selected_groups = items.filter((val) => selection?.includes(val.name)).map((val) => val.group);
         const controls_data = data.filter((val) => selected_groups?.includes(val[parameters.group_var]));
-        // controls_data group by date and group and average y_var:
+        // Current control data: all study data from selected regions
         const avg_data = d3.rollup(
             controls_data, 
             (v) => ({
@@ -155,7 +155,6 @@ export function LineChart({
             }), 
             (d) => d[parameters.x_var]);
         const avg_data2 : any[] = [...avg_data].flatMap(([k, v]) => ({ date: k as string, mean: v.mean, q95: v.q95, q05: v.q05 }));
-        console.log(avg_data2);
 
         // Mean line
         const lineGenerator = d3.line();
@@ -169,21 +168,39 @@ export function LineChart({
         areaGenerator.x((d: any) => xScale(d3.timeParse('%Y-%m-%d')(d.date) as Date));
         areaGenerator.y0((d: any) => yScale(d.q05));
         areaGenerator.y1((d: any) => yScale(d.q95));
-        //areaGenerator.curve(d3.curveBasis);
+        areaGenerator.curve(d3.curveBasis);
         const confidenceBands = areaGenerator(avg_data2) as string;
 
-        return [meanLine, confidenceBands];
+        return {
+            meanLine: meanLine as string,
+            confidenceBands: confidenceBands as string,
+            data: avg_data2 as any[]
+        };
 
     }, [data, xScale, yScale, selection, xMax, guardrail]);
 
+    // Function to place labels s.t. they don't overlap
     const labelPos = useMemo(() => {
 
-        const min_dist = 12;
-        const labels = (guardrail == 'super_data') ? selection?.concat(superimposeDatapoints?.map((val) => val.country)) : selection;
+        const min_dist = 10;
+        let labels = null;
+        switch(guardrail) {
+            case 'super_data':
+                labels = selection?.concat(superimposeDatapoints?.map((val) => val.country));
+                break;
+            case 'super_summ':
+                labels = selection?.concat(['Mean']);
+                break;
+            default:
+                labels = selection;
+                break;
+        }
 
         const pos = labels?.map((x) => ({
             country:   x as string,
-            label_pos: data.filter((val) => val[parameters.cat_var] == x).slice(-1).map((val) => yScale(val[parameters.y_var]))[0] as number
+            label_pos: (x == 'Mean' 
+            ? (superimposeSummary?.data.slice(-1).map((val) => yScale(val.mean))[0]) as number 
+            : (data.filter((val) => val[parameters.cat_var] == x).slice(-1).map((val) => yScale(val[parameters.y_var]))[0]) as number)
         })).sort((a,b) => 
             a.label_pos < b.label_pos ? 1 : -1
         );
@@ -258,7 +275,7 @@ export function LineChart({
                                 fill='lightgray'
                                 opacity={0.25}
                                 stroke='none'
-                                d={superimposeSummary[1]}
+                                d={superimposeSummary.confidenceBands}
                             />
                             <path
                                 id={'meanLine'}
@@ -267,7 +284,7 @@ export function LineChart({
                                 stroke='gray'
                                 strokeDasharray={'4,1'}
                                 strokeWidth={0.5}
-                                d={superimposeSummary[0]}
+                                d={superimposeSummary.meanLine}
                             />
                         </g>
                     ) : null}

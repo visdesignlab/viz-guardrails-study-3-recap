@@ -63,7 +63,14 @@ export function DataExplorer({ parameters }: StimulusParams<ChartParams>) {
             </Paper>
             <Group>
                 <Paper shadow='sm' radius='md' p='md'>
-                    <Sidebar items={items} setSelection={setSelection} />
+                    <Sidebar 
+                        parameters={parameters}
+                        data={filteredData}
+                        items={items} 
+                        setSelection={setSelection}
+                        range={range} 
+                        guardrail={guardrail}
+                    />
                 </Paper>
                 <Paper shadow='sm' radius='md' p='md'>
                     <Stack align='center'>
@@ -76,7 +83,10 @@ export function DataExplorer({ parameters }: StimulusParams<ChartParams>) {
                             guardrail={guardrail}
                         />
                         <div style={{ width: '500px' }}>
-                            <RangeSelector parameters={parameters} setRange={setRange} />
+                            <RangeSelector 
+                                parameters={parameters} 
+                                setRange={setRange} 
+                            />
                         </div>
                     </Stack>
                 </Paper>
