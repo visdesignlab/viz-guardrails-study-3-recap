@@ -93,7 +93,7 @@ export function Sidebar({
                             key={`${item.name}_checkbox`} 
                             value={item.name} 
                             label={item.name}
-                            style={{ alignContent: 'bottom'}}
+                            styles={(guardrail == 'juxt_data') ? { root: { display:'flex', alignItems: 'flex-end', padding:'2px 0'}} : {}}
                         >{item.name}</Checkbox>
                         </Grid.Col>
 
