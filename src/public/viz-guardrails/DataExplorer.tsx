@@ -10,6 +10,7 @@ import LineChart from './LineChart';
 import Sidebar from './Sidebar';
 import RangeSelector from './RangeSelector';
 import Selector from './Selector';
+import { Histogram } from './Histogram';
 
 export interface ChartParams { 
     dataset: string, 
@@ -53,7 +54,7 @@ export function DataExplorer({ parameters }: StimulusParams<ChartParams>) {
         }
 
         return null;
-        
+    
     }, [data, range]);
 
     return filteredData&&items&&range&&selection ? (
@@ -67,14 +68,17 @@ export function DataExplorer({ parameters }: StimulusParams<ChartParams>) {
                 </Paper>
                 <Paper shadow='sm' radius='md' p='md'>
                     <Stack align='center'>
-                        <LineChart 
-                            parameters={parameters} 
-                            data={filteredData} 
-                            items={items} 
-                            selection={selection} 
-                            range={range} 
-                            guardrail={guardrail}
-                        />
+                        <Group>
+                            {guardrail === 'juxt_summ' ? <Histogram data={filteredData}></Histogram> : null}
+                            <LineChart 
+                                parameters={parameters} 
+                                data={filteredData} 
+                                items={items} 
+                                selection={selection} 
+                                range={range} 
+                                guardrail={guardrail}
+                            />
+                        </Group>
                         <div style={{ width: '500px' }}>
                             <RangeSelector parameters={parameters} setRange={setRange} />
                         </div>
