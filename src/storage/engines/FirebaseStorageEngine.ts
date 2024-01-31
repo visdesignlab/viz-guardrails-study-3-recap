@@ -183,7 +183,6 @@ export class FirebaseStorageEngine extends StorageEngine {
     audioStream: MediaRecorder,
   ) {
     audioStream.addEventListener('dataavailable', (data) => {
-      console.log(data);
       const storage = getStorage();
 
       const storeRef = ref(storage, `${this.studyId}/audio/${this.currentParticipantId}`);
@@ -346,8 +345,8 @@ export class FirebaseStorageEngine extends StorageEngine {
 
       // Get provenance data
       if (participant !== null) {
-        const fullProvObj = await this._getFromFirebaseStorage(this.currentParticipantId, 'provenance');
-        const fullWindowEventsObj = await this._getFromFirebaseStorage(this.currentParticipantId, 'windowEvents');
+        const fullProvObj = await this._getFromFirebaseStorage(participantId || this.currentParticipantId, 'provenance');
+        const fullWindowEventsObj = await this._getFromFirebaseStorage(participantId || this.currentParticipantId, 'windowEvents');
 
         // Iterate over the participant answers and add the provenance graph
         Object.entries(participant.answers).forEach(([step, answer]) => {

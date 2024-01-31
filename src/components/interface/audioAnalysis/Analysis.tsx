@@ -203,7 +203,7 @@ export function Analysis({ setProvState } : {setProvState: (state: any) => void}
 
   const children = useMemo(() => (
     <Stack ref={ref} style={{ width: '100%' }} spacing={0}>
-      {status === 'success' && participant ? <AllTasksTimeline selectedTask={selectedTask} setSelectedTask={setSelectedTask} participantData={participant} width={width} height={50} /> : null}
+      {status === 'success' && participant ? <AllTasksTimeline selectedTask={selectedTask} setSelectedTask={setSelectedTask} participantData={participant} width={width} height={200} /> : null}
       {status === 'success' && participant ? <SingleTaskTimeline setSelectedTask={setSelectedTask} playTime={playTime} setPlayTime={_setPlayTime} isPlaying={isPlaying} setIsPlaying={_setIsPlaying} currentNode={currentNode} setCurrentNode={setCurrentNode} selectedTask={selectedTask} participantData={participant} width={width} height={50} /> : null}
       <Box ref={waveSurferDiv} style={{ width: '100%' }}>
 

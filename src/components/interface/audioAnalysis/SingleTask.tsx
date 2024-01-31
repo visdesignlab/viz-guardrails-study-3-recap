@@ -26,7 +26,6 @@ export function SingleTask({
       <foreignObject x={xScale(answer.startTime)} width={labelWidth} y={height - TIMELINE_HEIGHT - LABEL_DISTANCE - labelHeight} height={LABEL_HEIGHT}>
         <Center style={{ width: 'fit-content' }}>
           <Text weight={600} lineClamp={1} ref={ref} mx={0} style={{ width: 'fit-content' }} size={12}>{name}</Text>
-          {' '}
         </Center>
       </foreignObject>
     </g>

@@ -38,8 +38,6 @@ export function AnalysisHome() {
     }));
   }, [allPartsData, status]);
 
-  console.log(allPartsData);
-
   return status === 'success' && allPartsData ? (
     <Stack spacing={50} style={{ width: '100%' }}>
       {allPartsData?.map((participant) => <AnalysisSingleParticipant maxDuration={maxDuration} key={participant.participantId} participant={participant} />)}
