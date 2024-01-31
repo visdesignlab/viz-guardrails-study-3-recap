@@ -68,8 +68,6 @@ export function SingleTaskTimeline({
     setCurrentNode(node);
   }, [allTaskTimes, setPlayTime, taskIndex, wholeXScale, totalLength, setIsPlaying, setCurrentNode]);
 
-  console.log(participantData);
-
   return (
     <Stack>
       <svg style={{ width, height }}>

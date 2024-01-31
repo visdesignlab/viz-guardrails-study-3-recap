@@ -34,8 +34,6 @@ export function AnalysisSingleParticipant({ participant, maxDuration } : {partic
 
     const answersSorted = Object.values(participant.answers).sort((a, b) => a.startTime - b.startTime);
 
-    console.log(answersSorted);
-
     return new Date(answersSorted[answersSorted.length - 1].endTime - answersSorted[0].startTime).getTime();
   }, [participant]);
 

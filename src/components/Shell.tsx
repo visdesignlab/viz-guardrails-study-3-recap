@@ -5,7 +5,7 @@ import {
 } from 'react';
 import { Provider } from 'react-redux';
 import {
-  RouteObject, useMatch, useParams, useRoutes,
+  RouteObject, useMatch, useParams, useRoutes, useSearchParams,
 } from 'react-router-dom';
 import { Box, Center, Loader } from '@mantine/core';
 import { parseStudyConfig } from '../parser/parser';
@@ -25,7 +25,6 @@ import {
 } from '../store/store';
 import { sanitizeStringForUrl } from '../utils/sanitizeStringForUrl';
 
-import { PREFIX } from './GlobalConfigParser';
 import ComponentController from '../controllers/ComponentController';
 import { NavigateWithParams } from '../utils/NavigateWithParams';
 import { StudyEnd } from './StudyEnd';
@@ -37,6 +36,7 @@ import { StepRenderer } from './StepRenderer';
 import { ProvenanceWrapper } from './interface/audioAnalysis/ProvenanceWrapper';
 import { StorageEngine } from '../storage/engines/StorageEngine';
 import { AnalysisHome } from './interface/audioAnalysis/AnalysisHome';
+import { PREFIX } from './Prefix';
 
 async function fetchStudyConfig(configLocation: string, configKey: string) {
   const config = await (await fetch(`${PREFIX}${configLocation}`)).text();
@@ -58,7 +58,6 @@ export function GenerateStudiesRoutes({ studyId, config, storage }: {
   useEffect(() => {
     let _stream: Promise<MediaStream> | null;
     if (config && config.recordStudyAudio) {
-      console.log('creating');
       _stream = navigator.mediaDevices.getUserMedia({
         audio: true,
       });
@@ -72,7 +71,6 @@ export function GenerateStudiesRoutes({ studyId, config, storage }: {
     }
 
     return () => {
-      console.log('cleaning', _stream);
       if (_stream) {
         _stream.then((data) => {
           data.getTracks().forEach((track) => track.stop());
@@ -83,7 +81,6 @@ export function GenerateStudiesRoutes({ studyId, config, storage }: {
 
   useEffect(() => {
     if (atEnd && config && config.recordStudyAudio && audioStream) {
-      console.log('calling stop');
       storage.saveAudio(audioStream);
       dispatch(setIsRecording(false));
     }
@@ -148,7 +145,6 @@ export function Shell({ globalConfig }: {
     if (configKey) {
       const configJSON = globalConfig.configs[configKey];
       fetchStudyConfig(`${configJSON.path}`, configKey).then((config) => {
-        console.log('setting active config');
         setActiveConfig(config);
       });
     }
@@ -156,7 +152,8 @@ export function Shell({ globalConfig }: {
 
   const [store, setStore] = useState<Nullable<StudyStore>>(null);
   const { storageEngine } = useStorageEngine();
-  useMemo(() => {
+  const [searchParams] = useSearchParams();
+  useEffect(() => {
     async function initializeUserStoreRouting() {
       // Check that we have a storage engine and active config (studyId is set for config, but typescript complains)
       if (!storageEngine || !activeConfig || !studyId) return;
@@ -168,15 +165,17 @@ export function Shell({ globalConfig }: {
         await storageEngine.setSequenceArray(await generateSequenceArray(activeConfig));
       }
 
-      // If we don't have a user's session, we need to generate one
-      const participantSession = await storageEngine.initializeParticipantSession();
+      // Get or generate participant session
+      const urlParticipantId = activeConfig.uiConfig.urlParticipantIdParam ? searchParams.get(activeConfig.uiConfig.urlParticipantIdParam) || undefined : undefined;
+      const searchParamsObject = Object.fromEntries(searchParams.entries());
+      const participantSession = await storageEngine.initializeParticipantSession(searchParamsObject, urlParticipantId);
 
       // Initialize the redux stores
       const _store = await studyStoreCreator(studyId, activeConfig, participantSession.sequence, participantSession.answers);
       setStore(_store);
     }
     initializeUserStoreRouting();
-  }, [storageEngine, activeConfig, studyId]);
+  }, [storageEngine, activeConfig, studyId, searchParams]);
 
   return !store || !storageEngine
     ? (

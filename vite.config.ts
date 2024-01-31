@@ -3,13 +3,12 @@ import react from '@vitejs/plugin-react-swc';
 
 // https://vitejs.dev/config/
 export default defineConfig(({ command, mode }) => {
-
   const env = loadEnv(mode, process.cwd());
 
   return {
     base: command === 'build' ? env.VITE_BASE_PATH : '/',
     optimizeDeps: {
-      exclude: ['js-big-decimal']
+      exclude: ['js-big-decimal'],
     },
     plugins: [
       react({ devTarget: 'es2022' }),

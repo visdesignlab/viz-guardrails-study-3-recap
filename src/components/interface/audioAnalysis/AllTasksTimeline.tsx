@@ -80,7 +80,7 @@ export function AllTasksTimeline({
       let currentBrowsedAway: [number, number] = [-1, -1];
       let currentState: 'visible' | 'hidden' = 'visible';
       if (answer.windowEvents) {
-        for (let i = 0; i < answer.windowEvents.length; i++) {
+        for (let i = 0; i < answer.windowEvents.length; i += 1) {
           if (answer.windowEvents[i][1] === 'visibility') {
             if (answer.windowEvents[i][2] === 'hidden' && currentState === 'visible') {
               currentBrowsedAway = [answer.windowEvents[i][0], -1];

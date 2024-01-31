@@ -135,7 +135,6 @@ export function Analysis({ setProvState } : {setProvState: (state: any) => void}
     setPlayTime(n);
 
     if (wavesurfer && percent) {
-      console.log(percent);
       wavesurfer?.seekTo(percent);
     }
   }, [wavesurfer]);
