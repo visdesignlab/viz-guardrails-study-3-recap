@@ -3,13 +3,15 @@
 
 import { Loader } from '@mantine/core';
 import { StimulusParams } from '../../store/types';
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import * as d3 from 'd3';
 import { Group, Stack, Paper } from '@mantine/core';
 import LineChart from './LineChart';
 import Sidebar from './Sidebar';
 import RangeSelector from './RangeSelector';
 import Selector from './Selector';
+import { Registry, initializeTrrack } from '@trrack/core';
+import debounce from 'lodash.debounce';
 
 export interface ChartParams { 
     dataset: string, 
@@ -25,7 +27,7 @@ export interface ChartParams {
 
 export function DataExplorer({ parameters }: StimulusParams<ChartParams>) {
 
-    ///////////// Loading data
+    // ---------------------------- Setup & data ----------------------------
     const [ data, setData ] = useState<any[] | null>(null);
     const [ selection, setSelection ] = useState<string[] | null>(null);
     const [ items, setItems ] = useState<any[] | null>(null);
@@ -34,14 +36,14 @@ export function DataExplorer({ parameters }: StimulusParams<ChartParams>) {
 
     useEffect(() => {
         d3.csv(`./data/${parameters.dataset}.csv`)
-        .then((data) => {
-            setData(data);
-            setItems(Array.from(new Set(data.map((row) => (JSON.stringify({
-                name: row[parameters.cat_var],
-                group: row[parameters.group_var]
-            }))))).map((row) => JSON.parse(row)));
-            setSelection([]);
-        });
+            .then((data) => {
+                setData(data);
+                setItems(Array.from(new Set(data.map((row) => (JSON.stringify({
+                    name: row[parameters.cat_var],
+                    group: row[parameters.group_var]
+                }))))).map((row) => JSON.parse(row)));
+                setSelection([]);
+            });
     }, [parameters]);
 
     const filteredData = useMemo(() => {
@@ -53,8 +55,53 @@ export function DataExplorer({ parameters }: StimulusParams<ChartParams>) {
         }
 
         return null;
-        
+
     }, [data, range]);
+
+    // ---------------------------- Trrack ----------------------------
+    const { actions, trrack } = useMemo(() => {
+        const reg = Registry.create();
+
+        const selection = reg.register('selection', (state, currSelection: string[]) => {
+            state.selection = currSelection;
+            return state;
+        });
+
+        const range = reg.register('range', (state, currRange: [string, string]) => {
+            state.range = currRange;
+            return state;
+        });
+
+        const trrackInst = initializeTrrack({
+            registry: reg,
+            initialState: {
+                selection: [],
+                range: [parameters.start_date, parameters.end_date]
+            },
+        });
+
+        return {
+            actions: {
+                selection,
+                range
+            },
+            trrack: trrackInst,
+        };
+    }, []);
+
+    const trackRange = useCallback((newRange: [Date, Date]) => {
+        trrack.apply('Change daterange', actions.range([newRange[0].toISOString().slice(0, 10), newRange[1].toISOString().slice(0, 10)]));
+        console.log(trrack.getState());
+    }, [trrack, actions, setRange]);
+
+    const debouncedTrackRange = useMemo(() => debounce(trackRange, 200), [trackRange]);
+
+    const trackSelection = useCallback((newSelection: string[]) => {
+        trrack.apply('Change selection', actions.selection(newSelection));
+        console.log(trrack.getState());
+    }, [trrack, actions, setSelection]);
+
+    // ---------------------------- Render ----------------------------
 
     return filteredData&&items&&range&&selection ? (
         <Stack>
@@ -68,6 +115,7 @@ export function DataExplorer({ parameters }: StimulusParams<ChartParams>) {
                         data={filteredData}
                         items={items} 
                         setSelection={setSelection}
+                        trackSelection={trackSelection}
                         range={range} 
                         guardrail={guardrail}
                     />
@@ -86,6 +134,7 @@ export function DataExplorer({ parameters }: StimulusParams<ChartParams>) {
                             <RangeSelector 
                                 parameters={parameters} 
                                 setRange={setRange} 
+                                trackRange={debouncedTrackRange}
                             />
                         </div>
                     </Stack>

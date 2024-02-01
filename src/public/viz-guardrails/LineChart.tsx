@@ -12,7 +12,7 @@ import { OwidDistinctLinesPalette } from './Color';
 
 const margin = {
     top: 30,
-    left: 30,
+    left: 40,
     right: 100,
     bottom: 50
 };
@@ -46,6 +46,34 @@ export function LineChart({
         return hover.includes(country);
     });
 
+    // ---------------------------- Compute controls ----------------------------
+
+    const controlsSelection = useMemo(() => {
+
+        const selected_groups = items.filter((val) => selection?.includes(val.name)).map((val) => val.group);
+        const controls_selection = items.filter((val) => selected_groups?.includes(val.group)).filter((val) => !selection?.includes(val.name)).map((val) => val.name);
+        return controls_selection;
+
+    }, [selection, items]);
+
+    const avgData = useMemo(() => {
+
+        const selected_groups = items.map((val) => val.group);//.filter((val) => selection?.includes(val.name)).map((val) => val.group);
+        const controls_data = data.filter((val) => selected_groups?.includes(val[parameters.group_var]));
+        // Current control data: all study data from all regions
+        const avg_data = d3.rollup(
+            controls_data,
+            (v) => ({
+                mean: d3.quantile(v, 0.5, (d) => d[parameters.y_var]) as number,
+                upperq: d3.quantile(v, 0.75, (d) => d[parameters.y_var]) as number,
+                lowerq: d3.quantile(v, 0.25, (d) => d[parameters.y_var]) as number
+            }),
+            (d) => d[parameters.x_var]);
+        const avg_data2: any[] = [...avg_data].flatMap(([k, v]) => ({ date: k as string, mean: v.mean, upperq: v.upperq, lowerq: v.lowerq }));
+        return avg_data2;
+
+    }, [data, items, parameters]);
+
     // ---------------------------- Setup ----------------------------
 
     ///////////// Setting sizing
@@ -62,11 +90,25 @@ export function LineChart({
     ///////////// Setting scales
     const { xMin, yMin, xMax, yMax } = useMemo(() => {
 
-        const xData: number[] = data.filter((val) => selection?.includes(val[parameters.cat_var])).map((d) => +d[parameters.x_var]).filter((val) => val !== null) as number[];
+        let relevant_selection: string[] = [];
+        switch (guardrail) {
+            case 'super_data':
+                relevant_selection = selection?.concat(controlsSelection) as string[];
+                break;
+            default:
+                relevant_selection = selection as string[];
+                break;
+        }
+
+        const xData: number[] = data.map((d) => +d[parameters.x_var]).filter((val) => val !== null) as number[];
         const [xMin, xMax] = d3.extent(xData) as [number, number];
 
-        const yData: number[] = data.filter((val) => selection?.includes(val[parameters.cat_var])).map((d) => +d[parameters.y_var]).filter((val) => val !== null) as number[];
-        const [yMin, yMax] = d3.extent(yData) as [number, number];
+        const yData: number[] = data.filter((val) => relevant_selection.includes(val[parameters.cat_var])).map((d) => +d[parameters.y_var]).filter((val) => val !== null) as number[];
+        const [yMinSel, yMaxSel] = d3.extent(yData) as [number, number];
+        const [lowerq, upperq] = [ d3.min(avgData.map((val) => val.lowerq)) as number, d3.max(avgData.map((val) => val.upperq)) as number];
+
+        const yMin = (guardrail == 'super_summ' ? d3.min([yMinSel, lowerq]) : yMinSel) as number;
+        const yMax = (guardrail == 'super_summ' ? d3.max([yMaxSel, upperq]) : yMaxSel) as number;
 
         return {
             xMin,
@@ -75,7 +117,7 @@ export function LineChart({
             yMax
         };
 
-    }, [data, selection, range]);
+    }, [data, selection, range, guardrail]);
 
     const xScale = useMemo(() => {
         if (range) {
@@ -121,14 +163,11 @@ export function LineChart({
             return null;
         }
 
-        const selected_groups = items.filter((val) => selection?.includes(val.name)).map((val) => val.group);
-        const controls_selection = items.filter((val) => selected_groups?.includes(val.group)).filter((val) => !selection?.includes(val.name)).map((val) => val.name);
-
         const lineGenerator = d3.line();
         lineGenerator.x((d: any) => xScale(d3.timeParse('%Y-%m-%d')(d[parameters.x_var]) as Date));
         lineGenerator.y((d: any) => yScale(d[parameters.y_var]));
         lineGenerator.curve(d3.curveBasis);
-        const paths = controls_selection?.map((x) => ({
+        const paths = controlsSelection?.map((x) => ({
             country: x as string,
             path: lineGenerator(data.filter((val) => (val[parameters.cat_var] == x))) as string
         }));
@@ -143,38 +182,25 @@ export function LineChart({
             return null;
         }
 
-        const selected_groups = items.filter((val) => selection?.includes(val.name)).map((val) => val.group);
-        const controls_data = data.filter((val) => selected_groups?.includes(val[parameters.group_var]));
-        // Current control data: all study data from selected regions
-        const avg_data = d3.rollup(
-            controls_data, 
-            (v) => ({
-                mean: d3.mean(v, (d) => d[parameters.y_var]) as number,
-                q95: d3.quantile(v, 0.95, (d) => d[parameters.y_var]) as number,
-                q05: d3.quantile(v, 0.05, (d) => d[parameters.y_var]) as number
-            }), 
-            (d) => d[parameters.x_var]);
-        const avg_data2 : any[] = [...avg_data].flatMap(([k, v]) => ({ date: k as string, mean: v.mean, q95: v.q95, q05: v.q05 }));
-
         // Mean line
         const lineGenerator = d3.line();
         lineGenerator.x((d: any) => xScale(d3.timeParse('%Y-%m-%d')(d.date) as Date));
         lineGenerator.y((d: any) => yScale(d.mean));
         lineGenerator.curve(d3.curveBasis);
-        const meanLine = lineGenerator(avg_data2) as string;
+        const meanLine = lineGenerator(avgData) as string;
         
         // Confidence bands
         const areaGenerator = d3.area();
         areaGenerator.x((d: any) => xScale(d3.timeParse('%Y-%m-%d')(d.date) as Date));
-        areaGenerator.y0((d: any) => yScale(d.q05));
-        areaGenerator.y1((d: any) => yScale(d.q95));
+        areaGenerator.y0((d: any) => yScale(d.lowerq));
+        areaGenerator.y1((d: any) => yScale(d.upperq));
         areaGenerator.curve(d3.curveBasis);
-        const confidenceBands = areaGenerator(avg_data2) as string;
+        const confidenceBands = areaGenerator(avgData) as string;
 
         return {
             meanLine: meanLine as string,
             confidenceBands: confidenceBands as string,
-            data: avg_data2 as any[]
+            data: avgData as any[]
         };
 
     }, [data, xScale, yScale, selection, xMax, guardrail]);
@@ -189,7 +215,7 @@ export function LineChart({
                 labels = selection?.concat(superimposeDatapoints?.map((val) => val.country));
                 break;
             case 'super_summ':
-                labels = selection?.concat(['Mean']);
+                labels = selection?.concat(['Median']);
                 break;
             default:
                 labels = selection;
@@ -198,7 +224,7 @@ export function LineChart({
 
         const pos = labels?.map((x) => ({
             country:   x as string,
-            label_pos: (x == 'Mean' 
+            label_pos: (x == 'Median' 
             ? (superimposeSummary?.data.slice(-1).map((val) => yScale(val.mean))[0]) as number 
             : (data.filter((val) => val[parameters.cat_var] == x).slice(-1).map((val) => yScale(val[parameters.y_var]))[0]) as number)
         })).sort((a,b) => 
@@ -245,7 +271,12 @@ export function LineChart({
                             offset: xScale(value),
                         }))} />
 
-                    <YAxis yScale={yScale} horizontalPosition={margin.left} xRange={xScale.range()} />
+                    <YAxis 
+                        dataset={parameters.dataset}
+                        yScale={yScale} 
+                        horizontalPosition={margin.left} 
+                        xRange={xScale.range()} 
+                    />
                 </g>
 
                 <svg key={'control_lines'} style={{ width: `${width}` }}>
@@ -321,7 +352,7 @@ export function LineChart({
                                 }}
                                 onMouseOut={() => setHover([])}
                             >
-                                {x.country}
+                                {(x.country.includes('Policy')) ? x.country.split('(Policy')[0] : x.country}
                             </Text>
                         </foreignObject>
                     );

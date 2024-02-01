@@ -20,6 +20,7 @@ export function Sidebar({
     data,
     items,
     setSelection,
+    trackSelection,
     range,
     guardrail
 } : {
@@ -27,6 +28,7 @@ export function Sidebar({
     data: any[],
     items: any[],
     setSelection: (value: Array<string>) => void,
+    trackSelection: (value: Array<string>) => void,
     range: [Date, Date] | null,
     guardrail: string
 }) {
@@ -80,24 +82,24 @@ export function Sidebar({
             <Checkbox.Group
                 key='chip_group'
                 orientation='vertical'
-                onChange={(xs) => setSelection(xs)}
+                onChange={(xs) => {setSelection(xs); trackSelection(xs);}}
                 spacing={0}
                 offset='sm'
             >
                 {items?.map((item) => {
                     return (
-                        <Grid grow justify="space-between" align="bottom" gutter={10} columns={2}>
+                        <Grid key={`${item.name}_grid`} grow gutter={8} columns={2}>
                         
-                        <Grid.Col span={1}>
+                        <Grid.Col key={`${item.name}_grid1`} span={1}>
                         <Checkbox 
                             key={`${item.name}_checkbox`} 
                             value={item.name} 
                             label={item.name}
-                            styles={(guardrail == 'juxt_data') ? { root: { display:'flex', alignItems: 'flex-end', padding:'2px 0'}} : {}}
+                            styles={(guardrail == 'juxt_data') ? { root: { display:'flex', alignItems: 'flex-end', padding:'2px 0' }} : {}}
                         >{item.name}</Checkbox>
                         </Grid.Col>
 
-                        <Grid.Col span={guardrail == 'juxt_data' ? 'auto' : 3}>
+                        <Grid.Col key={`${item.name}_grid2`} span={guardrail == 'juxt_data' ? 'auto' : 3}>
                         <svg key={`${item.name}_sparksvg`} style={{ width: `${width}`, height: `${height}`}}>
                             <path 
                                 id={`${item.name}_spark`}

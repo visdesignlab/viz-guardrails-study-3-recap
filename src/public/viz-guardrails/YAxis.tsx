@@ -3,7 +3,7 @@ import * as d3 from 'd3';
 
 // code taken from https://wattenberger.com/blog/react-and-d3
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function YAxis({ yScale, xRange, horizontalPosition }: { yScale: any, xRange: any, horizontalPosition: any }) {
+export function YAxis({ dataset, yScale, xRange, horizontalPosition }: { dataset: string, yScale: any, xRange: any, horizontalPosition: any }) {
     const ticks = useMemo(() => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         return yScale.ticks(5).map((value: any) => ({
@@ -13,8 +13,13 @@ export function YAxis({ yScale, xRange, horizontalPosition }: { yScale: any, xRa
     }, [yScale]);
 
     const format = useMemo(() => {
+
+        if (dataset == 'clean_stocks') {
+            return d3.format(',.0%');
+        }
+
         return (yScale.domain()[1]) < 5 ? d3.format(',.2r') : d3.format(',.0f');
-    }, [yScale]);
+    }, [dataset, yScale]);
 
     return (
         <>
