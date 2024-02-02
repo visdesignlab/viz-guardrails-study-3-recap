@@ -114,6 +114,7 @@ export function DataExplorer({ parameters }: StimulusParams<ChartParams>) {
                         parameters={parameters}
                         data={filteredData}
                         items={items} 
+                        selection={selection}
                         setSelection={setSelection}
                         trackSelection={trackSelection}
                         range={range} 
