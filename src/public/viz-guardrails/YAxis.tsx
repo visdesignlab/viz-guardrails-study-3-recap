@@ -42,7 +42,7 @@ export function YAxis({ dataset, yScale, xRange, horizontalPosition }: { dataset
                             font: 'Roboto'
                         }}
                     >
-                        {value===0 ? '0' : format(value)}
+                        {format(value)}
                     </text>
                 </g>
             ))}

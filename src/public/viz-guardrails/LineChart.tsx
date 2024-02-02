@@ -206,6 +206,10 @@ export function LineChart({
 
     }, [data, xScale, yScale, selection, xMax, guardrail]);
 
+    const averageLabel = useMemo(() => {
+        return (parameters.dataset == 'clean_stocks' ? 'Market Index' : 'Average');
+    }, [parameters]);
+
     // Function to place labels s.t. they don't overlap
     const labelPos = useMemo(() => {
 
@@ -216,7 +220,7 @@ export function LineChart({
                 labels = selection?.concat(superimposeDatapoints?.map((val) => val.country));
                 break;
             case 'super_summ':
-                labels = selection?.concat(['Median']);
+                labels = selection?.concat([averageLabel]);
                 break;
             default:
                 labels = selection;
@@ -225,7 +229,7 @@ export function LineChart({
 
         const pos = labels?.map((x) => ({
             country:   x as string,
-            label_pos: (x == 'Median' 
+            label_pos: (x == averageLabel 
             ? (superimposeSummary?.data.slice(-1).map((val) => yScale(val.mean))[0]) as number 
             : (data.filter((val) => val[parameters.cat_var] == x).slice(-1).map((val) => yScale(val[parameters.y_var]))[0]) as number)
         })).sort((a,b) => 

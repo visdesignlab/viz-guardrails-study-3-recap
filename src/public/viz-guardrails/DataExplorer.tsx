@@ -5,7 +5,7 @@ import { Loader } from '@mantine/core';
 import { StimulusParams } from '../../store/types';
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import * as d3 from 'd3';
-import { Group, Stack, Paper } from '@mantine/core';
+import { Group, Stack, Paper, Text, Divider, Flex } from '@mantine/core';
 import LineChart from './LineChart';
 import Sidebar from './Sidebar';
 import RangeSelector from './RangeSelector';
@@ -108,21 +108,28 @@ export function DataExplorer({ parameters }: StimulusParams<ChartParams>) {
             <Paper shadow='sm' radius='md' p='md' style={{ width: '500px' }}>
                 <Selector guardrail={guardrail} setGuardrail={setGuardrail} />
             </Paper>
-            <Group>
-                <Paper shadow='sm' radius='md' p='md'>
-                    <Sidebar 
+            <Flex>
+            <Paper shadow='md' radius='md' p='md' withBorder>
+                    <Group>
+                    <Sidebar
                         parameters={parameters}
                         data={filteredData}
-                        items={items} 
+                        items={items}
                         selection={selection}
                         setSelection={setSelection}
                         trackSelection={trackSelection}
-                        range={range} 
+                        range={range}
                         guardrail={guardrail}
                     />
-                </Paper>
-                <Paper shadow='sm' radius='md' p='md'>
-                    <Stack align='center'>
+                        <Divider orientation='vertical' size='xs'/>
+                    <g>
+                    <Text fw={500}>
+                        {parameters.dataset === 'clean_stocks' ? 'Percent change in stock price' : 'Infections per million people'}
+                    </Text>
+                    {guardrail === 'super_summ' ? (
+                        <Text fz='xs' c='dimmed'>{'Shaded area represents the middle 50% of values.'}</Text>
+                    ) : null}
+                    <Stack>
                         <LineChart 
                             parameters={parameters} 
                             data={filteredData} 
@@ -131,16 +138,19 @@ export function DataExplorer({ parameters }: StimulusParams<ChartParams>) {
                             range={range} 
                             guardrail={guardrail}
                         />
-                        <div style={{ width: '500px' }}>
+                        {parameters.allow_time_slider ?
+                        (<div style={{ width: '500px' }}>
                             <RangeSelector 
                                 parameters={parameters} 
                                 setRange={setRange} 
                                 trackRange={debouncedTrackRange}
                             />
-                        </div>
+                        </div>) :null }
                     </Stack>
+                    </g>
+                    </Group>
                 </Paper>
-            </Group>
+            </Flex>
         </Stack>
     ) : <Loader/>;
 }
