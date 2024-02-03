@@ -10,7 +10,7 @@ import { getAuth, signInAnonymously } from '@firebase/auth';
 import localforage from 'localforage';
 
 export class FirebaseStorageEngine extends StorageEngine {
-  private RECAPTCHAV3TOKEN = '6LdjOd0lAAAAAASvFfDZFWgtbzFSS9Y3so8rHJth';
+  private RECAPTCHAV3TOKEN = '6Ldz_WQpAAAAAITx1qzoXnBDQMP8Zpub5MVyMl0k';
   private firestore: Firestore;
   private collectionPrefix = import.meta.env.DEV ? 'dev-' : 'prod-';
   private studyCollection: CollectionReference<DocumentData, DocumentData> | undefined = undefined;

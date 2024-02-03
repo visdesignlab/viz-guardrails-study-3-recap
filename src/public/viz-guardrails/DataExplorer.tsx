@@ -127,7 +127,7 @@ export function DataExplorer({ parameters }: StimulusParams<ChartParams>) {
                         {parameters.dataset === 'clean_stocks' ? 'Percent change in stock price' : 'Infections per million people'}
                     </Text>
                     {guardrail === 'super_summ' ? (
-                        <Text fz='xs' c='dimmed'>{'Shaded area represents the middle 50% of values.'}</Text>
+                        <Text fz='xs' c='dimmed'>{'Shaded area represents the middle 50% of all values.'}</Text>
                     ) : null}
                     <Stack>
                         <LineChart 

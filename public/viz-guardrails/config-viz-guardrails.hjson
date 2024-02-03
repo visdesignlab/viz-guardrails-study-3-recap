@@ -86,7 +86,7 @@
             "response": []
         },
         "stock-a": {
-            "instruction": "Select a view that best shows (and convinces your client) that **the car industry is the best investment**.",
+            "instruction": "Select a view that best shows (and convinces your client) that **the car industry fund is the best investment**.",
             "instructionLocation": "aboveStimulus",
             "type": "react-component",
             "path": "viz-guardrails/DataExplorer.tsx",
@@ -133,7 +133,7 @@
             ] 
         },
         "stock-b": {
-            "instruction": "Select a view that best shows (and convinces your client) that **the airline industry is the best investment**.",
+            "instruction": "Select a view that best shows (and convinces your client) that **the airline industry fund is the best investment**.",
             "instructionLocation": "aboveStimulus",
             "type": "react-component",
             "path": "viz-guardrails/DataExplorer.tsx",
@@ -187,7 +187,7 @@
                 "dataset": "clean_stocks",
                 "start_date": "2023-01-01",
                 "end_date": "2024-01-01",
-                "allow_time_slider": false,
+                "allow_time_slider": true,
                 "x_var": "Date",
                 "y_var": "Value",
                 "cat_var": "name",

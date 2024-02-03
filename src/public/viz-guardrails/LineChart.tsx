@@ -105,7 +105,7 @@ export function LineChart({
         const [xMin, xMax] = d3.extent(xData) as [number, number];
 
         const yData: number[] = data.filter((val) => relevant_selection.includes(val[parameters.cat_var])).map((d) => +d[parameters.y_var]).filter((val) => val !== null) as number[];
-        const [yMinSel, yMaxSel] = d3.extent(yData) as [number, number];
+        const [yMinSel, yMaxSel] = (parameters.dataset == 'clean_stocks' ? (d3.extent(yData) as [number, number]) : ([0, d3.extent(yData)[1]] as [number, number]));
         const [lowerq, upperq] = [ d3.min(avgData.map((val) => val.lowerq)) as number, d3.max(avgData.map((val) => val.upperq)) as number];
 
         const yMin = (guardrail == 'super_summ' ? d3.min([yMinSel, lowerq]) : yMinSel) as number;

@@ -6,7 +6,7 @@ import * as d3 from 'd3';
 export function YAxis({ dataset, yScale, xRange, horizontalPosition }: { dataset: string, yScale: any, xRange: any, horizontalPosition: any }) {
     const ticks = useMemo(() => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        return yScale.ticks(5).map((value: any) => ({
+        return yScale.ticks(6).map((value: any) => ({
             value,
             yOffset: yScale(value),
         }));
