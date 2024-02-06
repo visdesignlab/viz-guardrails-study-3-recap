@@ -78,7 +78,6 @@ export function Sidebar({
 
     return (
             <Checkbox.Group
-                key='chip_group'
                 orientation='vertical'
                 onChange={(xs) => setSelection(xs)}
                 spacing={0}
@@ -86,7 +85,7 @@ export function Sidebar({
             >
                 {items?.map((item) => {
                     return (
-                        <Grid grow justify="space-between" align="bottom" gutter={10} columns={2}>
+                        <Grid id={item.name} grow justify="space-between" align="bottom" gutter={10} columns={2}>
                         
                         <Grid.Col span={1}>
                         <Checkbox 

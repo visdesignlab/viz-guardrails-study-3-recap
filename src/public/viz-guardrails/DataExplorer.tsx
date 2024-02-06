@@ -75,8 +75,8 @@ export function DataExplorer({ parameters }: StimulusParams<ChartParams>) {
                 </Paper>
                 <Paper shadow='sm' radius='md' p='md'>
                     <Stack align='center'>
-                        <Group>
-                            {guardrail === 'juxt_summ' ? <Histogram data={filteredData}></Histogram> : null}
+                        <Group noWrap spacing={0}>
+                            {guardrail === 'juxt_summ' ? <Histogram data={filteredData} selection={selection} ></Histogram> : null}
                             <LineChart 
                                 parameters={parameters} 
                                 data={filteredData} 
