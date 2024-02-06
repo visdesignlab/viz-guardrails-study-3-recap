@@ -25,7 +25,7 @@ export interface ChartParams {
     guardrail: string 
 }
 
-export function DataExplorer({ parameters }: StimulusParams<ChartParams>) {
+export function DataExplorer({ parameters, setAnswer }: StimulusParams<ChartParams>) {
 
     // ---------------------------- Setup & data ----------------------------
     const [ data, setData ] = useState<any[] | null>(null);
@@ -91,15 +91,19 @@ export function DataExplorer({ parameters }: StimulusParams<ChartParams>) {
 
     const trackRange = useCallback((newRange: [Date, Date]) => {
         trrack.apply('Change daterange', actions.range([newRange[0].toISOString().slice(0, 10), newRange[1].toISOString().slice(0, 10)]));
-        console.log(trrack.getState());
     }, [trrack, actions, setRange]);
 
     const debouncedTrackRange = useMemo(() => debounce(trackRange, 200), [trackRange]);
 
     const trackSelection = useCallback((newSelection: string[]) => {
         trrack.apply('Change selection', actions.selection(newSelection));
-        console.log(trrack.getState());
-    }, [trrack, actions, setSelection]);
+
+        setAnswer({
+            status: true,
+            provenanceGraph: trrack.graph.backend,
+            answers: {},
+        });
+    }, [trrack, actions, setSelection, setAnswer]);
 
     // ---------------------------- Render ----------------------------
 
