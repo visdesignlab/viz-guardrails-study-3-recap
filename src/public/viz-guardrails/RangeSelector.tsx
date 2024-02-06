@@ -4,10 +4,12 @@ import { ChartParams } from './DataExplorer';
 
 export function RangeSelector({
     parameters,
-    setRange
+    setRange,
+    trackRange
 } : {
-    parameters: ChartParams;
-    setRange: (value: [Date, Date]) => void
+    parameters: ChartParams,
+    setRange: (value: [Date, Date]) => void,
+    trackRange: (value: [Date, Date]) => void
 }) {
 
     function numToRange(v: number) {
@@ -25,7 +27,7 @@ export function RangeSelector({
             label={numToRangeLabel}
             labelAlwaysOn
             disabled={!parameters.allow_time_slider}
-            onChange={([min, max]) => setRange([numToRange(min), numToRange(max) ])}
+            onChange={([min, max]) => { setRange([numToRange(min), numToRange(max)]); trackRange([numToRange(min), numToRange(max)]); } }
         />
     );
 

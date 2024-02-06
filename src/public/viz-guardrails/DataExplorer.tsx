@@ -3,14 +3,16 @@
 
 import { Loader } from '@mantine/core';
 import { StimulusParams } from '../../store/types';
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import * as d3 from 'd3';
-import { Group, Stack, Paper } from '@mantine/core';
+import { Group, Stack, Paper, Text, Divider, Flex } from '@mantine/core';
 import LineChart from './LineChart';
 import Sidebar from './Sidebar';
 import RangeSelector from './RangeSelector';
 import Selector from './Selector';
 import { Histogram } from './Histogram';
+import { Registry, initializeTrrack } from '@trrack/core';
+import debounce from 'lodash.debounce';
 
 export interface ChartParams { 
     dataset: string, 
@@ -24,9 +26,9 @@ export interface ChartParams {
     guardrail: string 
 }
 
-export function DataExplorer({ parameters }: StimulusParams<ChartParams>) {
+export function DataExplorer({ parameters, setAnswer }: StimulusParams<ChartParams>) {
 
-    ///////////// Loading data
+    // ---------------------------- Setup & data ----------------------------
     const [ data, setData ] = useState<any[] | null>(null);
     const [ selection, setSelection ] = useState<string[] | null>(null);
     const [ items, setItems ] = useState<any[] | null>(null);
@@ -35,14 +37,14 @@ export function DataExplorer({ parameters }: StimulusParams<ChartParams>) {
 
     useEffect(() => {
         d3.csv(`./data/${parameters.dataset}.csv`)
-        .then((data) => {
-            setData(data);
-            setItems(Array.from(new Set(data.map((row) => (JSON.stringify({
-                name: row[parameters.cat_var],
-                group: row[parameters.group_var]
-            }))))).map((row) => JSON.parse(row)));
-            setSelection([]);
-        });
+            .then((data) => {
+                setData(data);
+                setItems(Array.from(new Set(data.map((row) => (JSON.stringify({
+                    name: row[parameters.cat_var],
+                    group: row[parameters.group_var]
+                }))))).map((row) => JSON.parse(row)));
+                setSelection([]);
+            });
     }, [parameters]);
 
     const filteredData = useMemo(() => {
@@ -54,28 +56,85 @@ export function DataExplorer({ parameters }: StimulusParams<ChartParams>) {
         }
 
         return null;
-    
     }, [data, range]);
+
+    // ---------------------------- Trrack ----------------------------
+    const { actions, trrack } = useMemo(() => {
+        const reg = Registry.create();
+
+        const selection = reg.register('selection', (state, currSelection: string[]) => {
+            state.selection = currSelection;
+            return state;
+        });
+
+        const range = reg.register('range', (state, currRange: [string, string]) => {
+            state.range = currRange;
+            return state;
+        });
+
+        const trrackInst = initializeTrrack({
+            registry: reg,
+            initialState: {
+                selection: [],
+                range: [parameters.start_date, parameters.end_date]
+            },
+        });
+
+        return {
+            actions: {
+                selection,
+                range
+            },
+            trrack: trrackInst,
+        };
+    }, []);
+
+    const trackRange = useCallback((newRange: [Date, Date]) => {
+        trrack.apply('Change daterange', actions.range([newRange[0].toISOString().slice(0, 10), newRange[1].toISOString().slice(0, 10)]));
+    }, [trrack, actions, setRange]);
+
+    const debouncedTrackRange = useMemo(() => debounce(trackRange, 200), [trackRange]);
+
+    const trackSelection = useCallback((newSelection: string[]) => {
+        trrack.apply('Change selection', actions.selection(newSelection));
+
+        setAnswer({
+            status: true,
+            provenanceGraph: trrack.graph.backend,
+            answers: {},
+        });
+    }, [trrack, actions, setSelection, setAnswer]);
+
+    // ---------------------------- Render ----------------------------
 
     return filteredData&&items&&range&&selection ? (
         <Stack>
             <Paper shadow='sm' radius='md' p='md' style={{ width: '500px' }}>
                 <Selector guardrail={guardrail} setGuardrail={setGuardrail} />
             </Paper>
-            <Group>
-                <Paper shadow='sm' radius='md' p='md'>
-                    <Sidebar 
+            <Flex>
+            <Paper shadow='md' radius='md' p='md' withBorder>
+                    <Group>
+                    <Sidebar
                         parameters={parameters}
                         data={filteredData}
-                        items={items} 
+                        items={items}
+                        selection={selection}
                         setSelection={setSelection}
-                        range={range} 
+                        trackSelection={trackSelection}
+                        range={range}
                         guardrail={guardrail}
                     />
-                </Paper>
-                <Paper shadow='sm' radius='md' p='md'>
-                    <Stack align='center'>
-                        <Group noWrap spacing={0}>
+                        <Divider orientation='vertical' size='xs'/>
+                    <g>
+                    <Text fw={500}>
+                        {parameters.dataset === 'clean_stocks' ? 'Percent change in stock price' : 'Infections per million people'}
+                    </Text>
+                    {guardrail === 'super_summ' ? (
+                        <Text fz='xs' c='dimmed'>{'Shaded area represents the middle 50% of all values.'}</Text>
+                    ) : null}
+                    <Stack>
+                        <Group>
                             {guardrail === 'juxt_summ' ? <Histogram data={filteredData} selection={selection} ></Histogram> : null}
                             <LineChart 
                                 parameters={parameters} 
@@ -86,15 +145,19 @@ export function DataExplorer({ parameters }: StimulusParams<ChartParams>) {
                                 guardrail={guardrail}
                             />
                         </Group>
-                        <div style={{ width: '500px' }}>
+                        {parameters.allow_time_slider ?
+                        (<div style={{ width: '500px' }}>
                             <RangeSelector 
                                 parameters={parameters} 
                                 setRange={setRange} 
+                                trackRange={debouncedTrackRange}
                             />
-                        </div>
+                        </div>) :null }
                     </Stack>
+                    </g>
+                    </Group>
                 </Paper>
-            </Group>
+            </Flex>
         </Stack>
     ) : <Loader/>;
 }
