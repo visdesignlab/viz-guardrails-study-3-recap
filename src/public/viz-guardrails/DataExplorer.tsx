@@ -101,13 +101,15 @@ export function DataExplorer({ parameters, setAnswer }: StimulusParams<ChartPara
         setAnswer({
             status: true,
             provenanceGraph: trrack.graph.backend,
-            answers: {},
+            answers: {selection},
         });
-    }, [trrack, actions, setSelection, setAnswer]);
+
+        console.log(trrack.graph.backend);
+    }, [trrack, actions, selection, setAnswer]);
 
     // ---------------------------- Render ----------------------------
 
-    return filteredData&&items&&range&&selection ? (
+    return filteredData&&items&&range&&selection&&trrack ? (
         <Stack>
             <Paper shadow='sm' radius='md' p='md' style={{ width: '500px' }}>
                 <Selector guardrail={guardrail} setGuardrail={setGuardrail} />

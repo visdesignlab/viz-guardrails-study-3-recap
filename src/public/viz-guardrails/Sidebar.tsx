@@ -94,16 +94,16 @@ export function Sidebar({
             <Checkbox.Group
                 key='chip_group'
                 orientation='vertical'
-                onChange={(xs) => {setSelection(xs); trackSelection(xs);}}
+                onChange={(xs) => {setSelection(xs); trackSelection(xs); console.log(xs);}}
                 spacing={0}
                 offset='sm'
             >
                 {items?.map((item) => {
                     return (
                         <>
-                        {item.name === 'Eldoril North' ? <Divider size="xs" label="Policy A" labelPosition="left" color='darkgray' /> : null}
-                        {item.name === 'Eldoril West' ? <Divider size="xs" label="Policy B" labelPosition="left" color='darkgray' /> : null}
-                        {item.name === 'Silvoria North' ? <Divider size="xs" label="Policy C" labelPosition="left" color='darkgray'  /> : null}
+                        {item.name === 'Eldoril North' ? <Divider key="div_a" size="xs" label="Policy A" labelPosition="left" color='darkgray' /> : null}
+                        {item.name === 'Eldoril West' ? <Divider key="div_b" size="xs" label="Policy B" labelPosition="left" color='darkgray' /> : null}
+                        {item.name === 'Silvoria North' ? <Divider key="div_c" size="xs" label="Policy C" labelPosition="left" color='darkgray'  /> : null}
 
                         <Grid key={`${item.name}_grid`} grow  gutter={8} columns={2}>
                         
