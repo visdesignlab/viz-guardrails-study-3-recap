@@ -29,7 +29,7 @@ export function DataExplorer({ parameters, setAnswer }: StimulusParams<ChartPara
 
     // ---------------------------- Setup & data ----------------------------
     const [ data, setData ] = useState<any[] | null>(null);
-    const [ selection, setSelection ] = useState<string[] | null>(null);
+    const [ selection, setSelection ] = useState<string[] | null>([]);
     const [ items, setItems ] = useState<any[] | null>(null);
     const [ range, setRange ] = useState<[Date, Date] | null>([new Date(parameters.start_date), new Date(parameters.end_date)]);
     const [ guardrail, setGuardrail ] = useState<string>(parameters.guardrail);
@@ -42,7 +42,6 @@ export function DataExplorer({ parameters, setAnswer }: StimulusParams<ChartPara
                     name: row[parameters.cat_var],
                     group: row[parameters.group_var]
                 }))))).map((row) => JSON.parse(row)));
-                setSelection([]);
             });
     }, [parameters]);
 
@@ -101,15 +100,13 @@ export function DataExplorer({ parameters, setAnswer }: StimulusParams<ChartPara
         setAnswer({
             status: true,
             provenanceGraph: trrack.graph.backend,
-            answers: {selection},
+            answers: {},
         });
-
-        console.log(trrack.graph.backend);
-    }, [trrack, actions, selection, setAnswer]);
+    }, [trrack, actions, setAnswer]);
 
     // ---------------------------- Render ----------------------------
 
-    return filteredData&&items&&range&&selection&&trrack ? (
+    return filteredData&&items&&range&&selection ? (
         <Stack>
             <Paper shadow='sm' radius='md' p='md' style={{ width: '500px' }}>
                 <Selector guardrail={guardrail} setGuardrail={setGuardrail} />
