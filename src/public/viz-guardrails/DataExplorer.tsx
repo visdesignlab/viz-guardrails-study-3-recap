@@ -132,6 +132,9 @@ export function DataExplorer({ parameters, setAnswer }: StimulusParams<ChartPara
                     {guardrail === 'super_summ' ? (
                         <Text fz='xs' c='dimmed'>{'Shaded area represents the middle 50% of all values.'}</Text>
                     ) : null}
+                    {guardrail === 'juxt_summ' ? (
+                        <Text fz='xs' c='dimmed'>{'Bar on the left highlights the range of selection among all data.'}</Text>
+                    ) : null}
                     <Stack>
                         <Group>
                             {guardrail === 'juxt_summ' ? <Histogram parameters={parameters} data={filteredData} selection={selection} ></Histogram> : null}

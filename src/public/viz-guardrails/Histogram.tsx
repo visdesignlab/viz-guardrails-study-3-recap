@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { from, escape } from 'arquero';
 import { useMemo } from 'react';
 import * as d3 from 'd3';
@@ -26,12 +28,13 @@ export function Histogram({
     console.log(parameters);
 
     const allData = useMemo(() => {
-        const tempData = data.map((d) => ({...d, value: +d[parameters.y_var]}));
+        const tempData = data.map((d: any) => ({...d, value: +d[parameters.y_var]}));
         return from(tempData);
     }, [data, parameters]);
 
     const selectedDataRange = useMemo(() => {
-        return d3.extent(allData.filter(escape((d) => selection.includes(d[parameters.cat_var]))).array('value')) as [unknown, unknown] as [number, number];
+        const extent = d3.extent(allData.filter(escape((d: any) => selection.includes(d[parameters.cat_var]))).array('value')) as [unknown, unknown] as [number, number];
+        return (parameters.dataset === 'clean_stocks') ? extent : [0, extent[1]];
     }, [allData, selection, parameters]);
 
 
@@ -39,17 +42,17 @@ export function Histogram({
         return d3.scaleLinear([margin.top, height - margin.bottom]).domain(d3.extent(allData.array('value') as number[]).reverse() as unknown as [number, number]);
     }, [allData, height]);
 
-    const textFormat = d3.format('.0%');
+    const textFormat = parameters.dataset === 'clean_stocks' ? d3.format('.0%') : d3.format(',.0f');
 
     console.log(selectedDataRange);
 
     console.log(yScale.domain(), yScale.range(), data);
 
-    return(
+    return selection?.length===0 ? null : (
         <svg ref={ref} style={{height: '400px', width: '60px', overflow: 'visible'}}> 
             {/* <YAxis yScale={yScale} horizontalPosition={275} xRange={[0, 0]}/> */}
             {/* <line x1={margin.left} x2={margin.left} y1={margin.top} y2={height - margin.bottom} strokeWidth={1} stroke={'black'}></line> */}
-            <rect y={yScale(selectedDataRange[1])} height={yScale(selectedDataRange[0]) - yScale(selectedDataRange[1])} x={margin.left - 10} width={10} opacity={0.2} fill="black"></rect>
+            <rect y={yScale(selectedDataRange[1])} height={yScale(selectedDataRange[0]) - yScale(selectedDataRange[1])} x={margin.left - 10} width={10} opacity={0.1} fill="black"></rect>
             <text style={{fontSize: 10, dominantBaseline: 'middle', textAnchor: 'middle', fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif'}} x={25} y={margin.top - 5}>{textFormat(yScale.domain()[0])}</text>
             <text style={{fontSize: 10, dominantBaseline: 'middle', textAnchor: 'middle', fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif'}} x={25} y={height - margin.bottom + 8}>{textFormat(yScale.domain()[1])}</text>
             <text style={{fontSize: 10, dominantBaseline: 'middle', fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif'}} x={margin.left - 5} y={yScale(selectedDataRange[0])}>{textFormat(selectedDataRange[0])}</text>
@@ -57,13 +60,13 @@ export function Histogram({
 
 
 
-            {data.map((d) => <rect opacity={.2} fill={+d[parameters.y_var] > 0 ? '#1f77b4' : '#d62728ed'} x={0} width={50} y={yScale(+d.Value)} height={1}></rect>)}
+            {data.map((d: any) => <rect opacity={.2} fill={+d[parameters.y_var] > 0 ? 'steelblue' : 'firebrick'} x={0} width={50} y={yScale(+d[parameters.y_var])} height={1}></rect>)}
             <line strokeWidth={2} stroke="black" style={{fontSize: 10, dominantBaseline: 'middle'}} x1={0} x2={50} y1={yScale(selectedDataRange[0])} y2={yScale(selectedDataRange[0])}></line>
             <line strokeWidth={2} stroke="black" x1={0} x2={50} y1={yScale(selectedDataRange[1])} y2={yScale(selectedDataRange[1])}></line>
             <line strokeWidth={2} stroke="black" x1={0} x2={0} y1={yScale(selectedDataRange[1])} y2={yScale(selectedDataRange[0])}></line>
             <line strokeWidth={2} stroke="black" x1={50} x2={50} y1={yScale(selectedDataRange[1])} y2={yScale(selectedDataRange[0])}></line>
 
-            <path fill={'black'} opacity="0.2" d={`M${margin.left}, ${yScale(selectedDataRange[1])} L ${width + 20 + 33}, ${margin.top} L ${width + 20 + 33}, ${height - margin.bottom} L ${margin.left}, ${yScale(selectedDataRange[0])}`}></path>
+            <path fill={'black'} opacity="0.1" d={`M${margin.left}, ${yScale(selectedDataRange[1])} L ${width + 20 + 33}, ${margin.top} L ${width + 20 + 33}, ${height - margin.bottom} L ${margin.left}, ${yScale(selectedDataRange[0])}`}></path>
         </svg>
     );
 
