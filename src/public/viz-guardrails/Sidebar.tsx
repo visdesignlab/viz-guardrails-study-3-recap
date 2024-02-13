@@ -92,7 +92,6 @@ export function Sidebar({
 
     return (
             <Checkbox.Group
-                key='chip_group'
                 orientation='vertical'
                 onChange={(xs) => {setSelection(xs); trackSelection(xs);}}
                 spacing={0}

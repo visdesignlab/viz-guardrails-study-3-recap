@@ -10,6 +10,7 @@ import LineChart from './LineChart';
 import Sidebar from './Sidebar';
 import RangeSelector from './RangeSelector';
 import Selector from './Selector';
+import { Histogram } from './Histogram';
 import { Registry, initializeTrrack } from '@trrack/core';
 import debounce from 'lodash.debounce';
 
@@ -54,7 +55,6 @@ export function DataExplorer({ parameters, setAnswer }: StimulusParams<ChartPara
         }
 
         return null;
-
     }, [data, range]);
 
     // ---------------------------- Trrack ----------------------------
@@ -133,14 +133,17 @@ export function DataExplorer({ parameters, setAnswer }: StimulusParams<ChartPara
                         <Text fz='xs' c='dimmed'>{'Shaded area represents the middle 50% of all values.'}</Text>
                     ) : null}
                     <Stack>
-                        <LineChart 
-                            parameters={parameters} 
-                            data={filteredData} 
-                            items={items} 
-                            selection={selection} 
-                            range={range} 
-                            guardrail={guardrail}
-                        />
+                        <Group>
+                            {guardrail === 'juxt_summ' ? <Histogram parameters={parameters} data={filteredData} selection={selection} ></Histogram> : null}
+                            <LineChart 
+                                parameters={parameters} 
+                                data={filteredData} 
+                                items={items} 
+                                selection={selection} 
+                                range={range} 
+                                guardrail={guardrail}
+                            />
+                        </Group>
                         {parameters.allow_time_slider ?
                         (<div style={{ width: '500px' }}>
                             <RangeSelector 
