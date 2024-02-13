@@ -10,7 +10,7 @@ import LineChart from './LineChart';
 import Sidebar from './Sidebar';
 import RangeSelector from './RangeSelector';
 import Selector from './Selector';
-import { Histogram } from './Histogram';
+import { StripPlot } from './StripPlot';
 import { Registry, initializeTrrack } from '@trrack/core';
 import debounce from 'lodash.debounce';
 
@@ -137,7 +137,7 @@ export function DataExplorer({ parameters, setAnswer }: StimulusParams<ChartPara
                     ) : null}
                     <Stack>
                         <Group>
-                            {guardrail === 'juxt_summ' ? <Histogram parameters={parameters} data={filteredData} selection={selection} ></Histogram> : null}
+                            {guardrail === 'juxt_summ' ? <StripPlot parameters={parameters} data={filteredData} selection={selection} ></StripPlot> : null}
                             <LineChart 
                                 parameters={parameters} 
                                 data={filteredData} 
