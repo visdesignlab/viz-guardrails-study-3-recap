@@ -135,7 +135,7 @@ export function DataExplorer({ parameters, setAnswer }: StimulusParams<ChartPara
                     ) : null}
                     <Stack>
                         <Group>
-                            {guardrail === 'juxt_summ' ? <Histogram data={filteredData} selection={selection} ></Histogram> : null}
+                            {guardrail === 'juxt_summ' ? <Histogram parameters={parameters} data={filteredData} selection={selection} ></Histogram> : null}
                             <LineChart 
                                 parameters={parameters} 
                                 data={filteredData} 

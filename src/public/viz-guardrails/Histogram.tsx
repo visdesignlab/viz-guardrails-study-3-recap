@@ -1,59 +1,69 @@
-import { from, op, bin, escape } from 'arquero';
+import { from, escape } from 'arquero';
 import { useMemo } from 'react';
 import * as d3 from 'd3';
 import { useResizeObserver } from '@mantine/hooks';
+import { ChartParams } from './DataExplorer';
 
 const margin = {
-    top: 60,
-    left: 150,
+    top: 30,
+    left: 60,
     right: 80,
     bottom: 50
 };
 
 export function Histogram({
     data,
-    selection
+    selection,
+    parameters,
 } : {
     data: unknown[];
-    selection: string[]
+    selection: string[];
+    parameters: ChartParams
 }
 ) { 
     const [ref, {width, height}] = useResizeObserver();
 
+    console.log(parameters);
+
     const allData = useMemo(() => {
-        const tempData = data.map((d) => ({...d, value: +d.value}));
+        const tempData = data.map((d) => ({...d, value: +d[parameters.y_var]}));
         return from(tempData);
-    }, [data]);
+    }, [data, parameters]);
 
     const selectedDataRange = useMemo(() => {
-        return d3.extent(allData.filter(escape((d) => selection.includes(d.country_name))).array('value')) as [unknown, unknown] as [number, number];
-    }, [allData, selection]);
+        return d3.extent(allData.filter(escape((d) => selection.includes(d[parameters.cat_var]))).array('value')) as [unknown, unknown] as [number, number];
+    }, [allData, selection, parameters]);
 
-    const histValues = useMemo(() => {
-        return allData.orderby('value').groupby('value', { binStart: bin('value', { maxbins: 20, nice: true }), binEnd: bin('value', { maxbins: 20, nice: true, offset: 1 }) }).rollup({ count: op.count() }).groupby('binStart', 'binEnd').count(); 
-    }, [allData]);
 
     const yScale = useMemo(() => {
-        return d3.scaleLinear([margin.top, height - margin.bottom]).domain(d3.extent(allData.array('value') as number[]).reverse() as unknown as [number, number]).nice();
+        return d3.scaleLinear([margin.top, height - margin.bottom]).domain(d3.extent(allData.array('value') as number[]).reverse() as unknown as [number, number]);
     }, [allData, height]);
 
-    const xScale = useMemo(() => {
-        return d3.scaleLinear([margin.left, width - margin.right]).domain(d3.extent(histValues.array('count')) as unknown as [number, number]);
-    }, [histValues, width]);
+    const textFormat = d3.format('.0%');
+
+    console.log(selectedDataRange);
+
+    console.log(yScale.domain(), yScale.range(), data);
 
     return(
-        <svg ref={ref} style={{height: '400px', width: '280px', overflow: 'visible'}}> 
-            {histValues.objects().map((hist: {binStart: number, binEnd: number, count: number}) => {
-                return <rect y={yScale(hist.binEnd)} fill="lightgray" height={yScale(hist.binStart) - yScale(hist.binEnd)} width={xScale(hist.count)} x={width - margin.right - xScale(hist.count)}></rect>;
-            })}
+        <svg ref={ref} style={{height: '400px', width: '60px', overflow: 'visible'}}> 
             {/* <YAxis yScale={yScale} horizontalPosition={275} xRange={[0, 0]}/> */}
-            <line x1={260} x2={260} y1={margin.top} y2={height - margin.bottom} strokeWidth={1} stroke="black"></line>
-            <rect y={yScale(selectedDataRange[1])} height={yScale(selectedDataRange[0]) - yScale(selectedDataRange[1])} x={252} width={16} opacity={0.2} fill="black"></rect>
-            <text style={{fontSize: 10, dominantBaseline: 'middle', textAlign: 'center'}} x={255} y={margin.top - 5}>{yScale.domain()[0]}</text>
-            <text style={{fontSize: 10, dominantBaseline: 'middle', textAlign: 'center'}} x={255} y={height - margin.bottom + 5}>{yScale.domain()[1]}</text>
-            <g transform="translate(200, 0)">
-                {data.map((d) => <rect opacity={.2} fill={'black'} x={0} width={50} y={yScale(d.value)} height={1}></rect>)}
-            </g>
+            {/* <line x1={margin.left} x2={margin.left} y1={margin.top} y2={height - margin.bottom} strokeWidth={1} stroke={'black'}></line> */}
+            <rect y={yScale(selectedDataRange[1])} height={yScale(selectedDataRange[0]) - yScale(selectedDataRange[1])} x={margin.left - 10} width={10} opacity={0.2} fill="black"></rect>
+            <text style={{fontSize: 10, dominantBaseline: 'middle', textAnchor: 'middle', fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif'}} x={25} y={margin.top - 5}>{textFormat(yScale.domain()[0])}</text>
+            <text style={{fontSize: 10, dominantBaseline: 'middle', textAnchor: 'middle', fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif'}} x={25} y={height - margin.bottom + 8}>{textFormat(yScale.domain()[1])}</text>
+            <text style={{fontSize: 10, dominantBaseline: 'middle', fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif'}} x={margin.left - 5} y={yScale(selectedDataRange[0])}>{textFormat(selectedDataRange[0])}</text>
+            <text style={{fontSize: 10, dominantBaseline: 'middle', fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif'}} x={margin.left - 5} y={yScale(selectedDataRange[1])}>{textFormat(selectedDataRange[1])}</text>
+
+
+
+            {data.map((d) => <rect opacity={.2} fill={+d[parameters.y_var] > 0 ? '#1f77b4' : '#d62728ed'} x={0} width={50} y={yScale(+d.Value)} height={1}></rect>)}
+            <line strokeWidth={2} stroke="black" style={{fontSize: 10, dominantBaseline: 'middle'}} x1={0} x2={50} y1={yScale(selectedDataRange[0])} y2={yScale(selectedDataRange[0])}></line>
+            <line strokeWidth={2} stroke="black" x1={0} x2={50} y1={yScale(selectedDataRange[1])} y2={yScale(selectedDataRange[1])}></line>
+            <line strokeWidth={2} stroke="black" x1={0} x2={0} y1={yScale(selectedDataRange[1])} y2={yScale(selectedDataRange[0])}></line>
+            <line strokeWidth={2} stroke="black" x1={50} x2={50} y1={yScale(selectedDataRange[1])} y2={yScale(selectedDataRange[0])}></line>
+
+            <path fill={'black'} opacity="0.2" d={`M${margin.left}, ${yScale(selectedDataRange[1])} L ${width + 20 + 33}, ${margin.top} L ${width + 20 + 33}, ${height - margin.bottom} L ${margin.left}, ${yScale(selectedDataRange[0])}`}></path>
         </svg>
     );
 

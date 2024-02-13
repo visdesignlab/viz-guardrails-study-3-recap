@@ -826,7 +826,7 @@
                 "allow_time_slider": true,
                 "x_var": "Date",
                 "y_var": "Value",
-                "cat_var": "name",
+                "cat_var": "Stock",
                 "group_var": "industry",
                 "guardrail": "none"
             },
@@ -845,40 +845,7 @@
    "sequence": {
         "order": "fixed",
         "components": [
-            "introduction",
-            "consent",
-            {
-                "order": "latinSquare",
-                "numSamples": 1,
-                "components": [
-                    {
-                        "order": "fixed",
-                        "components": [
-                            "introduction1",
-                            {
-                                "order": "latinSquare",
-                                "components": [
-                                    "stock a-n",
-                                    "stock a-sd"
-                                ]
-                            }
-                        ]
-                    },
-                    {
-                        "order": "fixed",
-                        "components": [
-                            "introduction2",
-                            {
-                                "order": "latinSquare",
-                                "components": [
-                                    "viral a-n",
-                                    "viral a-sd"
-                                ]
-                            }
-                        ]
-                    },
-                ]
-            }
+            "exploration"
         ]
     }
 }
