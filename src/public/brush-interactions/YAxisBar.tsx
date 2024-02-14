@@ -26,7 +26,7 @@ export function YAxisBar({
       return length > max ? length : max;
     }, 0);
 
-    return maxLabelLength > 10 ? 60 : maxLabelLength * 6;
+    return maxLabelLength > 20 ? 120 : maxLabelLength * 6;
   }, [ticks]);
 
   return (
@@ -62,7 +62,7 @@ export function YAxisBar({
           >
             <foreignObject width={labelSpacing} height={20}>
               <Group style={{ width: '100%', height: '100%' }} position="right">
-                <Text sx={{ textOverflow: 'ellipsis', overflow: 'hidden' }} size={10}>
+                <Text lineClamp={1} sx={{ textOverflow: 'ellipsis', overflow: 'hidden' }} size={10}>
                   {value}
                 </Text>
               </Group>

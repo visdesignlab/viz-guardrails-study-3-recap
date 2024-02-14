@@ -1,4 +1,4 @@
-import { Suspense } from 'react';
+import { Suspense, useCallback } from 'react';
 import { ModuleNamespace } from 'vite/types/hot';
 import { ReactComponent } from '../parser/types';
 import { useCurrentStep } from '../routes';
@@ -18,7 +18,8 @@ function ReactComponentController({ currentConfig, provState }: { currentConfig:
 
   const storeDispatch = useStoreDispatch();
   const { updateResponseBlockValidation, setIframeAnswers } = useStoreActions();
-  function setAnswer({ status, provenanceGraph, answers }: Parameters<StimulusParams<unknown, unknown>['setAnswer']>[0]) {
+
+  const setAnswer = useCallback(({ status, provenanceGraph, answers }: Parameters<StimulusParams<unknown, unknown>['setAnswer']>[0]) => {
     storeDispatch(updateResponseBlockValidation({
       location: 'sidebar',
       currentStep,
@@ -30,7 +31,7 @@ function ReactComponentController({ currentConfig, provState }: { currentConfig:
     storeDispatch(setIframeAnswers(
       Object.values(answers).map((value) => value),
     ));
-  }
+  }, [storeDispatch, currentStep]);
 
   return (
     <Suspense fallback={<div>Loading...</div>}>

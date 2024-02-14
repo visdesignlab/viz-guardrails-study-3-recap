@@ -436,6 +436,118 @@
                 }
             ]
         },
+        "happinessSimple1": {
+            "baseComponent": "scatterPlot",
+            "instruction": "Which region seems to be the most happy?",
+            "parameters": {
+                "dataset": "happiness",
+                "x": "Freedom_To_Make_Life_Choices",
+                "y": "Life_Ladder",
+                "category": "Regional_Indicator",
+                "ids": "Country_Name",
+                "brushType": "Paintbrush Selection",
+                "year": 2020
+            },
+            "response": []
+        },
+        "happinessSimple2": {
+            "baseComponent": "scatterPlot",
+            "instruction": "Which region believes it has the most freedom to make life choices?",
+            "parameters": {
+                "dataset": "happiness",
+                "x": "Freedom_To_Make_Life_Choices",
+                "y": "Life_Ladder",
+                "category": "Regional_Indicator",
+                "ids": "Country_Name",
+                "brushType": "Paintbrush Selection",
+                "year": 2020
+            },
+            "response": []
+        },
+        "happinessSimple3": {
+            "baseComponent": "scatterPlot",
+            "instruction": "Of countries with a Log GDP Per Capita above 10, which one has the highest perception of corruption",
+            "parameters": {
+                "dataset": "happiness",
+                "x": "Freedom_To_Make_Life_Choices",
+                "y": "Life_Ladder",
+                "category": "Regional_Indicator",
+                "ids": "Country_Name",
+                "brushType": "Paintbrush Selection",
+                "year": 2020
+            },
+            "response": []
+        },
+        "happinessSimple4": {
+            "baseComponent": "scatterPlot",
+            "instruction": "Which columns in the dataset are the most correlated?",
+            "parameters": {
+                "dataset": "happiness",
+                "x": "Freedom_To_Make_Life_Choices",
+                "y": "Life_Ladder",
+                "category": "Regional_Indicator",
+                "ids": "Country_Name",
+                "brushType": "Paintbrush Selection",
+                "year": 2020
+            },
+            "response": []
+        },
+        "happinessComplex1": {
+            "baseComponent": "scatterPlot",
+            "instruction": "Find a country you’re knowledgable of or interested in, and explore the data for that country. Does anything standout or surprise you?",
+            "parameters": {
+                "dataset": "happiness",
+                "x": "Freedom_To_Make_Life_Choices",
+                "y": "Life_Ladder",
+                "category": "Regional_Indicator",
+                "ids": "Country_Name",
+                "brushType": "Paintbrush Selection",
+                "year": 2020
+            },
+            "response": []
+        },
+        "happinessComplex2": {
+            "baseComponent": "scatterPlot",
+            "instruction": "These values are found by randomly selecting 1000 people from each country each year, and created by the polling company Gallup. Knowing this, do you trust this data?",
+            "parameters": {
+                "dataset": "happiness",
+                "x": "Freedom_To_Make_Life_Choices",
+                "y": "Life_Ladder",
+                "category": "Regional_Indicator",
+                "ids": "Country_Name",
+                "brushType": "Paintbrush Selection",
+                "year": 2020
+            },
+            "response": []
+        },
+        "happinessComplex3": {
+            "baseComponent": "scatterPlot",
+            "instruction": "Does generosity impact other measures of happiness?",
+            "parameters": {
+                "dataset": "happiness",
+                "x": "Freedom_To_Make_Life_Choices",
+                "y": "Life_Ladder",
+                "category": "Regional_Indicator",
+                "ids": "Country_Name",
+                "brushType": "Paintbrush Selection",
+                "year": 2020
+            },
+            "response": []
+        },
+        "happinessComplex4": {
+            "baseComponent": "scatterPlot",
+            "instruction": "According to the dataset, how important does social support seem to be to other categories, such as Freedom to make life choices, Perceptions of corruption, and Life Ladder?",
+            "parameters": {
+                "dataset": "happiness",
+                "x": "Freedom_To_Make_Life_Choices",
+                "y": "Life_Ladder",
+                "category": "Regional_Indicator",
+                "ids": "Country_Name",
+                "brushType": "Paintbrush Selection",
+                "year": 2020
+            },
+            "response": []
+        },
         "post-study-survey": {
             "type": "questionnaire",
             "response": [
@@ -527,16 +639,16 @@
             "consent",
             "tutorial",
             {
-                "order": "random",
+                "order": "fixed",
                 "components": [
-                    "paintBrush_q1",
-                    "paintBrush_q2",
-                    "rectangleBrush_q1",
-                    "rectangleBrush_q2",
-                    "axisBrush_q1",
-                    "axisBrush_q2",
-                    "sliderBrush_q1",
-                    "sliderBrush_q2"
+                    "happinessSimple1",
+                    "happinessSimple2",
+                    "happinessSimple3",
+                    "happinessSimple4",
+                    "happinessComplex1",
+                    "happinessComplex2",
+                    "happinessComplex3",
+                    "happinessComplex4"
                 ]
             },
             "post-study-survey",

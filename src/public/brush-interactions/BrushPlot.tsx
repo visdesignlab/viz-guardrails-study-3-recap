@@ -1,31 +1,38 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { Loader, Stack } from '@mantine/core';
+import {
+  Box, Button, Center, Group, Loader, SegmentedControl, Stack,
+} from '@mantine/core';
 import {
   useCallback, useEffect, useMemo, useState,
 } from 'react';
 import { from, escape } from 'arquero';
 import ColumnTable from 'arquero/dist/types/table/column-table';
 import { Registry, initializeTrrack } from '@trrack/core';
-
 import * as d3 from 'd3';
 import debounce from 'lodash.debounce';
 import { Scatter } from './Scatter';
 import { Bar } from './Bar';
 import { StimulusParams } from '../../store/types';
 import { BrushParams, BrushState, SelectionType } from './types';
+import { AddPlot } from './AddPlot';
 
 export function BrushPlot({ parameters, setAnswer }: StimulusParams<BrushParams>) {
   const [filteredTable, setFilteredTable] = useState<ColumnTable | null>(null);
-  const [brushState, setBrushState] = useState<BrushState>({
-    hasBrush: false, x1: 0, y1: 0, x2: 0, y2: 0, ids: [],
+  const [brushState, setBrushState] = useState<{ [n: number] : BrushState, selection: string[] }>({
+    0: {
+      hasBrush: false, x1: 0, y1: 0, x2: 0, y2: 0, xCol: parameters.x, yCol: parameters.y, id: 0,
+    },
+    selection: [],
   });
+
+  const [isPaintbrushSelect, setIsPaintbrushSelect] = useState<boolean>(true);
 
   const [data, setData] = useState<any[] | null>(null);
 
   // load data
   useEffect(() => {
-    d3.csv(`./data/${parameters.dataset}.csv`).then((_data) => {
+    d3.csv(`/public/brush-interactions/data/${parameters.dataset}.csv`).then((_data) => {
       setData(_data);
     });
   }, [parameters]);
@@ -36,7 +43,7 @@ export function BrushPlot({ parameters, setAnswer }: StimulusParams<BrushParams>
     }
 
     return null;
-  }, [data]);
+  }, [data, parameters.year]);
 
   // creating provenance tracking
   const { actions, trrack } = useMemo(() => {
@@ -88,22 +95,30 @@ export function BrushPlot({ parameters, setAnswer }: StimulusParams<BrushParams>
     } else if (selType === 'handle') {
       trrack.apply('Brush', actions.brush(state));
     }
+
+    setAnswer({
+      status: true,
+      provenanceGraph: trrack.graph.backend,
+      answers: {},
+    });
   }, [actions, trrack]);
 
   // debouncing the trrack callback
   const debouncedCallback = useMemo(() => debounce(moveBrushCallback, 100, { maxWait: 100 }), [moveBrushCallback]);
 
   // brush callback, updating state, finding the selected points, and pushing to trrack
-  const brushedSpaceCallback = useCallback((sel: [[number | null, number | null], [number | null, number | null]], xScale: any, yScale: any, selType: SelectionType, ids?: string[]) => {
+  const brushedSpaceCallback = useCallback((sel: [[number | null, number | null], [number | null, number | null]], xScale: any, yScale: any, selType: SelectionType, id: number, ids?: string[]) => {
     if (!xScale || !yScale) {
       return;
     }
 
-    const xMin = xScale.invert(sel[0][0] || brushState.x1);
-    const xMax = xScale.invert(sel[1][0] || brushState.x2);
+    const currBrush = brushState[id];
 
-    const yMin = yScale.invert(sel[1][1] || brushState.y2);
-    const yMax = yScale.invert(sel[0][1] || brushState.y1);
+    const xMin = xScale.invert(sel[0][0] || currBrush.x1);
+    const xMax = xScale.invert(sel[1][0] || currBrush.x2);
+
+    const yMin = yScale.invert(sel[1][1] || currBrush.y2);
+    const yMax = yScale.invert(sel[0][1] || currBrush.y1);
 
     let _filteredTable = null;
     if (selType === 'clear') {
@@ -118,10 +133,12 @@ export function BrushPlot({ parameters, setAnswer }: StimulusParams<BrushParams>
     }
 
     const newState = {
-      x1: sel[0][0] || brushState?.x1 || 0, x2: sel[1][0] || brushState?.x2 || 0, y1: sel[0][1] || brushState?.y1 || 0, y2: sel[1][1] || brushState?.y2 || 0, hasBrush: selType !== 'clear', ids: selType !== 'clear' ? _filteredTable?.array('id') : [],
+      xCol: currBrush.xCol, yCol: currBrush.yCol, x1: sel[0][0] || currBrush?.x1 || 0, x2: sel[1][0] || currBrush?.x2 || 0, y1: sel[0][1] || currBrush?.y1 || 0, y2: sel[1][1] || currBrush?.y2 || 0, hasBrush: selType !== 'clear', id,
     };
 
-    setBrushState(newState);
+    const newSelection = selType !== 'clear' ? _filteredTable?.array(parameters.ids) : [];
+
+    setBrushState({ ...brushState, [id]: newState, selection: newSelection });
 
     if (selType === 'drag' || selType === 'handle') {
       debouncedCallback(selType, newState);
@@ -130,12 +147,6 @@ export function BrushPlot({ parameters, setAnswer }: StimulusParams<BrushParams>
     }
 
     setFilteredTable(_filteredTable);
-
-    setAnswer({
-      status: true,
-      provenanceGraph: trrack.graph.backend,
-      answers: {},
-    });
   }, [brushState, fullTable, parameters, trrack, setAnswer, debouncedCallback, actions]);
 
   // Which table the bar chart uses, either the base or the filtered table if any selections
@@ -153,10 +164,81 @@ export function BrushPlot({ parameters, setAnswer }: StimulusParams<BrushParams>
     setFilteredTable(c);
   }, []);
 
+  const dataForScatter = useMemo(() => fullTable?.objects() || [], [fullTable]);
+
   return data ? (
     <Stack spacing="xs">
-      <Scatter brushedPoints={brushState?.ids} data={data} params={parameters} brushType={parameters.brushType} setBrushedSpace={brushedSpaceCallback} brushState={brushState} setFilteredTable={filteredCallback} />
-      <Bar data={data} parameters={parameters} barsTable={barsTable} />
+      <Group>
+        <Button
+          ml={60}
+          compact
+          style={{ width: '130px' }}
+          disabled={brushState.selection.length === 0}
+          onClick={() => {
+            setFilteredTable(null);
+            setBrushState({ ...brushState, selection: [] });
+          }}
+        >
+          Clear Selection
+        </Button>
+        { parameters.brushType === 'Paintbrush Selection'
+          ? (
+            <SegmentedControl
+              defaultChecked
+              value={isPaintbrushSelect ? 'Select' : 'De-Select'}
+              onChange={(val) => setIsPaintbrushSelect(val === 'Select')}
+              data={[
+                { label: 'Select', value: 'Select' },
+                { label: 'De-Select', value: 'De-Select', disabled: brushState.selection.length === 0 },
+              ]}
+            />
+          ) : null}
+      </Group>
+      <Group>
+        {Object.entries(brushState).map((entry) => {
+          const [index, state] = entry;
+
+          if (index === 'selection') {
+            return null;
+          }
+
+          return (
+            <Scatter
+              onClose={(id: number) => {
+                const { [id]: _, ...newState } = brushState;
+                setBrushState(newState);
+              }}
+              key={index}
+              brushedPoints={brushState.selection}
+              data={dataForScatter}
+              initialParams={{ ...parameters, x: state.xCol, y: state.yCol }}
+              brushType={parameters.brushType}
+              setBrushedSpace={brushedSpaceCallback}
+              brushState={state}
+              isPaintbrushSelect={isPaintbrushSelect}
+              setFilteredTable={filteredCallback}
+            />
+          );
+        })}
+        {/* <Scatter setParams={setParameters} brushedPoints={brushState?.ids} data={fullTable?.objects() || []} params={parameters} brushType={parameters.brushType} setBrushedSpace={brushedSpaceCallback} brushState={brushState} setFilteredTable={filteredCallback} /> */}
+        <Box style={{ width: '400px' }}>
+          <Center>
+            <AddPlot
+              columns={Object.keys(data[0])}
+              onAdd={(xCol, yCol) => {
+                setBrushState({
+                  ...brushState,
+                  [Object.keys(brushState).length]: {
+                    hasBrush: false, x1: 0, y1: 0, x2: 0, y2: 0, xCol, yCol, id: Object.keys(brushState).length,
+                  },
+                });
+              }}
+            />
+          </Center>
+        </Box>
+      </Group>
+
+      <Bar data={dataForScatter} parameters={parameters} barsTable={barsTable} />
     </Stack>
   ) : <Loader />;
 }

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
-  Box, Button, Center, Group, Stack, Text,
+  Box, Button, Center, Divider, Group, Loader, ScrollArea, Stack, Text,
 } from '@mantine/core';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import {
@@ -34,6 +34,14 @@ export interface TranscribedAudio {
 function getParticipantData(trrackId: string | undefined, storageEngine: StorageEngine | undefined) {
   if (storageEngine) {
     return storageEngine.getParticipantData(trrackId);
+  }
+
+  return null;
+}
+
+function getAllParticipantsData(storageEngine: StorageEngine | undefined) {
+  if (storageEngine) {
+    return storageEngine.getAllParticipantsData();
   }
 
   return null;
@@ -78,6 +86,8 @@ export function Analysis({ setProvState } : {setProvState: (state: any) => void}
   const [transcription, setTranscription] = useState<TranscribedAudio | null>(null);
   const [currentShownTranscription, setCurrentShownTranscription] = useState<number | null>(null);
   const { value: participant, status } = useAsync(getParticipantData, [trrackId, storageEngine]);
+
+  const { value: allParts, status: allPartsStatus } = useAsync(getAllParticipantsData, [storageEngine]);
 
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [playTime, setPlayTime] = useState<number>(0);
@@ -188,7 +198,7 @@ export function Analysis({ setProvState } : {setProvState: (state: any) => void}
     const externalWindow = window.open(
       'about:blank',
       'newWin',
-      `width=2000,height=700,left=${window.screen.availWidth / 3
+      `width=2000,height=400,left=${window.screen.availWidth / 3
                 - 200},top=${window.screen.availHeight / 3 - 150}`,
     )!;
 
@@ -201,29 +211,52 @@ export function Analysis({ setProvState } : {setProvState: (state: any) => void}
   }, []);
 
   const children = useMemo(() => (
-    <Stack ref={ref} style={{ width: '100%' }} spacing={0}>
-      {status === 'success' && participant ? <AllTasksTimeline selectedTask={selectedTask} setSelectedTask={setSelectedTask} participantData={participant} width={width} height={200} /> : null}
-      {status === 'success' && participant ? <SingleTaskTimeline setSelectedTask={setSelectedTask} playTime={playTime} setPlayTime={_setPlayTime} isPlaying={isPlaying} setIsPlaying={_setIsPlaying} currentNode={currentNode} setCurrentNode={setCurrentNode} selectedTask={selectedTask} participantData={participant} width={width} height={50} /> : null}
-      <Box ref={waveSurferDiv} style={{ width: '100%' }}>
+    <Group noWrap spacing={25}>
+      <Stack ref={ref} style={{ width: '100%' }} spacing={25}>
+        {status === 'success' && participant ? <AllTasksTimeline selectedTask={selectedTask} setSelectedTask={setSelectedTask} participantData={participant} width={width} height={200} /> : <Center style={{ height: '275px' }}><Loader /></Center>}
+        {status === 'success' && participant ? <SingleTaskTimeline setSelectedTask={setSelectedTask} playTime={playTime} setPlayTime={_setPlayTime} isPlaying={isPlaying} setIsPlaying={_setIsPlaying} currentNode={currentNode} setCurrentNode={setCurrentNode} selectedTask={selectedTask} participantData={participant} width={width} height={50} /> : null}
+        {/* <Box ref={waveSurferDiv} style={{ width: '100%' }}>
 
-        <WaveSurferContext.Provider value={wavesurfer}>
-          <WaveForm id="waveform" />
-        </WaveSurferContext.Provider>
-      </Box>
-      <Group style={{ width: '100%', height: '100px' }} align="center" position="center">
-        <Center>
-          <Text color="dimmed" size={20} style={{ width: '100%' }}>
-            {transcription && currentShownTranscription !== null ? transcription.results[currentShownTranscription].alternatives[0].transcript : ''}
-          </Text>
-        </Center>
-      </Group>
-      <Group>
-        <Button onClick={() => _setIsPlaying(true)}>Play</Button>
-        <Button onClick={() => _setIsPlaying(false)}>Pause</Button>
-        <Text>{new Date(playTime).toLocaleString()}</Text>
-      </Group>
-    </Stack>
-  ), [_setIsPlaying, _setPlayTime, currentNode, currentShownTranscription, isPlaying, participant, playTime, ref, selectedTask, status, transcription, wavesurfer, width]);
+          <WaveSurferContext.Provider value={wavesurfer}>
+            <WaveForm id="waveform" />
+          </WaveSurferContext.Provider>
+        </Box>
+        <Group style={{ width: '100%', height: '100px' }} align="center" position="center">
+          <Center>
+            <Text color="dimmed" size={20} style={{ width: '100%' }}>
+              {transcription && currentShownTranscription !== null ? transcription.results[currentShownTranscription].alternatives[0].transcript : ''}
+            </Text>
+          </Center>
+        </Group> */}
+        <Group>
+          <Button onClick={() => _setIsPlaying(true)}>Play</Button>
+          <Button onClick={() => _setIsPlaying(false)}>Pause</Button>
+          <Text>{new Date(playTime).toLocaleString()}</Text>
+        </Group>
+      </Stack>
+      <Divider orientation="vertical" ml={25} />
+      <Stack style={{ width: '300px', height: '100%' }}>
+        <ScrollArea h={380}>
+          <Stack>
+            {allPartsStatus === 'success' && allParts ? allParts.map((part) => (
+              <Text
+                onClick={() => {
+                  const splitArr = location.pathname.split('/');
+                  splitArr[splitArr.length - 2] = part.participantId;
+                  navigate(splitArr.join('/'));
+                }}
+                color={trrackId === part.participantId ? 'cornflowerblue' : 'dimmed'}
+                key={part.participantId}
+                style={{ cursor: 'pointer' }}
+              >
+                {part.participantId}
+              </Text>
+            )) : null}
+          </Stack>
+        </ScrollArea>
+      </Stack>
+    </Group>
+  ), [_setIsPlaying, _setPlayTime, currentNode, currentShownTranscription, isPlaying, participant, playTime, ref, selectedTask, status, transcription, wavesurfer, width, allParts, allPartsStatus]);
 
   return (
     <div>
