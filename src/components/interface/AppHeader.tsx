@@ -50,7 +50,7 @@ export default function AppHeader() {
   const studyId = useStudyId();
   const studyHref = useHref(`/${studyId}`);
   function getNewParticipant() {
-    storageEngine?.nextParticipant()
+    storageEngine?.nextParticipant(studyConfig)
       .then(() => {
         window.location.href = studyHref;
       })
