@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
-  Box, Button, Center, Divider, Group, Loader, ScrollArea, Stack, Text,
+  Box, Button, Center, Divider, Group, Loader, Popover, ScrollArea, Stack, Text, TextInput,
 } from '@mantine/core';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import {
@@ -11,6 +11,7 @@ import { Registry, initializeTrrack } from '@trrack/core';
 import { WaveForm, useWavesurfer } from 'wavesurfer-react';
 import WaveSurferContext from 'wavesurfer-react/dist/contexts/WaveSurferContext';
 import { createPortal } from 'react-dom';
+import * as icons from '@tabler/icons-react';
 import { useStorageEngine } from '../../../store/storageEngineHooks';
 import { useAsync } from '../../../store/hooks/useAsync';
 import { StorageEngine } from '../../../storage/engines/StorageEngine';
@@ -19,6 +20,7 @@ import { SingleTaskTimeline } from './SingleTaskTimeline';
 
 import { deepCopy } from '../../../utils/deepCopy';
 import { useEvent } from '../../../store/hooks/useEvent';
+import { AudioTag } from '../../../store/types';
 
 // import WaveSurfer from 'wavesurfer.js';
 
@@ -47,6 +49,14 @@ function getAllParticipantsData(storageEngine: StorageEngine | undefined) {
   return null;
 }
 
+function getAudioTags(storageEngine: StorageEngine | undefined) {
+  if (storageEngine) {
+    return storageEngine.getAudioTags();
+  }
+
+  return null;
+}
+
 function copyStyles(sourceDoc: any, targetDoc: any) {
   Array.from(sourceDoc.styleSheets).forEach((styleSheet: any) => {
     if (styleSheet.cssRules) { // for <style> elements
@@ -68,6 +78,71 @@ function copyStyles(sourceDoc: any, targetDoc: any) {
   });
 }
 
+const exampleTags = [{
+  name: 'Plan of Action',
+  icon: '24Hours',
+},
+{
+  name: 'Representation Comment',
+  icon: '24Hours',
+},
+{
+  name: 'Data Size',
+  icon: '24Hours',
+},
+{
+  name: 'Missing Data',
+  icon: '24Hours',
+},
+{
+  name: 'Data Orientation',
+  icon: '24Hours',
+},
+{
+  name: 'Variable Metadata',
+  icon: '24Hours',
+},
+{
+  name: 'Data Provenance',
+  icon: '24Hours',
+},
+{
+  name: 'Distribution Range',
+  icon: '24Hours',
+},
+{
+  name: 'Distribution Shape',
+  icon: '24Hours',
+},
+{
+  name: 'Distribution Outlier',
+  icon: '24Hours',
+},
+{
+  name: 'Strength and Direction',
+  icon: '24Hours',
+},
+{
+  name: 'Relationship Presence',
+  icon: '24Hours',
+},
+{
+  name: 'Relationship Form',
+  icon: '24Hours',
+},
+{
+  name: 'Relationship Subgroups',
+  icon: '24Hours',
+},
+{
+  name: 'Range Constriction',
+  icon: '24Hours',
+},
+{
+  name: 'Relationship Outlier',
+  icon: '24Hours',
+}];
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function Analysis({ setProvState } : {setProvState: (state: any) => void}) {
   const { trrackId, trialName, studyId } = useParams();
@@ -75,7 +150,6 @@ export function Analysis({ setProvState } : {setProvState: (state: any) => void}
   const navigate = useNavigate();
 
   const location = useLocation();
-
   const { storageEngine } = useStorageEngine();
 
   const [ref, { width }] = useResizeObserver();
@@ -89,8 +163,12 @@ export function Analysis({ setProvState } : {setProvState: (state: any) => void}
 
   const { value: allParts, status: allPartsStatus } = useAsync(getAllParticipantsData, [storageEngine]);
 
+  const { value: audioTags, status: audioTagsStatus, execute: refetchTags } = useAsync(getAudioTags, [storageEngine]);
+
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [playTime, setPlayTime] = useState<number>(0);
+
+  const [addedTag, setAddedTag] = useState<AudioTag>({ name: 'temp', icon: 'temp' });
 
   useEffect(() => {
     if (selectedTask) {
@@ -255,8 +333,34 @@ export function Analysis({ setProvState } : {setProvState: (state: any) => void}
           </Stack>
         </ScrollArea>
       </Stack>
+
+      <Divider orientation="vertical" ml={25} />
+      <Stack style={{ width: '300px', height: '100%' }}>
+        <ScrollArea h={380}>
+          <Stack>
+            <Popover width={300} trapFocus position="bottom" withArrow shadow="md">
+              <Popover.Target>
+                <Button>Toggle popover</Button>
+              </Popover.Target>
+              <Popover.Dropdown>
+                <TextInput value={addedTag.name} onChange={(event) => setAddedTag({ ...addedTag, name: event.currentTarget.value })} label="Name" placeholder="Name" size="xs" />
+                <TextInput value={addedTag.icon} onChange={(event) => setAddedTag({ ...addedTag, icon: event.currentTarget.value })} label="Icon" placeholder="icon" size="xs" mt="xs" />
+                <Button onClick={() => storageEngine?.saveAudioTags([...audioTags, addedTag]).then(() => refetchTags(storageEngine))} />
+              </Popover.Dropdown>
+            </Popover>
+            {audioTags ? audioTags.map((tag) => (
+              <Group key={tag.name}>
+                {icons[`Icon${tag.icon}`]?.render({ color: 'gray' })}
+                <Text key={tag.name}>
+                  {tag.name}
+                </Text>
+              </Group>
+            )) : null}
+          </Stack>
+        </ScrollArea>
+      </Stack>
     </Group>
-  ), [_setIsPlaying, _setPlayTime, currentNode, currentShownTranscription, isPlaying, participant, playTime, ref, selectedTask, status, transcription, wavesurfer, width, allParts, allPartsStatus]);
+  ), [_setIsPlaying, _setPlayTime, currentNode, currentShownTranscription, isPlaying, participant, playTime, ref, selectedTask, status, transcription, wavesurfer, width, allParts, allPartsStatus, addedTag, storageEngine]);
 
   return (
     <div>

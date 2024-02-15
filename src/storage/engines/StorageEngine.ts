@@ -1,4 +1,4 @@
-import { StoredAnswer } from '../../store/types';
+import { AudioTag, StoredAnswer } from '../../store/types';
 import { ParticipantData } from '../types';
 
 export abstract class StorageEngine {
@@ -31,6 +31,10 @@ export abstract class StorageEngine {
   abstract clearCurrentParticipantId(): Promise<void>;
 
   abstract saveAnswer(currentStep: string, answer: StoredAnswer): Promise<void>;
+
+  abstract saveAudioTags(tags: AudioTag[]): Promise<void>;
+
+  abstract getAudioTags(): Promise<AudioTag[]>;
 
   abstract setSequenceArray(latinSquare: string[][]): Promise<void>;
 

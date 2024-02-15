@@ -17,6 +17,8 @@ type VisibilityEvent = [number, 'visibility', string];
 export type EventType = MouseMoveEvent | MouseDownEvent | MouseUpEvent | KeypressEvent | ScrollEvent | FocusEvent | InputEvent | ResizeEvent | VisibilityEvent;
 
 export type ValidationStatus = { valid: boolean, values: object }
+
+export type AudioTag = { name: string, icon: string }
 export type TrialValidation = Record<
   string,
   {

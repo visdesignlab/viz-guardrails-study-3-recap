@@ -11,7 +11,9 @@ import { getAuth, signInAnonymously } from '@firebase/auth';
 import localforage from 'localforage';
 import { StorageEngine } from './StorageEngine';
 import { ParticipantData } from '../types';
-import { EventType, StoredAnswer, TrrackedProvenance } from '../../store/types';
+import {
+  AudioTag, EventType, StoredAnswer, TrrackedProvenance,
+} from '../../store/types';
 
 export class FirebaseStorageEngine extends StorageEngine {
   private RECAPTCHAV3TOKEN = '6LdjOd0lAAAAAASvFfDZFWgtbzFSS9Y3so8rHJth';
@@ -183,6 +185,28 @@ export class FirebaseStorageEngine extends StorageEngine {
 
     this.localWindowEvents[currentStep] = answer.windowEvents;
     await this._pushToFirebaseStorage('windowEvents');
+  }
+
+  async saveAudioTags(tags: AudioTag[]) {
+    if (!this._verifyStudyDatabase(this.studyCollection)) {
+      throw new Error('Study database not initialized');
+    }
+
+    // Get the participant doc
+    const tagsDoc = doc(this.studyCollection, 'audioTags');
+
+    await setDoc(tagsDoc, { audioTags: tags });
+  }
+
+  async getAudioTags() {
+    if (this.studyCollection) {
+      const tagDoc = doc(this.studyCollection, 'audioTags');
+      const tags = (await getDoc(tagDoc)).data()?.audioTags as AudioTag[] | null;
+
+      return tags || [];
+    }
+
+    return [];
   }
 
   async saveAudio(
