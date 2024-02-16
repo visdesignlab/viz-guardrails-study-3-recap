@@ -1,5 +1,5 @@
 import { StudyConfig } from '../../parser/types';
-import { AudioTag, StoredAnswer } from '../../store/types';
+import { AudioTag, StoredAnswer, TextTag } from '../../store/types';
 import { ParticipantData } from '../types';
 
 export abstract class StorageEngine {
@@ -35,7 +35,11 @@ export abstract class StorageEngine {
 
   abstract saveAudioTags(tags: AudioTag[]): Promise<void>;
 
+  abstract saveTextTags(participantId: string, tags: TextTag[]): Promise<void>;
+
   abstract getAudioTags(): Promise<AudioTag[]>;
+
+  abstract getTextTags(participantId: string): Promise<TextTag[]>;
 
   abstract setSequenceArray(latinSquare: string[][]): Promise<void>;
 

@@ -12,7 +12,7 @@ import localforage from 'localforage';
 import { StorageEngine } from './StorageEngine';
 import { ParticipantData } from '../types';
 import {
-  AudioTag, EventType, StoredAnswer, TrrackedProvenance,
+  AudioTag, EventType, StoredAnswer, TextTag, TrrackedProvenance,
 } from '../../store/types';
 import { hash } from './utils';
 import { StudyConfig } from '../../parser/types';
@@ -219,6 +219,28 @@ export class FirebaseStorageEngine extends StorageEngine {
     return [];
   }
 
+  async saveTextTags(participantId: string, tags: TextTag[]) {
+    if (!this._verifyStudyDatabase(this.studyCollection)) {
+      throw new Error('Study database not initialized');
+    }
+
+    // Get the participant doc
+    const tagsDoc = doc(this.studyCollection, participantId);
+
+    await setDoc(tagsDoc, { textTags: tags }, { merge: true });
+  }
+
+  async getTextTags(participantId: string) {
+    if (this.studyCollection) {
+      const tagDoc = doc(this.studyCollection, participantId, 'textTag');
+      const tags = (await getDoc(tagDoc)).data()?.textTags as TextTag[] | null;
+
+      return tags || [];
+    }
+
+    return [];
+  }
+
   async saveAudio(
     audioStream: MediaRecorder,
   ) {
@@ -347,7 +369,7 @@ export class FirebaseStorageEngine extends StorageEngine {
     // Iterate over the participants and add the provenance graph
     const participantPulls = participants.docs.map(async (participant) => {
       // Exclude the config doc and the sequenceArray doc
-      if (participant.id === 'config' || participant.id === 'sequenceArray') return;
+      if (participant.id === 'config' || participant.id === 'sequenceArray' || participant.id === 'audioTags') return;
 
       const participantDataItem = participant.data() as ParticipantData;
 

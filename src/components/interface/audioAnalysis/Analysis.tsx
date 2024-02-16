@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
-  Box, Button, Center, Divider, Group, Loader, Popover, ScrollArea, Stack, Text, TextInput,
+  Box, Button, Center, Divider, Group, Loader, Menu, Popover, ScrollArea, Stack, Text, TextInput,
 } from '@mantine/core';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import {
   useCallback, useEffect, useMemo, useRef, useState,
 } from 'react';
-import { useResizeObserver } from '@mantine/hooks';
+import { useResizeObserver, useTextSelection } from '@mantine/hooks';
 import { Registry, initializeTrrack } from '@trrack/core';
 import { WaveForm, useWavesurfer } from 'wavesurfer-react';
 import WaveSurferContext from 'wavesurfer-react/dist/contexts/WaveSurferContext';
@@ -52,6 +52,14 @@ function getAllParticipantsData(storageEngine: StorageEngine | undefined) {
 function getAudioTags(storageEngine: StorageEngine | undefined) {
   if (storageEngine) {
     return storageEngine.getAudioTags();
+  }
+
+  return null;
+}
+
+function getTextTags(participantId: string, storageEngine: StorageEngine | undefined) {
+  if (storageEngine) {
+    return storageEngine.getTextTags(participantId);
   }
 
   return null;
@@ -164,11 +172,14 @@ export function Analysis({ setProvState } : {setProvState: (state: any) => void}
   const { value: allParts, status: allPartsStatus } = useAsync(getAllParticipantsData, [storageEngine]);
 
   const { value: audioTags, status: audioTagsStatus, execute: refetchTags } = useAsync(getAudioTags, [storageEngine]);
+  const { value: textTags, status: textTagsStatus, execute: refetchTextTags } = useAsync(getTextTags, [trrackId || '', storageEngine]);
 
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [playTime, setPlayTime] = useState<number>(0);
 
   const [addedTag, setAddedTag] = useState<AudioTag>({ name: 'temp', icon: 'temp' });
+
+  const highlightedAudio = useTextSelection();
 
   useEffect(() => {
     if (selectedTask) {
@@ -293,7 +304,7 @@ export function Analysis({ setProvState } : {setProvState: (state: any) => void}
       <Stack ref={ref} style={{ width: '100%' }} spacing={25}>
         {status === 'success' && participant ? <AllTasksTimeline selectedTask={selectedTask} setSelectedTask={setSelectedTask} participantData={participant} width={width} height={200} /> : <Center style={{ height: '275px' }}><Loader /></Center>}
         {status === 'success' && participant ? <SingleTaskTimeline setSelectedTask={setSelectedTask} playTime={playTime} setPlayTime={_setPlayTime} isPlaying={isPlaying} setIsPlaying={_setIsPlaying} currentNode={currentNode} setCurrentNode={setCurrentNode} selectedTask={selectedTask} participantData={participant} width={width} height={50} /> : null}
-        {/* <Box ref={waveSurferDiv} style={{ width: '100%' }}>
+        <Box ref={waveSurferDiv} style={{ width: '100%' }}>
 
           <WaveSurferContext.Provider value={wavesurfer}>
             <WaveForm id="waveform" />
@@ -305,14 +316,38 @@ export function Analysis({ setProvState } : {setProvState: (state: any) => void}
               {transcription && currentShownTranscription !== null ? transcription.results[currentShownTranscription].alternatives[0].transcript : ''}
             </Text>
           </Center>
-        </Group> */}
+        </Group>
         <Group>
           <Button onClick={() => _setIsPlaying(true)}>Play</Button>
           <Button onClick={() => _setIsPlaying(false)}>Pause</Button>
           <Text>{new Date(playTime).toLocaleString()}</Text>
         </Group>
+
+        <Menu width={200} shadow="md" trigger="click">
+          <Menu.Target>
+            <div>{transcription?.results.map((res) => res.alternatives[0].transcript).join(' ')}</div>
+          </Menu.Target>
+
+          <Menu.Dropdown>
+            {audioTags ? audioTags.map((tag) => (
+              <Menu.Item
+                key={tag.name}
+                onClick={() => {
+                  storageEngine?.saveTextTags(trrackId, [...textTags || [], { tag, text: highlightedAudio?.toString() }]);
+                }}
+              >
+                <Group>
+                  {icons[`Icon${tag.icon}`]?.render({ color: 'gray' })}
+                  <Text key={tag.name}>
+                    {tag.name}
+                  </Text>
+                </Group>
+              </Menu.Item>
+            )) : null}
+          </Menu.Dropdown>
+        </Menu>
       </Stack>
-      <Divider orientation="vertical" ml={25} />
+      {/* <Divider orientation="vertical" ml={25} />
       <Stack style={{ width: '300px', height: '100%' }}>
         <ScrollArea h={380}>
           <Stack>
@@ -332,7 +367,7 @@ export function Analysis({ setProvState } : {setProvState: (state: any) => void}
             )) : null}
           </Stack>
         </ScrollArea>
-      </Stack>
+      </Stack> */}
 
       <Divider orientation="vertical" ml={25} />
       <Stack style={{ width: '300px', height: '100%' }}>

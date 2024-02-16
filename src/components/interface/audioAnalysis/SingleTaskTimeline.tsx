@@ -44,7 +44,7 @@ export function SingleTaskTimeline({
         setTaskIndex(taskIndex + 1);
         setSelectedTask(allTaskTimes[taskIndex + 1].name);
         setProvNodeIndex(0);
-      } else if (playTime + wholeXScale.domain()[0] > allTaskTimes[taskIndex].nodes[provNodeIndex + 1]?.time) {
+      } else if (playTime + wholeXScale.domain()[0] > allTaskTimes[taskIndex]?.nodes[provNodeIndex + 1]?.time) {
         setProvNodeIndex(provNodeIndex + 1);
         setCurrentNode(allTaskTimes[taskIndex].nodes[provNodeIndex + 1].name);
       }
