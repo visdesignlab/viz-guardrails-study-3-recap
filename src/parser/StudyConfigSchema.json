@@ -55,11 +55,11 @@
           "type": "array"
         },
         "paramCapture": {
-          "description": "Use to capture querystring parameters such as PROLIFIC_ID. See the examples for how this is used.",
+          "description": "Use to capture querystring parameters in answers such as participant_name. See the examples for how this is used, but prefer uiConfig.urlParticipantIdParam if you are capturing a participant ID.",
           "type": "string"
         },
         "prompt": {
-          "description": "The prompt that is displayed to the participant.",
+          "description": "The prompt that is displayed to the participant. You can use markdown here to render images, links, etc.",
           "type": "string"
         },
         "required": {
@@ -115,7 +115,7 @@
           "type": "array"
         },
         "paramCapture": {
-          "description": "Use to capture querystring parameters such as PROLIFIC_ID. See the examples for how this is used.",
+          "description": "Use to capture querystring parameters in answers such as participant_name. See the examples for how this is used, but prefer uiConfig.urlParticipantIdParam if you are capturing a participant ID.",
           "type": "string"
         },
         "placeholder": {
@@ -123,7 +123,7 @@
           "type": "string"
         },
         "prompt": {
-          "description": "The prompt that is displayed to the participant.",
+          "description": "The prompt that is displayed to the participant. You can use markdown here to render images, links, etc.",
           "type": "string"
         },
         "required": {
@@ -172,11 +172,11 @@
           "description": "Controls the response location. These might be the same for all responses, or differ across responses."
         },
         "paramCapture": {
-          "description": "Use to capture querystring parameters such as PROLIFIC_ID. See the examples for how this is used.",
+          "description": "Use to capture querystring parameters in answers such as participant_name. See the examples for how this is used, but prefer uiConfig.urlParticipantIdParam if you are capturing a participant ID.",
           "type": "string"
         },
         "prompt": {
-          "description": "The prompt that is displayed to the participant.",
+          "description": "The prompt that is displayed to the participant. You can use markdown here to render images, links, etc.",
           "type": "string"
         },
         "required": {
@@ -405,7 +405,7 @@
           "description": "Controls the response location. These might be the same for all responses, or differ across responses."
         },
         "paramCapture": {
-          "description": "Use to capture querystring parameters such as PROLIFIC_ID. See the examples for how this is used.",
+          "description": "Use to capture querystring parameters in answers such as participant_name. See the examples for how this is used, but prefer uiConfig.urlParticipantIdParam if you are capturing a participant ID.",
           "type": "string"
         },
         "preset": {
@@ -413,7 +413,7 @@
           "type": "number"
         },
         "prompt": {
-          "description": "The prompt that is displayed to the participant.",
+          "description": "The prompt that is displayed to the participant. You can use markdown here to render images, links, etc.",
           "type": "string"
         },
         "required": {
@@ -466,7 +466,7 @@
           "description": "Controls the response location. These might be the same for all responses, or differ across responses."
         },
         "paramCapture": {
-          "description": "Use to capture querystring parameters such as PROLIFIC_ID. See the examples for how this is used.",
+          "description": "Use to capture querystring parameters in answers such as participant_name. See the examples for how this is used, but prefer uiConfig.urlParticipantIdParam if you are capturing a participant ID.",
           "type": "string"
         },
         "placeholder": {
@@ -474,7 +474,7 @@
           "type": "string"
         },
         "prompt": {
-          "description": "The prompt that is displayed to the participant.",
+          "description": "The prompt that is displayed to the participant. You can use markdown here to render images, links, etc.",
           "type": "string"
         },
         "required": {
@@ -589,7 +589,7 @@
           "type": "number"
         },
         "paramCapture": {
-          "description": "Use to capture querystring parameters such as PROLIFIC_ID. See the examples for how this is used.",
+          "description": "Use to capture querystring parameters in answers such as participant_name. See the examples for how this is used, but prefer uiConfig.urlParticipantIdParam if you are capturing a participant ID.",
           "type": "string"
         },
         "placeholder": {
@@ -597,7 +597,7 @@
           "type": "string"
         },
         "prompt": {
-          "description": "The prompt that is displayed to the participant.",
+          "description": "The prompt that is displayed to the participant. You can use markdown here to render images, links, etc.",
           "type": "string"
         },
         "required": {
@@ -768,11 +768,11 @@
           "type": "array"
         },
         "paramCapture": {
-          "description": "Use to capture querystring parameters such as PROLIFIC_ID. See the examples for how this is used.",
+          "description": "Use to capture querystring parameters in answers such as participant_name. See the examples for how this is used, but prefer uiConfig.urlParticipantIdParam if you are capturing a participant ID.",
           "type": "string"
         },
         "prompt": {
-          "description": "The prompt that is displayed to the participant.",
+          "description": "The prompt that is displayed to the participant. You can use markdown here to render images, links, etc.",
           "type": "string"
         },
         "required": {
@@ -927,7 +927,7 @@
           "description": "Controls the response location. These might be the same for all responses, or differ across responses."
         },
         "paramCapture": {
-          "description": "Use to capture querystring parameters such as PROLIFIC_ID. See the examples for how this is used.",
+          "description": "Use to capture querystring parameters in answers such as participant_name. See the examples for how this is used, but prefer uiConfig.urlParticipantIdParam if you are capturing a participant ID.",
           "type": "string"
         },
         "placeholder": {
@@ -935,7 +935,7 @@
           "type": "string"
         },
         "prompt": {
-          "description": "The prompt that is displayed to the participant.",
+          "description": "The prompt that is displayed to the participant. You can use markdown here to render images, links, etc.",
           "type": "string"
         },
         "required": {
@@ -990,11 +990,11 @@
           "type": "array"
         },
         "paramCapture": {
-          "description": "Use to capture querystring parameters such as PROLIFIC_ID. See the examples for how this is used.",
+          "description": "Use to capture querystring parameters in answers such as participant_name. See the examples for how this is used, but prefer uiConfig.urlParticipantIdParam if you are capturing a participant ID.",
           "type": "string"
         },
         "prompt": {
-          "description": "The prompt that is displayed to the participant.",
+          "description": "The prompt that is displayed to the participant. You can use markdown here to render images, links, etc.",
           "type": "string"
         },
         "required": {
@@ -1025,7 +1025,7 @@
     },
     "StudyConfig": {
       "additionalProperties": false,
-      "description": "The StudyConfig interface is used to define the properties of a study configuration. These are the hjson files that live in the public folder. In our repo, one example of this would be public/cleveland/config-cleveland.hjson.",
+      "description": "The StudyConfig interface is used to define the properties of a study configuration. These are the hjson files that live in the public folder. In our repo, one example of this would be public/cleveland/config-cleveland.json.",
       "properties": {
         "$schema": {
           "description": "A required json schema property. This should point to the github link for the version of the schema you would like. See examples for more information",
@@ -1234,6 +1234,10 @@
         },
         "studyEndMsg": {
           "description": "The message to display when the study ends.",
+          "type": "string"
+        },
+        "urlParticipantIdParam": {
+          "description": "If the participant ID is passed in the URL, this is the name of the querystring parameter that is used to capture the participant ID (e.g. PROLIFIC_ID). This will allow a user to continue a study on different devices and browsers.",
           "type": "string"
         },
         "windowEventDebounceTime": {

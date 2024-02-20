@@ -1,6 +1,9 @@
-import { Slider, SliderProps, Stack, Text } from '@mantine/core';
+import {
+  Input, Slider, SliderProps,
+} from '@mantine/core';
 import { SliderResponse } from '../../parser/types';
 import { generateErrorMessage } from './utils';
+import ReactMarkdownWrapper from '../ReactMarkdownWrapper';
 
 type inputProps = {
   response: SliderResponse;
@@ -13,15 +16,16 @@ export default function SliderInput({
   disabled,
   answer,
 }: inputProps) {
-  const { prompt, options } = response;
-
+  const { prompt, required, options } = response;
 
   const errorMessage = generateErrorMessage(response, answer);
   return (
-    <Stack spacing={2}>
-      <Text fz={'md'} fw={500}>
-        {prompt}
-      </Text>
+    <Input.Wrapper
+      withAsterisk={required}
+      label={<ReactMarkdownWrapper text={prompt} />}
+      error={errorMessage}
+      size="md"
+    >
       <Slider
         disabled={disabled}
         labelAlwaysOn
@@ -65,7 +69,6 @@ export default function SliderInput({
           },
         })}
       />
-      {errorMessage ? <Text size={12} c={'#fa5252'}>{errorMessage}</Text> : null}
-    </Stack>
+    </Input.Wrapper>
   );
 }
