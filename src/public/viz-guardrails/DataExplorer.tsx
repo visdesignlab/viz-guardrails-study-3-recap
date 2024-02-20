@@ -24,6 +24,7 @@ export interface ChartParams {
     start_date: string,
     end_date: string,
     allow_time_slider: boolean,
+    allow_guardrail_selector: boolean,
     x_var: string,
     y_var: string,
     cat_var: string,
@@ -111,9 +112,11 @@ export function DataExplorer({ parameters, setAnswer }: StimulusParams<ChartPara
 
   return filteredData && items && range && selection ? (
     <Stack>
-      <Paper shadow="sm" radius="md" p="md" style={{ width: '500px' }}>
-        <Selector guardrail={guardrail} setGuardrail={setGuardrail} />
-      </Paper>
+      {parameters.allow_guardrail_selector ? (
+        <Paper shadow="sm" radius="md" p="md" style={{ width: '500px' }}>
+          <Selector guardrail={guardrail} setGuardrail={setGuardrail} />
+        </Paper>
+      ) : null}
       <Flex>
         <Paper shadow="md" radius="md" p="md" withBorder>
           <Group>
