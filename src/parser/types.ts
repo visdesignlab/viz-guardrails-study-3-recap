@@ -1,7 +1,7 @@
 /**
  * The GlobalConfig is used to generate the list of available studies in the UI.
  * This list is displayed on the landing page when running the app.
-*/ 
+*/
 export interface GlobalConfig {
   /** A required json schema property. This should point to the github link for the version of the schema you would like. See examples for more information */
   $schema: string;
@@ -17,7 +17,7 @@ export interface GlobalConfig {
   configsList: string[];
 }
 
-/** 
+/**
  * The StudyMetadata is used to describe certain properties of a study.
  * Some of this data is displayed on the landing page when running the app, such as the title and description.
  * This data is also included in the data file that is downloaded at the end of the study, to help identify the study and version.
@@ -61,6 +61,10 @@ export interface UIConfig {
   sidebar: boolean;
   /** Debounce time in milliseconds for automatically tracked window events. Defaults to 100. E.g 100 here means 1000ms / 100ms = 10 times a second, 200 here means 1000ms / 200ms = 5 times per second  */
   windowEventDebounceTime?: number;
+  /**
+   * If the participant ID is passed in the URL, this is the name of the querystring parameter that is used to capture the participant ID (e.g. PROLIFIC_ID). This will allow a user to continue a study on different devices and browsers.
+   */
+  urlParticipantIdParam?: string;
 }
 
 /**
@@ -76,6 +80,19 @@ export interface Option {
 }
 
 /**
+ * @ignore
+ */
+export const responseBlockLocations = [
+  'sidebar',
+  'aboveStimulus',
+  'belowStimulus',
+] as const;
+/**
+ * @ignore
+ */
+export type ResponseBlockLocation = (typeof responseBlockLocations)[number];
+
+/**
  * The BaseResponse interface is used to define the required fields for all responses.
  * Other Response interfaces inherit properties from the BaseResponse interface.
  * Therefore, all responses must include these properties.
@@ -83,7 +100,7 @@ export interface Option {
 export interface BaseResponse {
   /** The id of the response. This is used to identify the response in the data file. */
   id: string;
-  /** The prompt that is displayed to the participant. */
+  /** The prompt that is displayed to the participant. You can use markdown here to render images, links, etc. */
   prompt: string;
   /** Controls whether the response is required to be answered. */
   required: boolean;
@@ -95,7 +112,7 @@ export interface BaseResponse {
   requiredValue?: unknown;
   /** You can provide a required label, which makes it so a participant has to answer with a response that matches label. */
   requiredLabel?: string;
-  /** Use to capture querystring parameters such as PROLIFIC_ID. See the examples for how this is used. */
+  /** Use to capture querystring parameters in answers such as participant_name. See the examples for how this is used, but prefer uiConfig.urlParticipantIdParam if you are capturing a participant ID. */
   paramCapture?: string;
   /** Controls whether the response is hidden. */
   hidden?: boolean;
@@ -226,21 +243,8 @@ export interface Answer {
 }
 
 /**
- * @ignore
- */
-export const responseBlockLocations = [
-  'sidebar',
-  'aboveStimulus',
-  'belowStimulus',
-] as const;
-/**
- * @ignore
- */
-export type ResponseBlockLocation = (typeof responseBlockLocations)[number];
-
-/**
  * The BaseIndividualComponent interface is used to define the required fields for all components. The only exception is the ContainerComponent, which is used to group components together.
- * 
+ *
  * All components must include the response field, which is an array of Response interfaces.
  * There are additional optional fields that can be included in a component that help layout the task. These include the nextButtonText, nextButtonLocation, instructionLocation, correctAnswer.
  * There are other fields that can be included in a component that are used to identify the task in the admin panel. These include the meta, description, instruction, and title fields.
@@ -332,7 +336,7 @@ export interface OrderObject {
 export type InheritedComponent = (Partial<IndividualComponent> & { baseComponent: string })
 
 /**
- * The StudyConfig interface is used to define the properties of a study configuration. These are the hjson files that live in the public folder. In our repo, one example of this would be public/cleveland/config-cleveland.hjson. 
+ * The StudyConfig interface is used to define the properties of a study configuration. These are the hjson files that live in the public folder. In our repo, one example of this would be public/cleveland/config-cleveland.json.
  */
 export interface StudyConfig {
   /** A required json schema property. This should point to the github link for the version of the schema you would like. See examples for more information */

@@ -1,6 +1,7 @@
 import { TextInput } from '@mantine/core';
 import { ShortTextResponse } from '../../parser/types';
 import { generateErrorMessage } from './utils';
+import ReactMarkdownWrapper from '../ReactMarkdownWrapper';
 
 type inputProps = {
   response: ShortTextResponse;
@@ -16,19 +17,17 @@ export default function StringInput({
   const { placeholder, prompt, required } = response;
 
   return (
-    <>
-      <TextInput
-        disabled={disabled}
-        placeholder={placeholder}
-        label={prompt}
-        radius={'md'}
-        size={'md'}
-        withAsterisk={required}
-        {...answer}
+    <TextInput
+      disabled={disabled}
+      placeholder={placeholder}
+      label={<ReactMarkdownWrapper text={prompt} />}
+      radius="md"
+      size="md"
+      withAsterisk={required}
+      {...answer}
         // This is necessary so the component doesnt switch from uncontrolled to controlled, which can cause issues.
-        value={answer.value || ''}
-        error={generateErrorMessage(response, answer)}
-      />
-    </>
+      value={answer.value || ''}
+      error={generateErrorMessage(response, answer)}
+    />
   );
 }
