@@ -36,7 +36,7 @@ export function StripPlot({
     }, [allData, selection, parameters]);
 
     const yScale = useMemo(() => {
-        return d3.scaleLinear([margin.top, height - margin.bottom]).domain(d3.extent(allData.array('value') as number[]).reverse() as unknown as [number, number]);
+        return d3.scaleLinear([margin.top, height - margin.bottom]).domain(d3.extent(allData.array('value') as number[]).reverse() as unknown as [number, number]).nice();
     }, [allData, height]);
 
     const nicedYScale = useMemo(() => {
