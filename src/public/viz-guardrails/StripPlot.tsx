@@ -14,7 +14,7 @@ const margin = {
   bottom: 50,
 };
 
-export function Histogram({
+export function StripPlot({
   data,
   selection,
   parameters,

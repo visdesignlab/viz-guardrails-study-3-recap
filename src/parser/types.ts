@@ -190,6 +190,10 @@ export interface SliderResponse extends BaseResponse {
   type: 'slider';
   /** This define the steps in the slider and the extent of the slider. */
   options: Option[];
+  /** The left label of the likert scale. E.g Strongly Disagree */
+  leftLabel?: string;
+  /** The right label of the likert scale. E.g Strongly Agree */
+  rightLabel?: string;
 }
 
 /**
