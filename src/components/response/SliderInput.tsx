@@ -41,6 +41,10 @@ export default function SliderInput({
           marks={options as SliderProps['marks']}
           {...answer}
           defaultValue={50}
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          thumbSize={(answer as any).value === '' ? 0.1 : 17}
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          color={(answer as any).value === '' ? 'gray.2' : 'blue'}
           min={0}
           max={100}
           showLabelOnHover={false}
