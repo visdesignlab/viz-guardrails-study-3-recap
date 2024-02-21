@@ -18,6 +18,7 @@ import Sidebar from './Sidebar';
 import RangeSelector from './RangeSelector';
 import Selector from './Selector';
 import { StripPlot } from './StripPlot';
+import { Help } from './Help';
 
 export interface ChartParams {
     dataset: string,
@@ -131,16 +132,21 @@ export function DataExplorer({ parameters, setAnswer }: StimulusParams<ChartPara
               guardrail={guardrail}
             />
             <Divider orientation="vertical" size="xs" />
-            <g>
-              <Text fw={500}>
-                {parameters.dataset === 'clean_stocks' ? 'Percent change in stock price' : 'Infections per million people'}
-              </Text>
-              {guardrail === 'super_summ' ? (
-                <Text fz="xs" c="dimmed">Shaded area represents the middle 50% of all values.</Text>
-              ) : null}
-              {guardrail === 'juxt_summ' ? (
-                <Text fz="xs" c="dimmed">Bar on the left highlights the range of selection among all data.</Text>
-              ) : null}
+            <Stack>
+              <Group position="apart">
+                <Stack spacing={0} justify="flex-start">
+                  <Text fw={500}>
+                    {parameters.dataset === 'clean_stocks' ? 'Percent change in stock price' : 'Infections per million people'}
+                  </Text>
+                  {guardrail === 'super_summ' ? (
+                    <Text fz="xs" c="dimmed">Shaded area represents the middle 50% of all values.</Text>
+                  ) : null}
+                  {guardrail === 'juxt_summ' ? (
+                    <Text fz="xs" c="dimmed">Bar on the left highlights the range of selection among all data.</Text>
+                  ) : null}
+                </Stack>
+                <Help parameters={parameters} />
+              </Group>
               <Stack>
                 <Group>
                   {guardrail === 'juxt_summ' ? <StripPlot parameters={parameters} data={filteredData} selection={selection} /> : null}
@@ -164,7 +170,7 @@ export function DataExplorer({ parameters, setAnswer }: StimulusParams<ChartPara
                     </div>
                   ) : null }
               </Stack>
-            </g>
+            </Stack>
           </Group>
         </Paper>
       </Flex>
