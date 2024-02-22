@@ -5,7 +5,7 @@
 /* eslint-disable camelcase */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { useResizeObserver } from '@mantine/hooks';
+// import { useResizeObserver } from '@mantine/hooks';
 import { useMemo, useState } from 'react';
 import * as d3 from 'd3';
 import { Center, Text } from '@mantine/core';
@@ -80,11 +80,11 @@ export function LineChart({
   // ---------------------------- Setup ----------------------------
 
   /// ////////// Setting sizing
-  const [ref, { height: originalHeight, width: originalWidth }] = useResizeObserver();
+  // const [ref, { height: originalHeight, width: originalWidth }] = useResizeObserver();
 
-  const width = useMemo(() => originalWidth - margin.left - margin.right, [originalWidth]);
+  const width = 660;// useMemo(() => originalWidth - margin.left - margin.right, [originalWidth]);
 
-  const height = useMemo(() => originalHeight - margin.top - margin.bottom, [originalHeight]);
+  const height = 320;// useMemo(() => originalHeight - margin.top - margin.bottom, [originalHeight]);
 
   /// ////////// Setting scales
   const {
@@ -241,11 +241,11 @@ export function LineChart({
   // ---------------------------- Render ----------------------------
   return (
     selection?.length === 0 ? (
-      <Center ref={ref} style={{ width: '800px', height: '400px' }}>
+      <Center style={{ width: '800px', height: '400px' }}>
         <Text fs="italic" c="dimmed">Select an item to view the chart.</Text>
       </Center>
     ) : (
-      <svg id="baseLineChart" ref={ref} style={{ height: '400px', width: '800px', fontFamily: '"Helvetica Neue", "Helvetica", "Arial", sans-serif' }}>
+      <svg id="baseLineChart" style={{ height: '400px', width: '800px', fontFamily: '"Helvetica Neue", "Helvetica", "Arial", sans-serif' }}>
 
         <g id="axes">
           <XAxis
