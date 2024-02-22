@@ -80,11 +80,9 @@ export function LineChart({
   // ---------------------------- Setup ----------------------------
 
   /// ////////// Setting sizing
-  // const [ref, { height: originalHeight, width: originalWidth }] = useResizeObserver();
+  const width = 800 - margin.left - margin.right;
 
-  const width = 660;// useMemo(() => originalWidth - margin.left - margin.right, [originalWidth]);
-
-  const height = 320;// useMemo(() => originalHeight - margin.top - margin.bottom, [originalHeight]);
+  const height = 400 - margin.top - margin.bottom;
 
   /// ////////// Setting scales
   const {
