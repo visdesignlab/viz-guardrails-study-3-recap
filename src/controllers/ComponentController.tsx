@@ -65,12 +65,14 @@ export default function ComponentController() {
       </Suspense>
 
       {(instructionLocation === 'belowStimulus' || (instructionLocation === undefined && !instructionInSideBar)) && <ReactMarkdownWrapper text={instruction} />}
-      <ResponseBlock
-        key={`${currentStep}-below-response-block`}
-        status={status}
-        config={currentConfig}
-        location="belowStimulus"
-      />
+      <div style={{ maxWidth: 800, margin: '0 0' }}>
+        <ResponseBlock
+          key={`${currentStep}-below-response-block`}
+          status={status}
+          config={currentConfig}
+          location="belowStimulus"
+        />
+      </div>
     </>
   );
 }

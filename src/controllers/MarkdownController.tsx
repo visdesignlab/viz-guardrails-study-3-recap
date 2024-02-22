@@ -15,6 +15,8 @@ export default function MarkdownController({ currentConfig }: { currentConfig: M
   if (importedText === null) return null;
 
   return (
-    <ReactMarkdownWrapper text={importedText} />
+    <div style={{ maxWidth: 700, margin: '0 0' }}>
+      <ReactMarkdownWrapper text={importedText} />
+    </div>
   );
 }

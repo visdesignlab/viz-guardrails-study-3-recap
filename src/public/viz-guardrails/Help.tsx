@@ -12,7 +12,7 @@ export function Help({
   const helpText = (parameters.dataset === 'clean_data'
     ? (
       <TypographyStylesProvider>
-        Select any subset of countries to the left of the visualization.
+        Select any subset of countries to the left of the visualization to support the prompt at the top of the page.
         <h4>Background:</h4>
         You live in a fantasy world that consists of your home country, as well as other
         15 countries located across 5 continents: Eldoril, Thundoril, Aerion, Silvoria, and Mystara.
@@ -28,7 +28,7 @@ export function Help({
         <i> already decided on a policy</i>
         .
         <h4>Task:</h4>
-        You are tasked with leading the promotion efforts and advertising the chosen policy to the population using data.
+        You are tasked with leading the promotion efforts that make the case for the chosen policy.
         In the experiment, you will use an interactive data explorer that shows infection data from other countries.
         You should select a view that best shows (and convinces the population) that your country&apos;s
         {' '}
@@ -42,11 +42,11 @@ export function Help({
     )
     : (
       <TypographyStylesProvider>
-        Select any subset of stocks to the left of the visualization.
+        Select any subset of stocks to the left of the visualization to support the prompt at the top of the page.
         <h4>Scenario:</h4>
         {' '}
         You are a financial advisor. Your client approached you asking for help in
-        picking a new investment---an industry fund that equally invests within a single industry.
+        picking a new investment&mdash;an industry fund that equally invests within a single industry.
         The client prefers to make their decisions
         {' '}
         <i>solely based on the data</i>
@@ -56,8 +56,8 @@ export function Help({
         {' '}
         <i>does</i>
         {' '}
-        have inside knowledge and orders you to recommend a specific industry.
-        You cannot disclose this to the client and have to use data to support your orders.
+        have inside knowledge and orders you to recommend a specific industry (which is ultimately in the best interest of the client).
+        You cannot disclose this to the client and have to use data to support your recommendations.
         <h4>Task:</h4>
         {' '}
         In the experiment, you will use an interactive data explorer that shows performance
