@@ -5,7 +5,6 @@
 /* eslint-disable camelcase */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-// import { useResizeObserver } from '@mantine/hooks';
 import { useMemo, useState } from 'react';
 import * as d3 from 'd3';
 import { Center, Text } from '@mantine/core';

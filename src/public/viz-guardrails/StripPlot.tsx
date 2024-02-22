@@ -4,7 +4,6 @@
 import { from, escape } from 'arquero';
 import { useMemo } from 'react';
 import * as d3 from 'd3';
-import { useResizeObserver } from '@mantine/hooks';
 import { ChartParams } from './DataExplorer';
 
 const margin = {
@@ -23,7 +22,8 @@ export function StripPlot({
     selection: string[];
     parameters: ChartParams
 }) {
-  const [ref, { width, height }] = useResizeObserver();
+  const width = 60;
+  const height = 400;
 
   const allData = useMemo(() => {
     const tempData = data.map((d: any) => ({ ...d, value: +d[parameters.y_var] }));
@@ -40,7 +40,7 @@ export function StripPlot({
   const textFormat = parameters.dataset === 'clean_stocks' ? d3.format('.0%') : d3.format(',.0f');
 
   return selection?.length === 0 ? null : (
-    <svg ref={ref} style={{ height: '400px', width: '60px', overflow: 'visible' }}>
+    <svg style={{ height: '400px', width: '60px', overflow: 'visible' }}>
       {/* <YAxis yScale={yScale} horizontalPosition={275} xRange={[0, 0]}/> */}
       {/* <line x1={margin.left} x2={margin.left} y1={margin.top} y2={height - margin.bottom} strokeWidth={1} stroke={'black'}></line> */}
       <rect y={yScale(selectedDataRange[1])} height={yScale(selectedDataRange[0]) - yScale(selectedDataRange[1])} x={margin.left - 10} width={10} opacity={0.1} fill="black" />
