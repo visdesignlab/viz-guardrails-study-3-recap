@@ -16,7 +16,8 @@ export function AllTasksTimeline({
   participantData, width, height, setSelectedTask, selectedTask, maxDuration,
 } : {participantData: ParticipantData, width: number, height: number, setSelectedTask: (task: string | null) => void, selectedTask: string | null, maxDuration?: number}) {
   const xScale = useMemo(() => {
-    const allStartTimes = Object.values(participantData.answers).map((answer) => [answer.startTime, answer.endTime]).flat();
+    console.log(participantData.answers);
+    const allStartTimes = Object.values(participantData.answers || {}).map((answer) => [answer.startTime, answer.endTime]).flat();
 
     const extent = d3.extent(allStartTimes) as [number, number];
 
@@ -28,7 +29,7 @@ export function AllTasksTimeline({
   const tasks = useMemo(() => {
     let currentHeight = 0;
 
-    const sortedEntries = Object.entries(participantData.answers).sort((a, b) => a[1].startTime - b[1].startTime);
+    const sortedEntries = Object.entries(participantData.answers || {}).sort((a, b) => a[1].startTime - b[1].startTime);
 
     return sortedEntries.map((entry, i) => {
       const [name, answer] = entry;

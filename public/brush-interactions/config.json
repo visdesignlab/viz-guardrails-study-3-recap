@@ -14,7 +14,7 @@
             "University of Toronto"
         ]
     },
-    recordStudyAudio: true,
+    "recordStudyAudio": true,
     "uiConfig": {
         "contactEmail": "cnobre@cs.toronto.edu",
         "helpTextPath": "brush-interactions/tutorial.md",
@@ -85,6 +85,18 @@
             ]
         },
         "tutorial": {
+            "type": "markdown",
+            "path": "brush-interactions/tutorial.md",
+            "nextButtonText": "",
+            "response": []
+        },
+        "titanicTutorial": {
+            "type": "markdown",
+            "path": "brush-interactions/titanicTutorial.md",
+            "nextButtonText": "",
+            "response": []
+        },
+        "happinessTutorial": {
             "type": "markdown",
             "path": "brush-interactions/tutorial.md",
             "nextButtonText": "",
@@ -288,6 +300,30 @@
                 }
             ]
         },
+        "paintBrush_q3": {
+            "baseComponent": "scatterPlot",
+            "instruction": "How many Gentoo penguins weigh less than 4.5k grams (g)?",
+            "parameters": {
+                "dataset": "penguin",
+                "x": "Body Mass (g)",
+                "y": "Flipper Length (mm)",
+                "category": "Species",
+                "ids": "id",
+                "brushType": "Paintbrush Selection"
+            },
+            "response": [
+                {
+                    "correctAnswer": 15,
+                    "id": "response",
+                    "prompt": "Answer:",
+                    "required": true,
+                    "location": "sidebar",
+                    "type": "numerical",
+                    "max": 100,
+                    "min": 0
+                }
+            ]
+        },
         "sliderBrush_q2": {
             "baseComponent": "scatterPlot",
             "instruction": "Consider only penguins that weigh between 4k and 5k grams (g) and have flipper lengths between 200 and 215mm. What is the most and least common type of penguin in this subset?",
@@ -298,6 +334,64 @@
                 "category": "Species",
                 "ids": "id",
                 "brushType": "Slider Selection"
+            },
+            "response": [
+                {
+                    "correctAnswer": "Gentoo",
+                    "id": "max-response",
+                    "prompt": "Most common Penguin:",
+                    "required": true,
+                    "location": "sidebar",
+                    "type": "dropdown",
+                    "options": [
+                        {
+                            "label": "Adelie",
+                            "value": "Adelie"
+                        },
+                        {
+                            "label": "Chinstrap",
+                            "value": "Chinstrap"
+                        },
+                        {
+                            "label": "Gentoo",
+                            "value": "Gentoo"
+                        }
+                    ]
+                },
+                {
+                    "correctAnswer": "Adelie",
+                    "id": "min-response",
+                    "prompt": "Least common Penguin:",
+                    "required": true,
+                    "location": "sidebar",
+                    "type": "dropdown",
+                    "options": [
+                        {
+                            "label": "Adelie",
+                            "value": "Adelie"
+                        },
+                        {
+                            "label": "Chinstrap",
+                            "value": "Chinstrap"
+                        },
+                        {
+                            "label": "Gentoo",
+                            "value": "Gentoo"
+                        }
+                    ]
+                }
+            ]
+        },
+        "paintBrush_q4": {
+            "baseComponent": "scatterPlot",
+            "instruction": "Consider only penguins that weigh between 4k and 5k grams (g) and have flipper lengths between 200 and 215mm. What is the most and least common type of penguin in this subset?",
+            "parameters": {
+                "dataset": "penguin",
+                "x": "Body Mass (g)",
+                "y": "Flipper Length (mm)",
+                "category": "Species",
+                "ids": "id",
+                "brushType": "Paintbrush Selection"
             },
             "response": [
                 {
@@ -492,6 +586,58 @@
             },
             "response": []
         },
+        "happinessComplex1Titanic": {
+            "baseComponent": "scatterPlot",
+            "instruction": "Who was on the ship? Was it mostly families, or individuals, and did this have an impact on survival?",
+            "parameters": {
+                "dataset": "titanic",
+                "x": "Fare",
+                "y": "Age",
+                "category": "Survived",
+                "ids": "Name",
+                "brushType": "Paintbrush Selection"
+            },
+            "response": []
+        },
+        "happinessComplex2Titanic": {
+            "baseComponent": "scatterPlot",
+            "instruction": "Did women and children have a better survival rate than men?",
+            "parameters": {
+                "dataset": "titanic",
+                "x": "Fare",
+                "y": "Age",
+                "category": "Survived",
+                "ids": "Name",
+                "brushType": "Paintbrush Selection"
+            },
+            "response": []
+        },
+        "happinessComplex3Titanic": {
+            "baseComponent": "scatterPlot",
+            "instruction": "Find a country you’re knowledgable of or interested in, and explore the data for that country. Does anything standout or surprise you?",
+            "parameters": {
+                "dataset": "titanic",
+                "x": "Fare",
+                "y": "Age",
+                "category": "Survived",
+                "ids": "Name",
+                "brushType": "Paintbrush Selection"
+            },
+            "response": []
+        },
+        "happinessComplex4Titanic": {
+            "baseComponent": "scatterPlot",
+            "instruction": "Explore the dataset for anything interesting to you. What insights do you gain from the data?",
+            "parameters": {
+                "dataset": "titanic",
+                "x": "Fare",
+                "y": "Age",
+                "category": "Survived",
+                "ids": "Name",
+                "brushType": "Paintbrush Selection"
+            },
+            "response": []
+        },
         "happinessComplex1": {
             "baseComponent": "scatterPlot",
             "instruction": "Find a country you’re knowledgable of or interested in, and explore the data for that country. Does anything standout or surprise you?",
@@ -508,7 +654,7 @@
         },
         "happinessComplex2": {
             "baseComponent": "scatterPlot",
-            "instruction": "These values are found by randomly selecting 1000 people from each country each year, and created by the polling company Gallup. Knowing this, do you trust this data?",
+            "instruction": "Explore the dataset for anything interesting to you. What insights do you gain from the data?",
             "parameters": {
                 "dataset": "happiness",
                 "x": "Freedom_To_Make_Life_Choices",
@@ -639,12 +785,28 @@
             "consent",
             "tutorial",
             {
+                "order": "random",
+                "components": [
+                    "paintBrush_q1",
+                    "paintBrush_q2",
+                    "paintBrush_q3",
+                    "paintBrush_q4"
+                ]
+            },
+            "titanicTutorial"
+            {
                 "order": "fixed",
                 "components": [
-                    "happinessSimple1",
-                    "happinessSimple2",
-                    "happinessSimple3",
-                    "happinessSimple4",
+                    "happinessComplex1Titanic",
+                    "happinessComplex2Titanic",
+                    "happinessComplex3Titanic",
+                    "happinessComplex4Titanic"
+                ]
+            },
+            "happinessTutorial",
+            {
+                "order": "fixed",
+                "components": [
                     "happinessComplex1",
                     "happinessComplex2",
                     "happinessComplex3",

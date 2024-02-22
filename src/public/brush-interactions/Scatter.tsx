@@ -180,7 +180,7 @@ export function Scatter({
       return null;
     }
 
-    return data.filter((d) => +d.Year === params.year).map((d, i) => {
+    return data.filter((d) => (params.year ? +d.Year === params.year : true)).map((d, i) => {
       if (d[params.x] === null || d[params.y] === null) {
         return null;
       }
@@ -235,7 +235,7 @@ export function Scatter({
           {circles}
           <g id="brushXRef" ref={brushXRef} />
           <g id="brushYRef" ref={brushYRef} />
-          {xScale && yScale && brushType === 'Paintbrush Selection' ? <Paintbrush currSelected={brushedPoints} svgRef={ref} brushState={brushState} setBrushedSpace={setBrushedSpace} params={params} data={data.filter((d) => +d.Year === params.year)} isSelect={isPaintbrushSelect} xScale={xScale as any} yScale={yScale} /> : null}
+          {xScale && yScale && brushType === 'Paintbrush Selection' ? <Paintbrush currSelected={brushedPoints} svgRef={ref} brushState={brushState} setBrushedSpace={setBrushedSpace} params={params} data={data.filter((d) => (params.year ? +d.Year === params.year : true))} isSelect={isPaintbrushSelect} xScale={xScale as any} yScale={yScale} /> : null}
         </svg>
         {brushType === 'Slider Selection' && xScale && yScale
           ? (

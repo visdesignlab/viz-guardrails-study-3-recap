@@ -37,6 +37,8 @@ export function BrushPlot({ parameters, setAnswer }: StimulusParams<BrushParams>
     });
   }, [parameters]);
 
+  console.log(data);
+
   const fullTable = useMemo(() => {
     if (data) {
       return from(data);

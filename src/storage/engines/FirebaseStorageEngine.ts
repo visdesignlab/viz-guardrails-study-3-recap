@@ -232,8 +232,10 @@ export class FirebaseStorageEngine extends StorageEngine {
 
   async getTextTags(participantId: string) {
     if (this.studyCollection) {
-      const tagDoc = doc(this.studyCollection, participantId, 'textTag');
+      const tagDoc = doc(this.studyCollection, participantId);
       const tags = (await getDoc(tagDoc)).data()?.textTags as TextTag[] | null;
+
+      console.log(tags);
 
       return tags || [];
     }
@@ -369,7 +371,7 @@ export class FirebaseStorageEngine extends StorageEngine {
     // Iterate over the participants and add the provenance graph
     const participantPulls = participants.docs.map(async (participant) => {
       // Exclude the config doc and the sequenceArray doc
-      if (participant.id === 'config' || participant.id === 'sequenceArray' || participant.id === 'audioTags') return;
+      if (participant.id === 'config' || participant.id === 'sequenceArray' || participant.id === 'audioTags' || participant.id === 'sequenceAssignment' || participant.id === 'configs') return;
 
       const participantDataItem = participant.data() as ParticipantData;
 
