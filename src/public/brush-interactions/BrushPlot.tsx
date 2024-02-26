@@ -32,7 +32,7 @@ export function BrushPlot({ parameters, setAnswer }: StimulusParams<BrushParams>
 
   // load data
   useEffect(() => {
-    d3.csv(`/public/brush-interactions-think-aloud/data/${parameters.dataset}.csv`).then((_data) => {
+    d3.csv(`/public/ThinkAloud/data/${parameters.dataset}.csv`).then((_data) => {
       setData(_data);
     });
   }, [parameters]);

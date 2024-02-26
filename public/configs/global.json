@@ -1,11 +1,11 @@
 {
     "$schema": "https://raw.githubusercontent.com/reVISit-studies/study/main/src/parser/GlobalConfigSchema.json",
     "configsList": [
-        "brush-interactions-think-aloud"
+        "ThinkAloud"
     ],
     "configs": {
-        "brush-interactions-think-aloud": {
-            "path": "ThinkAloud/brush-interactions-think-aloud/config.json"
+        "ThinkAloud": {
+            "path": "ThinkAloud/config.json"
         }
     }
 }
