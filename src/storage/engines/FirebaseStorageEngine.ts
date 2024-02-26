@@ -235,8 +235,6 @@ export class FirebaseStorageEngine extends StorageEngine {
       const tagDoc = doc(this.studyCollection, participantId);
       const tags = (await getDoc(tagDoc)).data()?.textTags as TextTag[] | null;
 
-      console.log(tags);
-
       return tags || [];
     }
 

@@ -25,15 +25,6 @@ import { AnalysisPopout } from './AnalysisPopout';
 
 // import WaveSurfer from 'wavesurfer.js';
 
-export interface TranscribedAudioSnippet {
-    alternatives: {confidence: number, transcript: string}[]
-    languageCode: string;
-    resultEndTime: string;
-}
-export interface TranscribedAudio {
-    results: TranscribedAudioSnippet[]
-}
-
 function getParticipantData(trrackId: string | undefined, storageEngine: StorageEngine | undefined) {
   if (storageEngine) {
     return storageEngine.getParticipantData(trrackId);
@@ -67,15 +58,11 @@ function getTextTags(participantId: string, storageEngine: StorageEngine | undef
 }
 
 function copyStyles(sourceDoc: any, targetDoc: any) {
-  console.log(sourceDoc.stylesheet);
-  console.log(sourceDoc.head.children);
   Array.from(sourceDoc.head.children).forEach((styleSheet: any) => {
     // if (styleSheet.cssRules) { // for <style> elements
-    console.log('we did ti');
     const newStyleEl = sourceDoc.createElement('style');
 
     Array.from(styleSheet.cssRules).forEach((cssRule: any) => {
-      console.log(cssRule);
       // write the text of each rule into the body of the style element
       newStyleEl.appendChild(sourceDoc.createTextNode(cssRule.cssText));
     });
@@ -103,7 +90,6 @@ export function Analysis({ setProvState } : {setProvState: (state: any) => void}
   const [selectedTask, setSelectedTask] = useState<string | null>(null);
   const [currentNode, setCurrentNode] = useState<string | null>(null);
 
-  const [transcription, setTranscription] = useState<TranscribedAudio | null>(null);
   const { value: participant, status } = useAsync(getParticipantData, [trrackId, storageEngine]);
 
   const popoutRef = useRef<Window>();
@@ -140,14 +126,6 @@ export function Analysis({ setProvState } : {setProvState: (state: any) => void}
   const containerEl = useMemo(() => document.createElement('div'), []);
 
   useEffect(() => {
-    if (studyId && trialName && trrackId) {
-      storageEngine?.getTranscription(trrackId).then((data) => {
-        setTranscription(JSON.parse(data));
-      });
-    }
-  }, [storageEngine, studyId, trialName, trrackId]);
-
-  useEffect(() => {
     const externalWindow = window.open(
       'about:blank',
       'newWin',
@@ -169,8 +147,6 @@ export function Analysis({ setProvState } : {setProvState: (state: any) => void}
       popoutRef.current.document.head.innerHTML = window.document.head.innerHTML;
     }
   }, []);
-
-  console.log(popoutRef.current);
 
   return (
     <div>

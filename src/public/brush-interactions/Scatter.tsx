@@ -190,8 +190,6 @@ export function Scatter({
     return null;
   }, [brushState, data, xScale, yScale]);
 
-  console.log(forceSimulation?.nodes());
-
   const circles = useMemo(() => {
     if (!xScale || !yScale) {
       return null;

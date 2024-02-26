@@ -14,6 +14,7 @@ function ReactComponentController({ currentConfig, provState }: { currentConfig:
   const currentStep = useCurrentStep();
 
   const reactPath = `../public/${currentConfig.path}`;
+
   const StimulusComponent = (modules[reactPath] as ModuleNamespace).default;
 
   const storeDispatch = useStoreDispatch();

@@ -16,7 +16,6 @@ export function AllTasksTimeline({
   participantData, width, height, setSelectedTask, selectedTask, maxDuration,
 } : {participantData: ParticipantData, width: number, height: number, setSelectedTask: (task: string | null) => void, selectedTask: string | null, maxDuration?: number}) {
   const xScale = useMemo(() => {
-    console.log(participantData.answers);
     const allStartTimes = Object.values(participantData.answers || {}).map((answer) => [answer.startTime, answer.endTime]).flat();
 
     const extent = d3.extent(allStartTimes) as [number, number];

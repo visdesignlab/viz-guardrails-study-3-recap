@@ -2,27 +2,30 @@
 import {
   Box, Button, Center, Divider, Group, Highlight, Loader, Menu, Popover, ScrollArea, Stack, Text, TextInput, Tooltip,
 } from '@mantine/core';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import {
-  useCallback, useEffect, useMemo, useRef, useState,
+  useCallback, useEffect, useRef, useState,
 } from 'react';
-import { useResizeObserver, useTextSelection } from '@mantine/hooks';
-import { Registry, initializeTrrack } from '@trrack/core';
+import { useResizeObserver } from '@mantine/hooks';
 import { WaveForm, useWavesurfer } from 'wavesurfer-react';
 import WaveSurferContext from 'wavesurfer-react/dist/contexts/WaveSurferContext';
-import { createPortal } from 'react-dom';
 import * as icons from '@tabler/icons-react';
 import { useStorageEngine } from '../../../store/storageEngineHooks';
 import { useAsync } from '../../../store/hooks/useAsync';
 import { StorageEngine } from '../../../storage/engines/StorageEngine';
 import { AllTasksTimeline } from './AllTasksTimeline';
 import { SingleTaskTimeline } from './SingleTaskTimeline';
-
-import { deepCopy } from '../../../utils/deepCopy';
-import { useEvent } from '../../../store/hooks/useEvent';
 import { AudioTag } from '../../../store/types';
-import { TranscribedAudio } from './Analysis';
 import { useTextHighlight } from '../../../store/hooks/useTextHighlight';
+
+export interface TranscribedAudioSnippet {
+  alternatives: {confidence: number, transcript: string}[]
+  languageCode: string;
+  resultEndTime: string;
+}
+export interface TranscribedAudio {
+  results: TranscribedAudioSnippet[]
+}
 
 function getParticipantData(trrackId: string | undefined, storageEngine: StorageEngine | undefined) {
   if (storageEngine) {
@@ -136,14 +139,6 @@ export function AnalysisPopout({ cssUpdate, popoutWindow } : {cssUpdate: () => v
   //   console.log(trrackId);
 
   //   console.log(highlightedAudio?.toString());
-
-  console.log(textTags?.map((tag) => tag.text));
-
-  console.log(audioTags);
-
-  console.log(highlightedAudio);
-
-  console.log(transcription, currentShownTranscription);
 
   return (
     <Group noWrap spacing={25}>

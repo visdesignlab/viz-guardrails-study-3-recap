@@ -32,12 +32,10 @@ export function BrushPlot({ parameters, setAnswer }: StimulusParams<BrushParams>
 
   // load data
   useEffect(() => {
-    d3.csv(`/public/brush-interactions/data/${parameters.dataset}.csv`).then((_data) => {
+    d3.csv(`/public/brush-interactions-think-aloud/data/${parameters.dataset}.csv`).then((_data) => {
       setData(_data);
     });
   }, [parameters]);
-
-  console.log(data);
 
   const fullTable = useMemo(() => {
     if (data) {

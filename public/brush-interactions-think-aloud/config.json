@@ -17,7 +17,7 @@
     "recordStudyAudio": true,
     "uiConfig": {
         "contactEmail": "cnobre@cs.toronto.edu",
-        "helpTextPath": "brush-interactions/tutorial.md",
+        "helpTextPath": "brush-interactions-think-aloud/tutorial.md",
         "logoPath": "assets/revisitLogoSquare.svg",
         "withProgressBar": true,
         "autoDownloadStudy": false,
@@ -29,7 +29,7 @@
         "scatterPlot": {
             "description": "A scatterplot and accompanying bar chart.",
             "type": "react-component",
-            "path": "brush-interactions/BrushPlot.tsx",
+            "path": "brush-interactions-think-aloud/BrushPlot.tsx",
             "nextButtonLocation": "sidebar",
             "instructionLocation": "sidebar",
             "response": []
@@ -38,7 +38,7 @@
     "components": {
         "introduction": {
             "type": "markdown",
-            "path": "brush-interactions/introduction.md",
+            "path": "brush-interactions-think-aloud/introduction.md",
             "response": [
                 {
                     "id": "prolificId",
@@ -53,7 +53,7 @@
         },
         "consent": {
             "type": "markdown",
-            "path": "brush-interactions/consent.md",
+            "path": "brush-interactions-think-aloud/consent.md",
             "nextButtonText": "Agree",
             "response": [
                 {
@@ -86,19 +86,19 @@
         },
         "tutorial": {
             "type": "markdown",
-            "path": "brush-interactions/tutorial.md",
+            "path": "brush-interactions-think-aloud/tutorial.md",
             "nextButtonText": "",
             "response": []
         },
         "titanicTutorial": {
             "type": "markdown",
-            "path": "brush-interactions/titanicTutorial.md",
+            "path": "brush-interactions-think-aloud/titanicTutorial.md",
             "nextButtonText": "",
             "response": []
         },
         "happinessTutorial": {
             "type": "markdown",
-            "path": "brush-interactions/tutorial.md",
+            "path": "brush-interactions-think-aloud/tutorial.md",
             "nextButtonText": "",
             "response": []
         },
