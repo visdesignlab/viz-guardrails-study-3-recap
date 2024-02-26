@@ -1,5 +1,5 @@
 import {
-  Center, Group, Text, Tooltip,
+  Center, Group, Select, Text, Tooltip,
 } from '@mantine/core';
 import { useCallback, useMemo } from 'react';
 import * as d3 from 'd3';
@@ -14,6 +14,9 @@ export function XAxisBar({
   isDate = false,
   showLines = true,
   compact = false,
+  dropdownColumn = false,
+  columnList,
+  setColumn,
 }: {
   showLines?: boolean;
   isDate?: boolean;
@@ -24,6 +27,9 @@ export function XAxisBar({
   label: string;
   ticks: { value: string; offset: number }[];
   compact?: boolean;
+  dropdownColumn?: boolean;
+  columnList?: string[];
+  setColumn?: (s: string) => void;
 }) {
   const tickWidth = useMemo(() => {
     if (ticks.length > 1) {
@@ -43,7 +49,7 @@ export function XAxisBar({
   return (
     <>
       <g transform={`translate(${xScale.range()[0]}, ${vertPosition + 25})`}>
-        <foreignObject width={Math.abs(xScale.range()[0] - xScale.range()[1])} height={20}>
+        <foreignObject width={Math.abs(xScale.range()[0] - xScale.range()[1])} height={120}>
           <Center>
             <Group spacing={3}>
               <Text size={compact ? 10 : 14} style={{ color: '#878E95' }}>

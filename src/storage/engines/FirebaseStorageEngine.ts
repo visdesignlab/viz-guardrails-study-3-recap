@@ -11,7 +11,9 @@ import { getAuth, signInAnonymously } from '@firebase/auth';
 import localforage from 'localforage';
 import { StorageEngine } from './StorageEngine';
 import { ParticipantData } from '../types';
-import { EventType, StoredAnswer, TrrackedProvenance } from '../../store/types';
+import {
+  AudioTag, EventType, StoredAnswer, TextTag, TrrackedProvenance,
+} from '../../store/types';
 import { hash } from './utils';
 import { StudyConfig } from '../../parser/types';
 
@@ -20,7 +22,7 @@ export class FirebaseStorageEngine extends StorageEngine {
 
   private firestore: Firestore;
 
-  private collectionPrefix = import.meta.env.DEV ? 'dev-' : 'prod-';
+  private collectionPrefix = 'prod-';
 
   private studyCollection: CollectionReference<DocumentData, DocumentData> | undefined = undefined;
 
@@ -107,7 +109,7 @@ export class FirebaseStorageEngine extends StorageEngine {
     // Restore localWindowEvents
     this.localWindowEvents = await this._getFromFirebaseStorage(this.currentParticipantId, 'windowEvents');
     Object.entries(this.localWindowEvents).forEach(([step, events]) => {
-      if (participant === null) return;
+      if (participant === null || !participant.answers[step]) return;
 
       if (events === undefined || events.length === 0) {
         participant.answers[step].windowEvents = [];
@@ -195,6 +197,114 @@ export class FirebaseStorageEngine extends StorageEngine {
     await this._pushToFirebaseStorage(this.currentParticipantId, 'windowEvents', this.localWindowEvents);
   }
 
+  async saveAudioTags(tags: AudioTag[]) {
+    if (!this._verifyStudyDatabase(this.studyCollection)) {
+      throw new Error('Study database not initialized');
+    }
+
+    // Get the participant doc
+    const tagsDoc = doc(this.studyCollection, 'audioTags');
+
+    await setDoc(tagsDoc, { audioTags: tags });
+  }
+
+  async getAudioTags() {
+    if (this.studyCollection) {
+      const tagDoc = doc(this.studyCollection, 'audioTags');
+      const tags = (await getDoc(tagDoc)).data()?.audioTags as AudioTag[] | null;
+
+      return tags || [];
+    }
+
+    return [];
+  }
+
+  async saveTextTags(participantId: string, tags: TextTag[]) {
+    if (!this._verifyStudyDatabase(this.studyCollection)) {
+      throw new Error('Study database not initialized');
+    }
+
+    // Get the participant doc
+    const tagsDoc = doc(this.studyCollection, participantId);
+
+    await setDoc(tagsDoc, { textTags: tags }, { merge: true });
+  }
+
+  async getTextTags(participantId: string) {
+    if (this.studyCollection) {
+      const tagDoc = doc(this.studyCollection, participantId);
+      const tags = (await getDoc(tagDoc)).data()?.textTags as TextTag[] | null;
+
+      return tags || [];
+    }
+
+    return [];
+  }
+
+  async saveAudio(
+    audioStream: MediaRecorder,
+  ) {
+    audioStream.addEventListener('dataavailable', (data) => {
+      const storage = getStorage();
+
+      const storeRef = ref(storage, `${this.studyId}/audio/${this.currentParticipantId}`);
+
+      uploadBytes(storeRef, data.data).then(() => {
+        console.warn('Uploaded a blob or file!');
+      });
+    });
+
+    audioStream.stop();
+
+    audioStream.stream.getTracks().forEach((track) => track.stop());
+  }
+
+  async getAudio(
+    participantId: string,
+  ) {
+    const storage = getStorage();
+
+    const url = await getDownloadURL(ref(storage, `${this.studyId}/audio/${participantId}`));
+
+    return new Promise<string>((resolve) => {
+      const xhr = new XMLHttpRequest();
+      xhr.responseType = 'blob';
+      xhr.onload = () => {
+        const blob = xhr.response;
+
+        const _url = URL.createObjectURL(blob);
+
+        resolve(_url);
+      };
+      xhr.open('GET', url);
+      xhr.send();
+    });
+  }
+
+  async getTranscription(
+    participantId: string,
+  ) {
+    const storage = getStorage();
+
+    const url = await getDownloadURL(ref(storage, `${this.studyId}/audio/${participantId}.wav_transcription.txt`));
+
+    return new Promise<string>((resolve) => {
+      const xhr = new XMLHttpRequest();
+      xhr.responseType = 'blob';
+      xhr.onload = () => {
+        const blob = xhr.response;
+
+        blob.text().then((text: string) => {
+          const json = text;
+
+          resolve(json);
+        });
+      };
+      xhr.open('GET', url);
+      xhr.send();
+    });
+  }
+
   async setSequenceArray(latinSquare: string[][]) {
     if (!this._verifyStudyDatabase(this.studyCollection)) {
       throw new Error('Study database not initialized');
@@ -262,7 +372,7 @@ export class FirebaseStorageEngine extends StorageEngine {
     // Iterate over the participants and add the provenance graph
     const participantPulls = participants.docs.map(async (participant) => {
       // Exclude the config doc and the sequenceArray doc
-      if (participant.id === 'config' || participant.id === 'sequenceArray') return;
+      if (participant.id === 'config' || participant.id === 'sequenceArray' || participant.id === 'audioTags' || participant.id === 'sequenceAssignment' || participant.id === 'configs') return;
 
       const participantDataItem = participant.data() as ParticipantData;
 
@@ -284,7 +394,7 @@ export class FirebaseStorageEngine extends StorageEngine {
     return participantData;
   }
 
-  async getParticipantData() {
+  async getParticipantData(participantId?: string) {
     if (!this._verifyStudyDatabase(this.studyCollection)) {
       throw new Error('Study database not initialized');
     }
@@ -295,13 +405,13 @@ export class FirebaseStorageEngine extends StorageEngine {
     // Get participant data
     let participant: ParticipantData | null = null;
     if (this.currentParticipantId !== null) {
-      const participantDoc = doc(this.studyCollection, this.currentParticipantId);
+      const participantDoc = doc(this.studyCollection, participantId || this.currentParticipantId);
       participant = (await getDoc(participantDoc)).data() as ParticipantData | null;
 
       // Get provenance data
       if (participant !== null) {
-        const fullProvObj = await this._getFromFirebaseStorage(this.currentParticipantId, 'provenance');
-        const fullWindowEventsObj = await this._getFromFirebaseStorage(this.currentParticipantId, 'windowEvents');
+        const fullProvObj = await this._getFromFirebaseStorage(participantId || this.currentParticipantId, 'provenance');
+        const fullWindowEventsObj = await this._getFromFirebaseStorage(participantId || this.currentParticipantId, 'windowEvents');
 
         // Iterate over the participant answers and add the provenance graph
         Object.entries(participant.answers).forEach(([step, answer]) => {
@@ -404,5 +514,39 @@ export class FirebaseStorageEngine extends StorageEngine {
       });
       await uploadBytes(storageRef, blob);
     }
+  }
+
+  private async _getFirebaseProvenance(participantId: string) {
+    const storage = getStorage();
+    const storageRef = ref(storage, `${this.studyId}/${participantId}_provenance`);
+
+    let fullProvObj: Record<string, TrrackedProvenance> = {};
+    try {
+      const url = await getDownloadURL(storageRef);
+      const response = await fetch(url);
+      const fullProvStr = await response.text();
+      fullProvObj = JSON.parse(fullProvStr);
+    } catch {
+      console.warn(`Participant ${participantId} does not have a provenance graph for ${this.studyId}.`);
+    }
+
+    return fullProvObj;
+  }
+
+  private async _getFirebaseWindowEvents(participantId: string) {
+    const storage = getStorage();
+    const storageRef = ref(storage, `${this.studyId}/${participantId}_windowEvents`);
+
+    let fullProvObj: Record<string, TrrackedProvenance> = {};
+    try {
+      const url = await getDownloadURL(storageRef);
+      const response = await fetch(url);
+      const fullProvStr = await response.text();
+      fullProvObj = JSON.parse(fullProvStr);
+    } catch {
+      console.warn(`Participant ${participantId} does not have a provenance graph for ${this.studyId}.`);
+    }
+
+    return fullProvObj;
   }
 }
