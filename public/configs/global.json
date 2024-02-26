@@ -5,7 +5,7 @@
     ],
     "configs": {
         "brush-interactions-think-aloud": {
-            "path": "brush-interactions-think-aloud/config.json"
+            "path": "ThinkAloud/brush-interactions-think-aloud/config.json"
         }
     }
 }
