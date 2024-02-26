@@ -63,7 +63,7 @@ export default function AppHeader() {
     <Header height="70" p="md">
       <Grid mt={-7} align="center">
         <Grid.Col span={4}>
-          <Group align="center">
+          <Group align="center" noWrap>
             <Image maw={40} src={`${PREFIX}${logoPath}`} alt="Study Logo" />
             <Space w="md" />
             <Title order={4}>{studyConfig?.studyMetadata.title}</Title>

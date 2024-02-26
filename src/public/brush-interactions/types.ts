@@ -7,6 +7,7 @@ export interface BrushState {
     xCol: string;
     yCol: string;
     id: number;
+    type?: 'scatter' | 'beeswarm'
   }
 
 export type SelectionType = 'drag' | 'handle' | 'clear' | null

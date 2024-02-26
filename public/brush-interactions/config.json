@@ -588,7 +588,7 @@
         },
         "happinessComplex1Titanic": {
             "baseComponent": "scatterPlot",
-            "instruction": "Who was on the ship? Was it mostly families, or individuals, and did this have an impact on survival?",
+            "instruction": "Who was on the ship? Was it mostly families or individuals? How old were they?",
             "parameters": {
                 "dataset": "titanic",
                 "x": "Fare",
@@ -604,7 +604,7 @@
             "instruction": "Did women and children have a better survival rate than men?",
             "parameters": {
                 "dataset": "titanic",
-                "x": "Fare",
+                "x": "Sex",
                 "y": "Age",
                 "category": "Survived",
                 "ids": "Name",
@@ -614,7 +614,7 @@
         },
         "happinessComplex3Titanic": {
             "baseComponent": "scatterPlot",
-            "instruction": "Find a country you’re knowledgable of or interested in, and explore the data for that country. Does anything standout or surprise you?",
+            "instruction": "How did class and ticket fare affect survival rate?",
             "parameters": {
                 "dataset": "titanic",
                 "x": "Fare",

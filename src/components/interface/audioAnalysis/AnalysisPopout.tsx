@@ -169,7 +169,7 @@ export function AnalysisPopout({ cssUpdate, popoutWindow } : {cssUpdate: () => v
           <Text>{new Date(playTime).toLocaleString()}</Text>
         </Group>
 
-        <Menu width={200} shadow="md" trigger="hover">
+        <Menu width={250} position="bottom" shadow="md" trigger="hover">
           <Menu.Target>
             <Tooltip withinPortal label="example">
               <Highlight

@@ -21,7 +21,7 @@ export function BrushPlot({ parameters, setAnswer }: StimulusParams<BrushParams>
   const [filteredTable, setFilteredTable] = useState<ColumnTable | null>(null);
   const [brushState, setBrushState] = useState<{ [n: number] : BrushState, selection: string[] }>({
     0: {
-      hasBrush: false, x1: 0, y1: 0, x2: 0, y2: 0, xCol: parameters.x, yCol: parameters.y, id: 0,
+      hasBrush: false, x1: 0, y1: 0, x2: 0, y2: 0, xCol: parameters.x, yCol: parameters.y, id: 0, type: 'beeswarm',
     },
     selection: [],
   });
@@ -231,7 +231,7 @@ export function BrushPlot({ parameters, setAnswer }: StimulusParams<BrushParams>
                 setBrushState({
                   ...brushState,
                   [Object.keys(brushState).length]: {
-                    hasBrush: false, x1: 0, y1: 0, x2: 0, y2: 0, xCol, yCol, id: Object.keys(brushState).length,
+                    hasBrush: false, x1: 0, y1: 0, x2: 0, y2: 0, xCol, yCol, id: Object.keys(brushState).length, type: 'beeswarm',
                   },
                 });
               }}

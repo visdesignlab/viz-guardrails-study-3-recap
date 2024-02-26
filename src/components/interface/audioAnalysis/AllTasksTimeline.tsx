@@ -51,7 +51,7 @@ export function AllTasksTimeline({
   const lines = useMemo(() => {
     let currentHeight = 0;
 
-    const sortedEntries = Object.entries(participantData.answers).sort((a, b) => a[1].startTime - b[1].startTime);
+    const sortedEntries = Object.entries(participantData.answers || {}).sort((a, b) => a[1].startTime - b[1].startTime);
 
     return sortedEntries.map((entry, i) => {
       const [name, answer] = entry;
@@ -71,7 +71,7 @@ export function AllTasksTimeline({
   }, [height, participantData.answers, selectedTask, setSelectedTask, xScale]);
 
   const browsedAway = useMemo(() => {
-    const sortedEntries = Object.entries(participantData.answers).sort((a, b) => a[1].startTime - b[1].startTime);
+    const sortedEntries = Object.entries(participantData.answers || {}).sort((a, b) => a[1].startTime - b[1].startTime);
 
     return sortedEntries.map((entry) => {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
