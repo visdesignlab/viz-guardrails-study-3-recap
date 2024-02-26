@@ -14,7 +14,6 @@
             "University of Toronto"
         ]
     },
-    "recordStudyAudio": true,
     "uiConfig": {
         "contactEmail": "cnobre@cs.toronto.edu",
         "helpTextPath": "brush-interactions-think-aloud/tutorial.md",
