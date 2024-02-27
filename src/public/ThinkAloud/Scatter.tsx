@@ -182,13 +182,13 @@ export function Scatter({
         .force('y', d3.forceY((d) => yScale(d[params.y])))
         .force('collide', d3.forceCollide((d) => 3));
 
-      for (let i = 0; i < 500; i += 1) simulation.tick();
+      for (let i = 0; i < 100; i += 1) simulation.tick();
 
       return simulation;
     }
 
     return null;
-  }, [brushState, data, xScale, yScale]);
+  }, [brushState.type, data, xScale, yScale]);
 
   const circles = useMemo(() => {
     if (!xScale || !yScale) {
@@ -202,7 +202,7 @@ export function Scatter({
 
       const xVal = params.dataType === 'date' ? xScale(new Date(d[params.x])) : xScale(d[params.x]);
 
-      return <Tooltip key={i} withinPortal label={d[params.ids]}><circle key={i} opacity={brushedSet && !brushedSet.has(d[params.ids]) ? 0.3 : 1} r={3} fill={brushedSet && !brushedSet.has(d[params.ids]) ? 'lightgray' : colorScale(d[params.category])} cx={xVal} cy={yScale(d[params.y])} /></Tooltip>;
+      return <Tooltip key={i} withinPortal label={d[params.ids]}><circle key={i} opacity={brushedSet && !brushedSet.has(d[params.ids]) ? 0.3 : 0.7} r={3} fill={brushedSet && !brushedSet.has(d[params.ids]) ? 'lightgray' : colorScale(d[params.category])} cx={xVal} cy={yScale(d[params.y])} /></Tooltip>;
     }) : forceSimulation?.nodes().map((d) => <Tooltip key={d[params.ids]} withinPortal label={d[params.ids]}><circle opacity={brushedSet && !brushedSet.has(d[params.ids]) ? 0.3 : 1} r={3} fill={brushedSet && !brushedSet.has(d[params.ids]) ? 'lightgray' : colorScale(d[params.category])} cx={d.x} cy={d.y} /></Tooltip>);
   }, [brushedSet, colorScale, data, params.category, params.ids, params.x, params.y, xScale, yScale, params]);
 

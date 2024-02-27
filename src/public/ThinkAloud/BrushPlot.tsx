@@ -21,7 +21,7 @@ export function BrushPlot({ parameters, setAnswer }: StimulusParams<BrushParams>
   const [filteredTable, setFilteredTable] = useState<ColumnTable | null>(null);
   const [brushState, setBrushState] = useState<{ [n: number] : BrushState, selection: string[] }>({
     0: {
-      hasBrush: false, x1: 0, y1: 0, x2: 0, y2: 0, xCol: parameters.x, yCol: parameters.y, id: 0, type: 'beeswarm',
+      hasBrush: false, x1: 0, y1: 0, x2: 0, y2: 0, xCol: parameters.x, yCol: parameters.y, id: 0, type: 'scatter',
     },
     selection: [],
   });
@@ -32,7 +32,7 @@ export function BrushPlot({ parameters, setAnswer }: StimulusParams<BrushParams>
 
   // load data
   useEffect(() => {
-    d3.csv(`/public/ThinkAloud/data/${parameters.dataset}.csv`).then((_data) => {
+    d3.csv(`./data/${parameters.dataset}.csv`).then((_data) => {
       setData(_data);
     });
   }, [parameters]);
@@ -221,21 +221,24 @@ export function BrushPlot({ parameters, setAnswer }: StimulusParams<BrushParams>
           );
         })}
         {/* <Scatter setParams={setParameters} brushedPoints={brushState?.ids} data={fullTable?.objects() || []} params={parameters} brushType={parameters.brushType} setBrushedSpace={brushedSpaceCallback} brushState={brushState} setFilteredTable={filteredCallback} /> */}
-        <Box style={{ width: '400px' }}>
-          <Center>
-            <AddPlot
-              columns={parameters.columns ? parameters.columns : Object.keys(data[0])}
-              onAdd={(xCol, yCol) => {
-                setBrushState({
-                  ...brushState,
-                  [Object.keys(brushState).length]: {
-                    hasBrush: false, x1: 0, y1: 0, x2: 0, y2: 0, xCol, yCol, id: Object.keys(brushState).length, type: 'beeswarm',
-                  },
-                });
-              }}
-            />
-          </Center>
-        </Box>
+
+        {parameters.columns ? (
+          <Box style={{ width: '400px' }}>
+            <Center>
+              <AddPlot
+                columns={parameters.columns ? parameters.columns : Object.keys(data[0])}
+                onAdd={(xCol, yCol) => {
+                  setBrushState({
+                    ...brushState,
+                    [Object.keys(brushState).length]: {
+                      hasBrush: false, x1: 0, y1: 0, x2: 0, y2: 0, xCol, yCol, id: Object.keys(brushState).length, type: parameters.catColumns && (parameters.catColumns.includes(xCol) || parameters.catColumns.includes(yCol)) ? 'beeswarm' : 'scatter',
+                    },
+                  });
+                }}
+              />
+            </Center>
+          </Box>
+        ) : null}
       </Group>
 
       <Bar data={dataForScatter as any} parameters={parameters} barsTable={barsTable} />
