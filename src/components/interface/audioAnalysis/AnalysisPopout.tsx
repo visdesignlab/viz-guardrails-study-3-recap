@@ -185,15 +185,14 @@ export function AnalysisPopout({ cssUpdate, popoutWindow } : {cssUpdate: () => v
           </Menu.Target>
 
           <Menu.Dropdown>
-            {audioTags ? audioTags.map((tag) => (
+            {audioTags && trrackId ? audioTags.map((tag) => (
               <Menu.Item
                 key={tag.name}
                 onClick={() => {
-                  storageEngine?.saveTextTags(trrackId, [...(textTags || []), { tag, text: highlightedAudio?.toString() }]).then(() => refetchTextTags(trrackId || '', storageEngine));
+                  storageEngine?.saveTextTags(trrackId, [...(textTags || []), { tag, text: highlightedAudio?.toString() || '' }]).then(() => refetchTextTags(trrackId || '', storageEngine));
                 }}
               >
                 <Group>
-                  {icons[`Icon${tag.icon}`]?.render({ color: 'gray' })}
                   <Text key={tag.name}>
                     {tag.name}
                   </Text>
@@ -241,7 +240,6 @@ export function AnalysisPopout({ cssUpdate, popoutWindow } : {cssUpdate: () => v
             </Popover>
             {audioTags ? audioTags.map((tag) => (
               <Group key={tag.name}>
-                {icons[`Icon${tag.icon}`]?.render({ color: 'gray' })}
                 <Text key={tag.name}>
                   {tag.name}
                 </Text>

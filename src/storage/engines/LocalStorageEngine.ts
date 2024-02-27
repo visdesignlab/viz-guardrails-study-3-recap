@@ -2,11 +2,27 @@ import localforage from 'localforage';
 import { v4 as uuidv4 } from 'uuid';
 import { StorageEngine } from './StorageEngine';
 import { ParticipantData } from '../types';
-import { StoredAnswer } from '../../store/types';
+import { AudioTag, StoredAnswer, TextTag } from '../../store/types';
 import { hash } from './utils';
 import { StudyConfig } from '../../parser/types';
 
 export class LocalStorageEngine extends StorageEngine {
+  saveAudioTags(tags: AudioTag[]): Promise<void> {
+    throw new Error('Method not implemented.');
+  }
+
+  saveTextTags(participantId: string, tags: TextTag[]): Promise<void> {
+    throw new Error('Method not implemented.');
+  }
+
+  getAudioTags(): Promise<AudioTag[]> {
+    throw new Error('Method not implemented.');
+  }
+
+  getTextTags(participantId: string): Promise<TextTag[]> {
+    throw new Error('Method not implemented.');
+  }
+
   getAudio(participantId?: string | undefined): Promise<string> {
     console.warn('not yet implemented', participantId);
     return Promise.resolve('not implemented');

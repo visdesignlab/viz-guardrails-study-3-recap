@@ -1,26 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import {
-  Box, Button, Center, Divider, Group, Loader, Menu, Popover, ScrollArea, Stack, Text, TextInput,
-} from '@mantine/core';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import {
   useCallback, useEffect, useMemo, useRef, useState,
 } from 'react';
-import { useResizeObserver, useTextSelection } from '@mantine/hooks';
 import { Registry, initializeTrrack } from '@trrack/core';
-import { WaveForm, useWavesurfer } from 'wavesurfer-react';
-import WaveSurferContext from 'wavesurfer-react/dist/contexts/WaveSurferContext';
 import { createPortal } from 'react-dom';
-import * as icons from '@tabler/icons-react';
 import { useStorageEngine } from '../../../store/storageEngineHooks';
 import { useAsync } from '../../../store/hooks/useAsync';
 import { StorageEngine } from '../../../storage/engines/StorageEngine';
-import { AllTasksTimeline } from './AllTasksTimeline';
-import { SingleTaskTimeline } from './SingleTaskTimeline';
 
 import { deepCopy } from '../../../utils/deepCopy';
-import { useEvent } from '../../../store/hooks/useEvent';
-import { AudioTag } from '../../../store/types';
 import { AnalysisPopout } from './AnalysisPopout';
 
 // import WaveSurfer from 'wavesurfer.js';
@@ -152,7 +141,7 @@ export function Analysis({ setProvState } : {setProvState: (state: any) => void}
     <div>
 
       {/* {children} */}
-      {createPortal(<div><AnalysisPopout popoutWindow={popoutRef.current || document} cssUpdate={updateCss} /></div>, containerEl)}
+      {createPortal(<div><AnalysisPopout popoutWindow={popoutRef.current || document as any} cssUpdate={updateCss} /></div>, containerEl)}
     </div>
   );
 }

@@ -211,10 +211,10 @@ export function BrushPlot({ parameters, setAnswer }: StimulusParams<BrushParams>
               key={index}
               brushedPoints={brushState.selection}
               data={dataForScatter}
-              initialParams={{ ...parameters, x: state.xCol, y: state.yCol }}
+              initialParams={{ ...parameters, x: (state as BrushState).xCol, y: (state as BrushState).yCol }}
               brushType={parameters.brushType}
               setBrushedSpace={brushedSpaceCallback}
-              brushState={state}
+              brushState={(state as BrushState)}
               isPaintbrushSelect={isPaintbrushSelect}
               setFilteredTable={filteredCallback}
             />
@@ -238,7 +238,7 @@ export function BrushPlot({ parameters, setAnswer }: StimulusParams<BrushParams>
         </Box>
       </Group>
 
-      <Bar data={dataForScatter} parameters={parameters} barsTable={barsTable} />
+      <Bar data={dataForScatter as any} parameters={parameters} barsTable={barsTable} />
     </Stack>
   ) : <Loader />;
 }
