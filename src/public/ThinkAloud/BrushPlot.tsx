@@ -224,7 +224,7 @@ export function BrushPlot({ parameters, setAnswer }: StimulusParams<BrushParams>
         <Box style={{ width: '400px' }}>
           <Center>
             <AddPlot
-              columns={Object.keys(data[0])}
+              columns={parameters.columns ? parameters.columns : Object.keys(data[0])}
               onAdd={(xCol, yCol) => {
                 setBrushState({
                   ...brushState,
