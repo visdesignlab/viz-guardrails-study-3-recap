@@ -4,7 +4,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import {
-  Loader, Group, Stack, Paper, Text, Divider, Flex,
+  Loader, Group, Stack, Paper, Text, Divider, Flex, Blockquote,
 } from '@mantine/core';
 import {
   useEffect, useState, useMemo, useCallback,
@@ -24,8 +24,12 @@ export interface ChartParams {
     dataset: string,
     start_date: string,
     end_date: string,
+    initial_selection: string[],
     allow_time_slider: boolean,
     allow_guardrail_selector: boolean,
+    allow_selection: boolean,
+    allow_help: boolean,
+    caption: string,
     x_var: string,
     y_var: string,
     cat_var: string,
@@ -36,7 +40,7 @@ export interface ChartParams {
 export function DataExplorer({ parameters, setAnswer }: StimulusParams<ChartParams>) {
   // ---------------------------- Setup & data ----------------------------
   const [data, setData] = useState<any[] | null>(null);
-  const [selection, setSelection] = useState<string[] | null>([]);
+  const [selection, setSelection] = useState<string[] | null>(parameters.initial_selection);
   const [items, setItems] = useState<any[] | null>(null);
   const [range, setRange] = useState<[Date, Date] | null>([new Date(parameters.start_date), new Date(parameters.end_date)]);
   const [guardrail, setGuardrail] = useState<string>(parameters.guardrail);
@@ -120,6 +124,13 @@ export function DataExplorer({ parameters, setAnswer }: StimulusParams<ChartPara
       ) : null}
       <Flex>
         <Paper shadow="md" radius="md" p="md" withBorder>
+          {parameters.caption === '' ? null : (
+            <Flex style={{ width: '800px' }}>
+              <Blockquote>
+                {parameters.caption}
+              </Blockquote>
+            </Flex>
+          )}
           <Group>
             <Sidebar
               parameters={parameters}
@@ -145,7 +156,7 @@ export function DataExplorer({ parameters, setAnswer }: StimulusParams<ChartPara
                     <Text fz="xs" c="dimmed">Bar on the left highlights the range of selection among all data.</Text>
                   ) : null}
                 </Stack>
-                <Help parameters={parameters} />
+                {parameters.allow_help ? <Help parameters={parameters} /> : null}
               </Group>
               <Stack>
                 <Group>

@@ -90,10 +90,12 @@ export function Sidebar({
 
   return (
     <Checkbox.Group
+      defaultValue={selection as string[]}
       orientation="vertical"
       onChange={(xs) => { setSelection(xs); trackSelection(xs); }}
       spacing={0}
       offset="sm"
+      styles={(parameters.allow_selection === false) ? { root: { pointerEvents: 'none' } } : { root: { pointerEvents: 'auto' } }}
     >
       {items?.map((item) => (
         <>
@@ -107,7 +109,8 @@ export function Sidebar({
               <Checkbox
                 key={`${item.name}_checkbox`}
                 value={item.name}
-                label={item.name.includes('Policy') ? item.name.split('(Policy')[0] : item.name}
+                label={item.name}
+                color={parameters.allow_selection ? 'blue' : 'gray'}
                 styles={(guardrail === 'juxt_data') ? { root: { display: 'flex', alignItems: 'flex-end', padding: '2px 0' } } : {}}
               >
                 {item.name}
