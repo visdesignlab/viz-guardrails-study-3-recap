@@ -175,27 +175,27 @@ export function Scatter({
 
   const brushedSet = useMemo(() => (brushedPoints.length === 0 ? null : new Set(brushedPoints)), [brushedPoints]);
 
-  const forceSimulation = useMemo(() => {
-    if (brushState.type === 'beeswarm' && xScale && yScale) {
-      const simulation = d3.forceSimulation(data.filter((d) => (params.year ? +d.Year === params.year : true)))
-        .force('x', d3.forceX((d) => xScale(d[params.x])))
-        .force('y', d3.forceY((d) => yScale(d[params.y])))
-        .force('collide', d3.forceCollide((d) => 3));
+  // const forceSimulation = useMemo(() => {
+  //   if (brushState.type === 'beeswarm' && xScale && yScale) {
+  //     const simulation = d3.forceSimulation(data.filter((d) => (params.year ? +d.Year === params.year : true)))
+  //       .force('x', d3.forceX((d) => xScale(d[params.x])))
+  //       .force('y', d3.forceY((d) => yScale(d[params.y])))
+  //       .force('collide', d3.forceCollide((d) => 3));
 
-      for (let i = 0; i < 100; i += 1) simulation.tick();
+  //     for (let i = 0; i < 100; i += 1) simulation.tick();
 
-      return simulation;
-    }
+  //     return simulation;
+  //   }
 
-    return null;
-  }, [brushState.type, data, xScale, yScale]);
+  //   return null;
+  // }, [brushState.type, data, xScale, yScale]);
 
   const circles = useMemo(() => {
     if (!xScale || !yScale) {
       return null;
     }
 
-    return brushState.type !== 'beeswarm' ? data.filter((d) => (params.year ? +d.Year === params.year : true)).map((d, i) => {
+    return data.filter((d) => (params.year ? +d.Year === params.year : true)).map((d, i) => {
       if (d[params.x] === null || d[params.y] === null) {
         return null;
       }
@@ -203,7 +203,7 @@ export function Scatter({
       const xVal = params.dataType === 'date' ? xScale(new Date(d[params.x])) : xScale(d[params.x]);
 
       return <Tooltip key={i} withinPortal label={d[params.ids]}><circle key={i} opacity={brushedSet && !brushedSet.has(d[params.ids]) ? 0.3 : 0.7} r={3} fill={brushedSet && !brushedSet.has(d[params.ids]) ? 'lightgray' : colorScale(d[params.category])} cx={xVal} cy={yScale(d[params.y])} /></Tooltip>;
-    }) : forceSimulation?.nodes().map((d) => <Tooltip key={d[params.ids]} withinPortal label={d[params.ids]}><circle opacity={brushedSet && !brushedSet.has(d[params.ids]) ? 0.3 : 1} r={3} fill={brushedSet && !brushedSet.has(d[params.ids]) ? 'lightgray' : colorScale(d[params.category])} cx={d.x} cy={d.y} /></Tooltip>);
+    });
   }, [brushedSet, colorScale, data, params.category, params.ids, params.x, params.y, xScale, yScale, params]);
 
   useEffect(() => {
@@ -302,5 +302,3 @@ export function Scatter({
     </Stack>
   );
 }
-
-export default Scatter;

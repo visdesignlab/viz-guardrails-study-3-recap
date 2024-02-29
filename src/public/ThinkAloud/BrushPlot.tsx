@@ -1,3 +1,4 @@
+/* eslint-disable no-nested-ternary */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import {
@@ -16,10 +17,12 @@ import { Bar } from './Bar';
 import { StimulusParams } from '../../store/types';
 import { BrushParams, BrushState, SelectionType } from './types';
 import { AddPlot } from './AddPlot';
+import { Histogram } from './Histogram';
+import { Violin } from './Violin';
 
 export function BrushPlot({ parameters, setAnswer }: StimulusParams<BrushParams>) {
   const [filteredTable, setFilteredTable] = useState<ColumnTable | null>(null);
-  const [brushState, setBrushState] = useState<{ [n: number] : BrushState, selection: string[] }>({
+  const [brushState, setBrushState] = useState<{ [n: number] : BrushState, selection: string[] }>(parameters.brushState ? { ...parameters.brushState, selection: [] } : {
     0: {
       hasBrush: false, x1: 0, y1: 0, x2: 0, y2: 0, xCol: parameters.x, yCol: parameters.y, id: 0, type: 'scatter',
     },
@@ -166,6 +169,8 @@ export function BrushPlot({ parameters, setAnswer }: StimulusParams<BrushParams>
 
   const dataForScatter = useMemo(() => fullTable?.objects() || [], [fullTable]);
 
+  const dataForBars = useMemo(() => filteredTable?.objects() || [], [filteredTable]);
+
   return data ? (
     <Stack spacing="xs">
       <Group>
@@ -202,15 +207,15 @@ export function BrushPlot({ parameters, setAnswer }: StimulusParams<BrushParams>
             return null;
           }
 
-          return (
-            <Scatter
+          return (state as BrushState).type === 'histogram' ? (
+            <Histogram
               onClose={(id: number) => {
                 const { [id]: _, ...newState } = brushState;
                 setBrushState(newState);
               }}
               key={index}
               brushedPoints={brushState.selection}
-              data={dataForScatter}
+              data={dataForBars.length > 0 ? dataForBars : dataForScatter}
               initialParams={{ ...parameters, x: (state as BrushState).xCol, y: (state as BrushState).yCol }}
               brushType={parameters.brushType}
               setBrushedSpace={brushedSpaceCallback}
@@ -218,7 +223,40 @@ export function BrushPlot({ parameters, setAnswer }: StimulusParams<BrushParams>
               isPaintbrushSelect={isPaintbrushSelect}
               setFilteredTable={filteredCallback}
             />
-          );
+          ) : (state as BrushState).type === 'violin'
+            ? (
+              <Violin
+                onClose={(id: number) => {
+                  const { [id]: _, ...newState } = brushState;
+                  setBrushState(newState);
+                }}
+                key={index}
+                brushedPoints={brushState.selection}
+                data={dataForBars.length > 0 ? dataForBars : dataForScatter}
+                initialParams={{ ...parameters, x: (state as BrushState).xCol, y: (state as BrushState).yCol }}
+                brushType={parameters.brushType}
+                setBrushedSpace={brushedSpaceCallback}
+                brushState={(state as BrushState)}
+                isPaintbrushSelect={isPaintbrushSelect}
+                setFilteredTable={filteredCallback}
+              />
+            ) : (
+              <Scatter
+                onClose={(id: number) => {
+                  const { [id]: _, ...newState } = brushState;
+                  setBrushState(newState);
+                }}
+                key={index}
+                brushedPoints={brushState.selection}
+                data={dataForScatter}
+                initialParams={{ ...parameters, x: (state as BrushState).xCol, y: (state as BrushState).yCol }}
+                brushType={parameters.brushType}
+                setBrushedSpace={brushedSpaceCallback}
+                brushState={(state as BrushState)}
+                isPaintbrushSelect={isPaintbrushSelect}
+                setFilteredTable={filteredCallback}
+              />
+            );
         })}
         {/* <Scatter setParams={setParameters} brushedPoints={brushState?.ids} data={fullTable?.objects() || []} params={parameters} brushType={parameters.brushType} setBrushedSpace={brushedSpaceCallback} brushState={brushState} setFilteredTable={filteredCallback} /> */}
 
@@ -227,11 +265,20 @@ export function BrushPlot({ parameters, setAnswer }: StimulusParams<BrushParams>
             <Center>
               <AddPlot
                 columns={parameters.columns ? parameters.columns : Object.keys(data[0])}
+                catColumns={parameters.catColumns || []}
+                onAddHistogram={(xCol) => {
+                  setBrushState({
+                    ...brushState,
+                    [Object.keys(brushState).length]: {
+                      hasBrush: false, x1: 0, y1: 0, x2: 0, y2: 0, xCol, yCol: xCol, id: Object.keys(brushState).length, type: 'histogram',
+                    },
+                  });
+                }}
                 onAdd={(xCol, yCol) => {
                   setBrushState({
                     ...brushState,
                     [Object.keys(brushState).length]: {
-                      hasBrush: false, x1: 0, y1: 0, x2: 0, y2: 0, xCol, yCol, id: Object.keys(brushState).length, type: parameters.catColumns && (parameters.catColumns.includes(xCol) || parameters.catColumns.includes(yCol)) ? 'beeswarm' : 'scatter',
+                      hasBrush: false, x1: 0, y1: 0, x2: 0, y2: 0, xCol, yCol, id: Object.keys(brushState).length, type: parameters.catColumns && (parameters.catColumns.includes(xCol) || parameters.catColumns.includes(yCol)) ? 'violin' : 'scatter',
                     },
                   });
                 }}

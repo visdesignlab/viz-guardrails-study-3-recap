@@ -12,7 +12,7 @@ export function YAxisBar({
   showLines,
   compact = false,
 }: {
-  yScale: d3.ScaleBand<string>
+  yScale: d3.ScaleBand<string> | d3.ScaleLinear<number, number>
   xRange: [number, number];
   horizontalPosition: number;
   label: string;

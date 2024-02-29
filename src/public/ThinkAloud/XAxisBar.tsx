@@ -1,3 +1,4 @@
+/* eslint-disable no-nested-ternary */
 import {
   Center, Group, Select, Text, Tooltip,
 } from '@mantine/core';
@@ -17,11 +18,12 @@ export function XAxisBar({
   dropdownColumn = false,
   columnList,
   setColumn,
+  stringTicks = false,
 }: {
   showLines?: boolean;
   isDate?: boolean;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  xScale: d3.ScaleTime<any, any> | d3.ScaleLinear<number, number>;
+  xScale: d3.ScaleTime<any, any> | d3.ScaleLinear<number, number> | d3.ScaleBand<any>;
   yRange: [number, number];
   vertPosition: number;
   label: string;
@@ -30,6 +32,7 @@ export function XAxisBar({
   dropdownColumn?: boolean;
   columnList?: string[];
   setColumn?: (s: string) => void;
+  stringTicks?: boolean
 }) {
   const tickWidth = useMemo(() => {
     if (ticks.length > 1) {
@@ -77,7 +80,7 @@ export function XAxisBar({
                     textAlign: 'center', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap',
                   }}
                 >
-                  {+value === 0 ? 0 : format(isDate ? new Date(value) : value)}
+                  {stringTicks ? value : +value === 0 ? 0 : format(isDate ? new Date(value) : value)}
                 </Text>
               </Tooltip>
             </Center>

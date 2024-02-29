@@ -7,11 +7,11 @@ export interface BrushState {
     xCol: string;
     yCol: string;
     id: number;
-    type?: 'scatter' | 'beeswarm'
+    type?: 'scatter' | 'beeswarm' | 'histogram' | 'violin'
   }
 
 export type SelectionType = 'drag' | 'handle' | 'clear' | null
 
 export type BrushNames = 'Rectangular Selection' | 'Axis Selection' | 'Slider Selection' | 'Paintbrush Selection'
 
-export interface BrushParams {brushType: BrushNames, dataset: string, x: string, y: string, category: string, ids: string, dataType?: 'date', year?: number | undefined, columns?: string[], catColumns?: string[]}
+export interface BrushParams {brushType: BrushNames, dataset: string, x: string, y: string, category: string, ids: string, dataType?: 'date', year?: number | undefined, columns?: string[], catColumns?: string[], brushState?: Record<number, BrushState>}
