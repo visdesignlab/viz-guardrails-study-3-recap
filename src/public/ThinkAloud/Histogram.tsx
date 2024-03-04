@@ -29,13 +29,14 @@ const margin = {
 export function Histogram({
   setFilteredTable,
   brushState,
-  setBrushedSpace,
+  setSelection,
   brushType,
   initialParams,
   data,
   brushedPoints,
   onClose,
   isPaintbrushSelect,
+  dataTable,
 }:
 {
   brushedPoints: string[],
@@ -43,10 +44,11 @@ export function Histogram({
   initialParams: BrushParams,
   setFilteredTable: (c: ColumnTable | null) => void,
   brushState: BrushState,
-  setBrushedSpace: (brush: [[number | null, number | null], [number | null, number | null]], xScale: any, yScale: any, selType: 'drag' | 'handle' | 'clear' | null, id: number, ids?: string[]) => void,
+  setSelection: (sel: string[]) => void,
   brushType: BrushNames,
   onClose: (id: number) => void
   isPaintbrushSelect: boolean;
+  dataTable: ColumnTable;
 }) {
   const [ref, { height: originalHeight, width: originalWidth }] = useResizeObserver();
 
@@ -56,7 +58,13 @@ export function Histogram({
 
   const height = useMemo(() => originalHeight - margin.top - margin.bottom, [originalHeight]);
 
-  const partialBarsTable = useMemo(() => {
+  const allDataTable = useMemo(() => {
+    const binnedTable = dataTable.groupby(brushState.xCol, 'Survived').count();
+
+    return binnedTable;
+  }, [brushState.xCol, dataTable]);
+
+  const barsTable = useMemo(() => {
     if (!data) {
       return null;
     }
@@ -68,33 +76,21 @@ export function Histogram({
     return binnedTable;
   }, [brushState.xCol, data]);
 
-  const barsTable = useMemo(() => {
-    if (!data) {
-      return null;
-    }
-
-    const tempTable = from(data);
-
-    const binnedTable = tempTable.groupby(brushState.xCol).count();
-
-    return binnedTable;
-  }, [brushState.xCol, data]);
-
   const yScale = useMemo(() => {
-    if (!barsTable) {
+    if (!allDataTable) {
       return null;
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return d3.scaleLinear([margin.top, height + margin.top]).domain([0, d3.max(barsTable.objects().map((obj: any) => obj.count)) as any].reverse()).nice();
-  }, [barsTable, height]);
+    return d3.scaleLinear([margin.top, height + margin.top]).domain([0, d3.max(allDataTable.objects().map((obj: any) => obj.count)) as any].reverse()).nice();
+  }, [allDataTable, height]);
 
   const xScale = useMemo(() => {
-    if (!barsTable) {
+    if (!allDataTable) {
       return null;
     }
 
-    return d3.scaleBand([margin.left, width + margin.left]).domain(barsTable.array(brushState.xCol).sort()).paddingInner(0.01);
-  }, [barsTable, width, brushState.xCol]);
+    return d3.scaleBand([margin.left, width + margin.left]).domain(allDataTable.array(brushState.xCol).sort()).paddingInner(0.1);
+  }, [allDataTable, width, brushState.xCol]);
 
   const rects = useMemo(() => {
     if (!xScale || !yScale || !barsTable) {
@@ -103,26 +99,26 @@ export function Histogram({
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return (barsTable.objects() as any[]).map((bar: any, i) => (
-      <g key={i}>
-        <rect key={i} x={xScale(bar[brushState.xCol])} y={height - (height - yScale(bar.count))} fill={bar.Survived ? 'gray' : 'lightgray'} width={xScale.bandwidth()} height={margin.top + height - yScale(bar.count)} />
-        <text x={xScale(bar[brushState.xCol])! + xScale.bandwidth() / 2} y={yScale(bar.count) - 10} style={{ textAnchor: 'middle', dominantBaseline: 'middle', fontSize: 14 }}>{bar.count}</text>
+      <g key={`${i}fullRects`}>
+        <rect onClick={() => setSelection(dataTable.objects().filter((d) => d[brushState.xCol] === bar[brushState.xCol] && d.Survived === bar.Survived).map((d) => d.Name))} x={bar.Survived === 'Yes' ? xScale(bar[brushState.xCol]) : xScale(bar[brushState.xCol])! + (xScale.bandwidth() / 2)} y={height - (height - yScale(bar.count))} fill={bar.Survived === 'Yes' ? '#f28e2c' : '#4e79a7'} width={xScale.bandwidth() / 2} height={margin.top + height - yScale(bar.count)} />
+        <text x={xScale(bar[brushState.xCol])! + (bar.Survived === 'Yes' ? xScale.bandwidth() / 4 : xScale.bandwidth() * 0.75)} y={yScale(bar.count) - 10} style={{ textAnchor: 'middle', dominantBaseline: 'middle', fontSize: 14 }}>{bar.count}</text>
       </g>
     ));
-  }, [barsTable, brushState.xCol, height, xScale, yScale]);
+  }, [barsTable, brushState.xCol, dataTable, height, setSelection, xScale, yScale]);
 
   const survivedRects = useMemo(() => {
-    if (!xScale || !yScale || !partialBarsTable) {
+    if (!xScale || !yScale || !allDataTable) {
       return null;
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (partialBarsTable.objects() as any[]).filter((bar) => bar.Survived === 'Yes').map((bar: any, i) => (
-      <g key={i}>
-        <rect key={i} x={xScale(bar[brushState.xCol])} y={height - (height - yScale(bar.count))} fill={bar.Survived ? 'gray' : 'lightgray'} width={xScale.bandwidth()} height={margin.top + height - yScale(bar.count)} />
+    return (allDataTable.objects() as any[]).map((bar: any, i) => (
+      <g key={`${i}survRects`}>
+        <rect onClick={() => setSelection(dataTable.objects().filter((d) => d[brushState.xCol] === bar[brushState.xCol] && d.Survived === bar.Survived).map((d) => d.Name))} opacity={0.7} x={bar.Survived === 'Yes' ? xScale(bar[brushState.xCol]) : xScale(bar[brushState.xCol])! + (xScale.bandwidth() / 2)} fill="lightgray" width={xScale.bandwidth() / 2} y={height - (height - yScale(bar.count))} height={margin.top + height - yScale(bar.count)} />
         {/* <text x={xScale(bar[brushState.xCol]) + xScale.bandwidth() / 2} y={yScale(bar.count)!} style={{ textAlign: 'center', dominantBaseline: 'middle', fontSize: 14 }}>{bar.count}</text> */}
       </g>
     ));
-  }, [brushState.xCol, height, partialBarsTable, xScale, yScale]);
+  }, [allDataTable, brushState.xCol, dataTable, height, setSelection, xScale, yScale]);
 
   return yScale && xScale && barsTable ? (
     <Stack spacing={0}>
@@ -138,7 +134,7 @@ export function Histogram({
           showLines={false}
           stringTicks
           label={brushState.xCol}
-          ticks={barsTable.array(brushState.xCol).map((country: string) => ({
+          ticks={[...new Set(barsTable.array(brushState.xCol) as string[])].map((country: string) => ({
             value: country,
             offset: xScale(country)! + xScale.bandwidth() / 2,
           }))}
@@ -156,8 +152,8 @@ export function Histogram({
             }))}
           />
         ) : null }
-        { rects }
         { survivedRects }
+        { rects }
       </svg>
     </Stack>
   ) : null;

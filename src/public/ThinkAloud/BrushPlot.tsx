@@ -46,7 +46,7 @@ export function BrushPlot({ parameters, setAnswer }: StimulusParams<BrushParams>
     }
 
     return null;
-  }, [data, parameters.year]);
+  }, [data]);
 
   // creating provenance tracking
   const { actions, trrack } = useMemo(() => {
@@ -104,7 +104,7 @@ export function BrushPlot({ parameters, setAnswer }: StimulusParams<BrushParams>
       provenanceGraph: trrack.graph.backend,
       answers: {},
     });
-  }, [actions, trrack]);
+  }, [actions, setAnswer, trrack]);
 
   // debouncing the trrack callback
   const debouncedCallback = useMemo(() => debounce(moveBrushCallback, 100, { maxWait: 100 }), [moveBrushCallback]);
@@ -150,7 +150,7 @@ export function BrushPlot({ parameters, setAnswer }: StimulusParams<BrushParams>
     }
 
     setFilteredTable(_filteredTable);
-  }, [brushState, fullTable, parameters, trrack, setAnswer, debouncedCallback, actions]);
+  }, [brushState, fullTable, parameters, trrack, debouncedCallback, actions]);
 
   // Which table the bar chart uses, either the base or the filtered table if any selections
   const barsTable = useMemo(() => {
@@ -166,6 +166,15 @@ export function BrushPlot({ parameters, setAnswer }: StimulusParams<BrushParams>
   const filteredCallback = useCallback((c: ColumnTable | null) => {
     setFilteredTable(c);
   }, []);
+
+  const setSelection = useCallback((selection: string[]) => {
+    setBrushState({ ...brushState, selection });
+    const idSet = new Set(selection);
+    const _filteredTable = fullTable!.filter(escape((d: any) => idSet.has(d[parameters.ids])));
+    setFilteredTable(_filteredTable);
+  }, [brushState, fullTable, parameters.ids]);
+
+  filteredTable?.print();
 
   const dataForScatter = useMemo(() => fullTable?.objects() || [], [fullTable]);
 
@@ -213,12 +222,13 @@ export function BrushPlot({ parameters, setAnswer }: StimulusParams<BrushParams>
                 const { [id]: _, ...newState } = brushState;
                 setBrushState(newState);
               }}
+              dataTable={fullTable!}
               key={index}
+              setSelection={setSelection}
               brushedPoints={brushState.selection}
               data={dataForBars.length > 0 ? dataForBars : dataForScatter}
               initialParams={{ ...parameters, x: (state as BrushState).xCol, y: (state as BrushState).yCol }}
               brushType={parameters.brushType}
-              setBrushedSpace={brushedSpaceCallback}
               brushState={(state as BrushState)}
               isPaintbrushSelect={isPaintbrushSelect}
               setFilteredTable={filteredCallback}
@@ -230,6 +240,7 @@ export function BrushPlot({ parameters, setAnswer }: StimulusParams<BrushParams>
                   const { [id]: _, ...newState } = brushState;
                   setBrushState(newState);
                 }}
+                allData={dataForScatter}
                 key={index}
                 brushedPoints={brushState.selection}
                 data={dataForBars.length > 0 ? dataForBars : dataForScatter}
@@ -260,7 +271,7 @@ export function BrushPlot({ parameters, setAnswer }: StimulusParams<BrushParams>
         })}
         {/* <Scatter setParams={setParameters} brushedPoints={brushState?.ids} data={fullTable?.objects() || []} params={parameters} brushType={parameters.brushType} setBrushedSpace={brushedSpaceCallback} brushState={brushState} setFilteredTable={filteredCallback} /> */}
 
-        {parameters.columns ? (
+        {/* {parameters.columns ? (
           <Box style={{ width: '400px' }}>
             <Center>
               <AddPlot
@@ -285,7 +296,7 @@ export function BrushPlot({ parameters, setAnswer }: StimulusParams<BrushParams>
               />
             </Center>
           </Box>
-        ) : null}
+        ) : null} */}
       </Group>
 
       <Bar data={dataForScatter as any} parameters={parameters} barsTable={barsTable} />
