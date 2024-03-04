@@ -13,7 +13,7 @@ import { BrushParams } from './types';
 export function AudioTest({ parameters, setAnswer }: StimulusParams<BrushParams>) {
   const foundAudio = useState<boolean>(true);
   return (
-    <Center style={{ height: '100%', width: '100%' }}>
+    <Center style={{ height: '70%', width: '100%' }}>
       <Stack>
         <Text ta="center">
           Please allow us to access your microphone. There may be a popup in your browser window asking for access, click accept.
@@ -24,7 +24,6 @@ export function AudioTest({ parameters, setAnswer }: StimulusParams<BrushParams>
         <Text ta="center" weight={700}>
           If you are not comfortable or capable of speaking English during this study, please close it now.
         </Text>
-        <Center><Button disabled={!foundAudio} style={{ width: '100px' }}>Continue</Button></Center>
       </Stack>
     </Center>
   );
