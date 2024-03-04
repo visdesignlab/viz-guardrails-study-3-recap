@@ -225,7 +225,7 @@ export function Scatter({
             <Slider min={2008} max={2022} value={params.year} onChange={sliderChange} ml={margin.left} style={{ width: '150px' }} label={params.year} />
           </Stack>
         ) : null}
-        <ActionIcon variant="light" onClick={() => onClose(brushState.id)}><IconX /></ActionIcon>
+        {/* <ActionIcon variant="light" onClick={() => onClose(brushState.id)}><IconX /></ActionIcon> */}
       </Group>
       <Group style={{ width: '100%', height: '100%' }} noWrap>
 

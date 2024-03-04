@@ -344,6 +344,7 @@ export interface StudyConfig {
   /** The metadata for the study. This is used to identify the study and version in the data file. */
   studyMetadata: StudyMetadata;
   recordStudyAudio?: boolean;
+  tasksToNotRecordAudio?: string[];
   /** The UI configuration for the study. This is used to configure the UI of the app. */
   uiConfig: UIConfig;
   /** The components that are used in the study (baseComponents allow PartialComponents which allows for inheriting from them in components). */

@@ -31,6 +31,8 @@ export default function AppHeader() {
   const { toggleShowHelpText, toggleShowAdmin } = useStoreActions();
   const { storageEngine } = useStorageEngine();
 
+  const isRecording = useStoreSelector((store) => store.isRecording);
+
   const currentStep = useCurrentStep();
 
   const progressBarCurrent = studyConfig !== null
@@ -67,7 +69,7 @@ export default function AppHeader() {
             <Image maw={40} src={`${PREFIX}${logoPath}`} alt="Study Logo" />
             <Space w="md" />
             <Title order={4}>{studyConfig?.studyMetadata.title}</Title>
-            {studyConfig?.recordStudyAudio ? (
+            {isRecording ? (
               <Group spacing={5}>
                 <IconMicrophone color="red" />
                 <Text color="red">Recording audio</Text>

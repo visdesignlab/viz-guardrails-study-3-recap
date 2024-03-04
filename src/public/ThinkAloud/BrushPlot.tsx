@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import {
-  Box, Button, Center, Group, Loader, SegmentedControl, Stack,
+  Box, Button, Center, ColorSwatch, Group, Loader, SegmentedControl, Stack, Text,
 } from '@mantine/core';
 import {
   useCallback, useEffect, useMemo, useState,
@@ -174,8 +174,6 @@ export function BrushPlot({ parameters, setAnswer }: StimulusParams<BrushParams>
     setFilteredTable(_filteredTable);
   }, [brushState, fullTable, parameters.ids]);
 
-  filteredTable?.print();
-
   const dataForScatter = useMemo(() => fullTable?.objects() || [], [fullTable]);
 
   const dataForBars = useMemo(() => filteredTable?.objects() || [], [filteredTable]);
@@ -207,6 +205,15 @@ export function BrushPlot({ parameters, setAnswer }: StimulusParams<BrushParams>
               ]}
             />
           ) : null}
+        { parameters.columns ? (
+          <>
+            <ColorSwatch color="#f28e2c" />
+            <Text>Survived</Text>
+
+            <ColorSwatch color="#4e79a7" />
+            <Text>Died</Text>
+          </>
+        ) : null}
       </Group>
       <Group>
         {Object.entries(brushState).map((entry) => {
@@ -242,6 +249,7 @@ export function BrushPlot({ parameters, setAnswer }: StimulusParams<BrushParams>
                 }}
                 allData={dataForScatter}
                 key={index}
+                setSelection={setSelection}
                 brushedPoints={brushState.selection}
                 data={dataForBars.length > 0 ? dataForBars : dataForScatter}
                 initialParams={{ ...parameters, x: (state as BrushState).xCol, y: (state as BrushState).yCol }}
@@ -297,9 +305,10 @@ export function BrushPlot({ parameters, setAnswer }: StimulusParams<BrushParams>
             </Center>
           </Box>
         ) : null} */}
+        <Bar data={dataForScatter as any} parameters={parameters} barsTable={barsTable} />
+
       </Group>
 
-      <Bar data={dataForScatter as any} parameters={parameters} barsTable={barsTable} />
     </Stack>
   ) : <Loader />;
 }

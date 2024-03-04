@@ -100,7 +100,7 @@ export function Histogram({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return (barsTable.objects() as any[]).map((bar: any, i) => (
       <g key={`${i}fullRects`}>
-        <rect onClick={() => setSelection(dataTable.objects().filter((d) => d[brushState.xCol] === bar[brushState.xCol] && d.Survived === bar.Survived).map((d) => d.Name))} x={bar.Survived === 'Yes' ? xScale(bar[brushState.xCol]) : xScale(bar[brushState.xCol])! + (xScale.bandwidth() / 2)} y={height - (height - yScale(bar.count))} fill={bar.Survived === 'Yes' ? '#f28e2c' : '#4e79a7'} width={xScale.bandwidth() / 2} height={margin.top + height - yScale(bar.count)} />
+        <rect onClick={() => setSelection(dataTable.objects().filter((d: any) => d[brushState.xCol] === bar[brushState.xCol] && d.Survived === bar.Survived).map((d: any) => d.Name))} x={bar.Survived === 'Yes' ? xScale(bar[brushState.xCol]) : xScale(bar[brushState.xCol])! + (xScale.bandwidth() / 2)} y={height - (height - yScale(bar.count))} fill={bar.Survived === 'Yes' ? '#f28e2c' : '#4e79a7'} width={xScale.bandwidth() / 2} height={margin.top + height - yScale(bar.count)} />
         <text x={xScale(bar[brushState.xCol])! + (bar.Survived === 'Yes' ? xScale.bandwidth() / 4 : xScale.bandwidth() * 0.75)} y={yScale(bar.count) - 10} style={{ textAnchor: 'middle', dominantBaseline: 'middle', fontSize: 14 }}>{bar.count}</text>
       </g>
     ));
@@ -114,7 +114,7 @@ export function Histogram({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return (allDataTable.objects() as any[]).map((bar: any, i) => (
       <g key={`${i}survRects`}>
-        <rect onClick={() => setSelection(dataTable.objects().filter((d) => d[brushState.xCol] === bar[brushState.xCol] && d.Survived === bar.Survived).map((d) => d.Name))} opacity={0.7} x={bar.Survived === 'Yes' ? xScale(bar[brushState.xCol]) : xScale(bar[brushState.xCol])! + (xScale.bandwidth() / 2)} fill="lightgray" width={xScale.bandwidth() / 2} y={height - (height - yScale(bar.count))} height={margin.top + height - yScale(bar.count)} />
+        <rect onClick={() => setSelection(dataTable.objects().filter((d: any) => d[brushState.xCol] === bar[brushState.xCol] && d.Survived === bar.Survived).map((d: any) => d.Name))} opacity={0.7} x={bar.Survived === 'Yes' ? xScale(bar[brushState.xCol]) : xScale(bar[brushState.xCol])! + (xScale.bandwidth() / 2)} fill="lightgray" width={xScale.bandwidth() / 2} y={height - (height - yScale(bar.count))} height={margin.top + height - yScale(bar.count)} />
         {/* <text x={xScale(bar[brushState.xCol]) + xScale.bandwidth() / 2} y={yScale(bar.count)!} style={{ textAlign: 'center', dominantBaseline: 'middle', fontSize: 14 }}>{bar.count}</text> */}
       </g>
     ));
@@ -122,10 +122,10 @@ export function Histogram({
 
   return yScale && xScale && barsTable ? (
     <Stack spacing={0}>
-      <Group mr={margin.right} style={{ justifyContent: 'space-between' }}>
+      {/* <Group mr={margin.right} style={{ justifyContent: 'space-between' }}>
 
         <ActionIcon variant="light" onClick={() => onClose(brushState.id)}><IconX /></ActionIcon>
-      </Group>
+      </Group> */}
       <svg id="scatterSvgBrushStudy" ref={ref} style={{ height: '500px', width: params.brushType === 'Axis Selection' ? '800px' : '530px', fontFamily: 'BlinkMacSystemFont, -apple-system, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", "Helvetica", "Arial", sans-serif' }}>
         <XAxisBar
           xScale={xScale}

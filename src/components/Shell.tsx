@@ -5,7 +5,7 @@ import {
 } from 'react';
 import { Provider } from 'react-redux';
 import {
-  RouteObject, useMatch, useParams, useRoutes, useSearchParams,
+  RouteObject, useLocation, useMatch, useParams, useRoutes, useSearchParams,
 } from 'react-router-dom';
 import { Box, Center, Loader } from '@mantine/core';
 import { parseStudyConfig } from '../parser/parser';
@@ -47,44 +47,14 @@ export function GenerateStudiesRoutes({ studyId, config, storage }: {
   studyId: Nullable<string>,
   config: Nullable<StudyConfig>,
   storage: StorageEngine}) {
-  const [audioStream, setAudioStream] = useState<MediaRecorder | null>(null);
-  const dispatch = useStoreDispatch();
-  const { setIsRecording } = useStoreActions();
-
   const sequence = useStoreSelector((state) => state.sequence);
 
-  const atEnd = useMatch('/:studyId/end');
-
-  useEffect(() => {
-    let _stream: Promise<MediaStream> | null;
-    if (config && config.recordStudyAudio) {
-      _stream = navigator.mediaDevices.getUserMedia({
-        audio: true,
-      });
-
-      _stream.then((stream) => {
-        const mediaRecorder = new MediaRecorder(stream);
-        mediaRecorder.start();
-        setAudioStream(mediaRecorder);
-        dispatch(setIsRecording(true));
-      });
-    }
-
-    return () => {
-      if (_stream) {
-        _stream.then((data) => {
-          data.getTracks().forEach((track) => track.stop());
-        });
-      }
-    };
-  }, [config, dispatch, setIsRecording]);
-
-  useEffect(() => {
-    if (atEnd && config && config.recordStudyAudio && audioStream) {
-      storage.saveAudio(audioStream);
-      dispatch(setIsRecording(false));
-    }
-  }, [config, atEnd, audioStream, dispatch, setIsRecording, storage]);
+  // useEffect(() => {
+  //   if (atEnd && config && config.recordStudyAudio && audioStream) {
+  //     storage.saveAudio(audioStream);
+  //     dispatch(setIsRecording(false));
+  //   }
+  // }, [config, atEnd, audioStream, dispatch, setIsRecording, storage]);
 
   const routes = useMemo(() => {
     if (studyId && config && sequence) {

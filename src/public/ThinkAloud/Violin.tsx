@@ -57,6 +57,7 @@ export function Violin({
   initialParams,
   data,
   allData,
+  setSelection,
   brushedPoints,
   onClose,
   isPaintbrushSelect,
@@ -70,6 +71,8 @@ export function Violin({
   brushState: BrushState,
   setBrushedSpace: (brush: [[number | null, number | null], [number | null, number | null]], xScale: any, yScale: any, selType: 'drag' | 'handle' | 'clear' | null, id: number, ids?: string[]) => void,
   brushType: BrushNames,
+  setSelection: (sel: string[]) => void,
+
   onClose: (id: number) => void
   isPaintbrushSelect: boolean;
 }) {
@@ -88,150 +91,79 @@ export function Violin({
 
   const xScale = useMemo(() => d3.scaleBand([margin.left, width + margin.left]).domain([...new Set(allData.map((d) => d[brushState.xCol].toString()))].sort()).paddingInner(0.01), [width, allData, brushState.xCol]);
 
-  const allDataPaths = useMemo(() => {
-    if (!xScale) {
-      return null;
-    }
+  //   const paths = useMemo(() => {
+  //     if (!xScale) {
+  //       return null;
+  //     }
 
-    const survivedDensities = xScale.domain().map((cat) => {
-      const catSurvived = allData.filter((d) => d[brushState.xCol] === cat && d.Survived === 'Yes');
-      const silvermansInfo: { variance: number; q1: number; q3: number } = table({ values: catSurvived.map((d) => d[brushState.yCol]) })
-        .rollup({
-          variance: op.variance('values'),
-          q1: op.quantile('values', 0.25),
-          q3: op.quantile('values', 0.75),
-        })
-        .objects()[0] as { variance: number; q1: number; q3: number };
+  //     const survivedDensities = xScale.domain().map((cat) => {
+  //       const catSurvived = data.filter((d) => d[brushState.xCol] === cat && d.Survived === 'Yes');
+  //       const silvermansInfo: { variance: number; q1: number; q3: number } = table({ values: catSurvived.map((d) => d[brushState.yCol]) })
+  //         .rollup({
+  //           variance: op.variance('values'),
+  //           q1: op.quantile('values', 0.25),
+  //           q3: op.quantile('values', 0.75),
+  //         })
+  //         .objects()[0] as { variance: number; q1: number; q3: number };
 
-      const kde = kernelDensityEstimator(
-        kernelEpanechnikov(silvermans(silvermansInfo.q3 - silvermansInfo.q1, silvermansInfo.variance, catSurvived.length)),
-        yScale.ticks(25),
-      );
+  //       const kde = kernelDensityEstimator(
+  //         kernelEpanechnikov(silvermans(silvermansInfo.q3 - silvermansInfo.q1, silvermansInfo.variance, catSurvived.length)),
+  //         yScale.ticks(25),
+  //       );
 
-      const density: number[][] = kde(catSurvived.map((d) => d[brushState.yCol])) as number[][];
+  //       const density: number[][] = kde(catSurvived.map((d) => d[brushState.yCol])) as number[][];
 
-      const widthScale = d3.scaleLinear([0, xScale.bandwidth() / 2]).domain([0, d3.max(density.map((d) => Math.abs(d[1]))) || 1]);
+  //       console.log(density);
 
-      const line = d3.line((d) => widthScale(d[1]) + xScale.bandwidth() / 2, (d) => yScale(d[0])).curve(d3.curveBasis);
+  //       const widthScale = d3.scaleLinear([0, xScale.bandwidth() / 2]).domain([0, d3.max(density.map((d) => Math.abs(d[1]))) || 1]);
 
-      return {
-        density, cat, length: catSurvived.length, line,
-      };
-    });
+  //       const line = d3.line((d) => widthScale(d[1]) + xScale.bandwidth() / 2, (d) => yScale(d[0])).curve(d3.curveBasis);
 
-    const deadDensities = xScale.domain().map((cat) => {
-      const catDied = allData.filter((d) => d[brushState.xCol] === cat && d.Survived === 'No');
+  //       return {
+  //         density, cat, length: catSurvived.length, line,
+  //       };
+  //     });
 
-      const silvermansInfo: { variance: number; q1: number; q3: number } = table({ values: catDied.map((d) => d[brushState.yCol]) })
-        .rollup({
-          variance: op.variance('values'),
-          q1: op.quantile('values', 0.25),
-          q3: op.quantile('values', 0.75),
-        })
-        .objects()[0] as { variance: number; q1: number; q3: number };
+  const fullTable = useMemo(() => from(allData.map((d) => ({ ...d, Age: +d.Age }))), [allData]);
+  const partialTable = useMemo(() => from(data.map((d) => ({ ...d, Age: +d.Age }))), [data]);
 
-      const kde = kernelDensityEstimator(
-        kernelEpanechnikov(silvermans(silvermansInfo.q3 - silvermansInfo.q1, silvermansInfo.variance, catDied.length)),
-        yScale.ticks(25),
-      );
+  const histogram = useMemo(() => {
+    const binnedTable = fullTable
+      .groupby(brushState.xCol, 'Survived', { group: bin(brushState.yCol, { maxbins: 20 }), group_max: bin(brushState.yCol, { maxbins: 20, offset: 1 }) })
+      .rollup({ ids: op.array_agg(params.ids), count: op.count() })
+      .orderby('group');
 
-      const density: number[][] = kde(catDied.map((d) => d[brushState.yCol])) as number [][];
-      console.log(density);
+    const binnedPartialTable = partialTable
+      .groupby(brushState.xCol, 'Survived', { group: bin(brushState.yCol, { maxbins: 20 }), group_max: bin(brushState.yCol, { maxbins: 20, offset: 1 }) })
+      .rollup({ ids: op.array_agg(params.ids), count: op.count() })
+      .orderby('group');
 
-      const widthScale = d3.scaleLinear([0, xScale.bandwidth() / 2]).domain([0, d3.max(density.map((d) => Math.abs(d[1]))) || 1]);
+    const widthScale = d3.scaleLinear([0, xScale.bandwidth() / 2]).domain([0, d3.max<number>(binnedTable.array('count'))!]);
 
-      const line = d3.line((d) => xScale.bandwidth() / 2 - widthScale(d[1]), (d) => yScale(d[0])).curve(d3.curveBasis);
+    const linePositive = d3.line((d) => widthScale(d[1]) + (xScale.bandwidth() / 2), (d) => yScale(d[0])).curve(d3.curveBasis);
+    const lineNegative = d3.line((d) => (xScale.bandwidth() / 2) - widthScale(d[1]), (d) => yScale(d[0])).curve(d3.curveBasis);
 
-      return {
-        density, cat, length: catDied.length, line,
-      };
-    });
+    return (
+      <g>
+        {xScale.domain().map((xVal: string) => (
+          <g key={xVal}>
+            <path onClick={() => setSelection(binnedTable.objects().filter((d: any) => d[brushState.xCol] === xVal && d.Survived === 'Yes').map((d: any) => (d.ids)).flat())} opacity={0.7} transform={`translate(${xScale(xVal)}, 0)`} d={`${linePositive(binnedTable.objects().filter((d: any) => d[brushState.xCol] === xVal && d.Survived === 'Yes').map((d: any) => ([d.group, d.count])))}L${xScale.bandwidth() / 2},${yScale.range()[0]}L${xScale.bandwidth() / 2},${yScale.range()[1]}Z`} fill="lightgray" />
+            <path onClick={() => setSelection(binnedTable.objects().filter((d: any) => d[brushState.xCol] === xVal && d.Survived === 'No').map((d: any) => (d.ids)).flat())} opacity={0.7} transform={`translate(${xScale(xVal)}, 0)`} d={`${lineNegative(binnedTable.objects().filter((d: any) => d[brushState.xCol] === xVal && d.Survived === 'No').map((d: any) => ([d.group, d.count])))}L${xScale.bandwidth() / 2},${yScale.range()[0]}L${xScale.bandwidth() / 2},${yScale.range()[1]}Z`} fill="lightgray" />
+            <path onClick={() => setSelection(binnedTable.objects().filter((d: any) => d[brushState.xCol] === xVal && d.Survived === 'Yes').map((d: any) => (d.ids)).flat())} transform={`translate(${xScale(xVal)}, 0)`} d={`${linePositive(binnedPartialTable.objects().filter((d: any) => d[brushState.xCol] === xVal && d.Survived === 'Yes').map((d: any) => ([d.group, d.count])))}L${xScale.bandwidth() / 2},${yScale.range()[0]}L${xScale.bandwidth() / 2},${yScale.range()[1]}Z`} fill="#f28e2c" />
+            <path onClick={() => setSelection(binnedTable.objects().filter((d: any) => d[brushState.xCol] === xVal && d.Survived === 'No').map((d: any) => (d.ids)).flat())} transform={`translate(${xScale(xVal)}, 0)`} d={`${lineNegative(binnedPartialTable.objects().filter((d: any) => d[brushState.xCol] === xVal && d.Survived === 'No').map((d: any) => ([d.group, d.count])))}L${xScale.bandwidth() / 2},${yScale.range()[0]}L${xScale.bandwidth() / 2},${yScale.range()[1]}Z`} fill="#4e79a7" />
+          </g>
+        ))}
+      </g>
+    );
+  }, [brushState.xCol, brushState.yCol, fullTable, params.ids, partialTable, setSelection, xScale, yScale]);
 
-    const combinedDensities = [...survivedDensities, ...deadDensities];
-
-    const maxLength = d3.max(combinedDensities.map((d) => d.length)) || 1;
-
-    const survivedPaths = survivedDensities.map((density, i) => <path opacity={0.7} fill="lightgray" key={`${i + density.cat}survived`} transform={`translate(${xScale(density.cat)}, 0)`} d={`${density.line(density.density.map((d) => [d[0], d[1] * (density.length / maxLength)]))}L${xScale.bandwidth() / 2},${yScale.range()[1]}L${xScale.bandwidth() / 2},${yScale.range()[0]}Z` || ''} stroke="none" />);
-    const deadPaths = deadDensities.map((density, i) => <path opacity={0.7} fill="lightgray" key={`${i + density.cat}dead`} transform={`translate(${xScale(density.cat)}, 0)`} d={`${density.line(density.density.map((d) => [d[0], d[1] * (density.length / maxLength)]))}L${xScale.bandwidth() / 2},${yScale.range()[1]}L${xScale.bandwidth() / 2},${yScale.range()[0]}Z` || ''} stroke="none" />);
-
-    return [...survivedPaths, ...deadPaths];
-  }, [allData, brushState.xCol, brushState.yCol, xScale, yScale]);
-
-  const paths = useMemo(() => {
-    if (!xScale) {
-      return null;
-    }
-
-    const survivedDensities = xScale.domain().map((cat) => {
-      const catSurvived = data.filter((d) => d[brushState.xCol] === cat && d.Survived === 'Yes');
-      const silvermansInfo: { variance: number; q1: number; q3: number } = table({ values: catSurvived.map((d) => d[brushState.yCol]) })
-        .rollup({
-          variance: op.variance('values'),
-          q1: op.quantile('values', 0.25),
-          q3: op.quantile('values', 0.75),
-        })
-        .objects()[0] as { variance: number; q1: number; q3: number };
-
-      const kde = kernelDensityEstimator(
-        kernelEpanechnikov(silvermans(silvermansInfo.q3 - silvermansInfo.q1, silvermansInfo.variance, catSurvived.length)),
-        yScale.ticks(25),
-      );
-
-      const density: number[][] = kde(catSurvived.map((d) => d[brushState.yCol])) as number[][];
-
-      console.log(density);
-
-      const widthScale = d3.scaleLinear([0, xScale.bandwidth() / 2]).domain([0, d3.max(density.map((d) => Math.abs(d[1]))) || 1]);
-
-      const line = d3.line((d) => widthScale(d[1]) + xScale.bandwidth() / 2, (d) => yScale(d[0])).curve(d3.curveBasis);
-
-      return {
-        density, cat, length: catSurvived.length, line,
-      };
-    });
-
-    const deadDensities = xScale.domain().map((cat) => {
-      const catDied = data.filter((d) => d[brushState.xCol] === cat && d.Survived === 'No');
-
-      const silvermansInfo: { variance: number; q1: number; q3: number } = table({ values: catDied.map((d) => d[brushState.yCol]) })
-        .rollup({
-          variance: op.variance('values'),
-          q1: op.quantile('values', 0.25),
-          q3: op.quantile('values', 0.75),
-        })
-        .objects()[0] as { variance: number; q1: number; q3: number };
-
-      const kde = kernelDensityEstimator(
-        kernelEpanechnikov(silvermans(silvermansInfo.q3 - silvermansInfo.q1, silvermansInfo.variance, catDied.length)),
-        yScale.ticks(25),
-      );
-
-      const density: number[][] = kde(catDied.map((d) => d[brushState.yCol])) as number [][];
-
-      const widthScale = d3.scaleLinear([0, xScale.bandwidth() / 2]).domain([0, d3.max(density.map((d) => Math.abs(d[1]))) || 1]);
-
-      const line = d3.line((d) => xScale.bandwidth() / 2 - widthScale(d[1]), (d) => yScale(d[0])).curve(d3.curveBasis);
-
-      return {
-        density, cat, length: catDied.length, line,
-      };
-    });
-
-    const combinedDensities = [...survivedDensities, ...deadDensities];
-
-    const maxLength = d3.max(combinedDensities.map((d) => d.length)) || 1;
-
-    const survivedPaths = survivedDensities.map((density, i) => <path key={`${i + density.cat}survived`} transform={`translate(${xScale(density.cat)}, 0)`} d={`${density.line(density.density.map((d) => [d[0], d[1] * (density.length / maxLength)]))}L${xScale.bandwidth() / 2},${yScale.range()[1]}L${xScale.bandwidth() / 2},${yScale.range()[0]}Z` || ''} stroke="none" fill="#f28e2c" />);
-    const deadPaths = deadDensities.map((density, i) => <path key={`${i + density.cat}dead`} transform={`translate(${xScale(density.cat)}, 0)`} d={`${density.line(density.density.map((d) => [d[0], d[1] * (density.length / maxLength)]))}L${xScale.bandwidth() / 2},${yScale.range()[1]}L${xScale.bandwidth() / 2},${yScale.range()[0]}Z` || ''} stroke="none" fill="#4e79a7" />);
-
-    return [...survivedPaths, ...deadPaths];
-  }, [brushState.xCol, brushState.yCol, data, xScale, yScale]);
+  //   histogram.print();
 
   return (
     <Stack spacing={0}>
-      <Group mr={margin.right} style={{ justifyContent: 'space-between' }}>
+      {/* <Group mr={margin.right} style={{ justifyContent: 'space-between' }}>
         <ActionIcon variant="light" onClick={() => onClose(brushState.id)}><IconX /></ActionIcon>
-      </Group>
+      </Group> */}
       <svg id="scatterSvgBrushStudy" ref={ref} style={{ height: '500px', width: params.brushType === 'Axis Selection' ? '800px' : '530px', fontFamily: 'BlinkMacSystemFont, -apple-system, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", "Helvetica", "Arial", sans-serif' }}>
         <XAxisBar
           xScale={xScale}
@@ -258,8 +190,10 @@ export function Violin({
             }))}
           />
         ) : null }
-        {paths}
-        {allDataPaths}
+
+        {histogram}
+        {/* {paths}
+        {allDataPaths} */}
         {/* { rects }
         { survivedRects } */}
       </svg>

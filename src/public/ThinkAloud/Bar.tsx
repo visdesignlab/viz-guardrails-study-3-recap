@@ -15,7 +15,7 @@ const margin = {
   top: 15,
   left: 160,
   right: 50,
-  bottom: 50,
+  bottom: 130,
 };
 
 export function Bar({ barsTable, parameters, data } : {barsTable: ColumnTable | null, parameters: BrushParams, data: Record<string, string>[]}) {
@@ -67,7 +67,7 @@ export function Bar({ barsTable, parameters, data } : {barsTable: ColumnTable | 
   }, [barsTable, colorScale, parameters.category, xScale, yScale]);
 
   return yScale && xScale ? (
-    <svg ref={ref} style={{ height: '400px', width: '550px', fontFamily: 'BlinkMacSystemFont, -apple-system, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", "Helvetica", "Arial", sans-serif' }}>
+    <svg ref={ref} style={{ height: '500px', width: '530px', fontFamily: 'BlinkMacSystemFont, -apple-system, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", "Helvetica", "Arial", sans-serif' }}>
       <XAxisBar
         xScale={xScale}
         yRange={yScale.range() as [number, number]}

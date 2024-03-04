@@ -1,4 +1,4 @@
-import { Suspense, useEffect } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import merge from 'lodash.merge';
 import { useParams } from 'react-router-dom';
 import ResponseBlock from '../components/response/ResponseBlock';
@@ -13,12 +13,14 @@ import { isInheritedComponent } from '../parser/parser';
 import { IndividualComponent } from '../parser/types';
 import { disableBrowserBack } from '../utils/disableBrowserBack';
 import { useStorageEngine } from '../store/storageEngineHooks';
-import { useStoreActions, useStoreDispatch } from '../store/store';
+import { useStoreActions, useStoreDispatch, useStoreSelector } from '../store/store';
 
 // current active stimuli presented to the user
 export default function ComponentController({ provState } : {provState?: unknown}) {
   // Get the config for the current step
   const studyConfig = useStudyConfig();
+  const storage = useStorageEngine();
+
   const { trialName: currentStep } = useParams();
 
   const stepConfig = studyConfig.components[currentStep!];
@@ -31,6 +33,49 @@ export default function ComponentController({ provState } : {provState?: unknown
   const instruction = (currentConfig.instruction || '');
   const { instructionLocation } = currentConfig;
   const instructionInSideBar = studyConfig.uiConfig.sidebar && (instructionLocation === 'sidebar' || instructionLocation === undefined);
+
+  const [audioStream, setAudioStream] = useState<MediaRecorder | null>(null);
+  const dispatch = useStoreDispatch();
+  const { setIsRecording } = useStoreActions();
+
+  const { trialName } = useParams();
+  const [prevTrialName, setPrevTrialName] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!trialName || !studyConfig || !studyConfig.recordStudyAudio || !storage.storageEngine) {
+      return;
+    }
+
+    if (audioStream && prevTrialName) {
+      storage.storageEngine.saveAudio(audioStream, prevTrialName);
+    }
+
+    if (studyConfig.tasksToNotRecordAudio && studyConfig.tasksToNotRecordAudio.includes(trialName)) {
+      setPrevTrialName(null);
+      setAudioStream(null);
+      dispatch(setIsRecording(false));
+    } else {
+      const _stream = navigator.mediaDevices.getUserMedia({
+        audio: true,
+      });
+
+      _stream.then((stream) => {
+        const mediaRecorder = new MediaRecorder(stream);
+        mediaRecorder.start();
+        setAudioStream(mediaRecorder);
+        dispatch(setIsRecording(true));
+      });
+      setPrevTrialName(trialName);
+    }
+
+    // return () => {
+    //   if (_stream) {
+    //     _stream.then((data) => {
+    //       data.getTracks().forEach((track) => track.stop());
+    //     });
+    //   }
+    // };
+  }, [trialName]);
 
   // Disable browser back button from all stimuli
   disableBrowserBack();

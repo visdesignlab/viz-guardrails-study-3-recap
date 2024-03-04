@@ -57,7 +57,7 @@ export abstract class StorageEngine {
 
   abstract nextParticipant(config: StudyConfig): Promise<ParticipantData>;
 
-  abstract saveAudio(audioStream: MediaRecorder): Promise<void>;
+  abstract saveAudio(audioStream: MediaRecorder, taskName: string): Promise<void>;
 
   abstract verifyCompletion(answers: Record<string, StoredAnswer>): Promise<boolean>;
 }
