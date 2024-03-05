@@ -167,10 +167,11 @@ export function BrushPlot({ parameters, setAnswer }: StimulusParams<BrushParams>
     setFilteredTable(c);
   }, []);
 
-  const setSelection = useCallback((selection: string[]) => {
-    setBrushState({ ...brushState, selection });
-    const idSet = new Set(selection);
+  const setSelection = useCallback((selection: string[], e: React.MouseEvent) => {
+    const idSet = new Set(e.ctrlKey || e.metaKey ? [...brushState.selection, ...selection] : selection);
     const _filteredTable = fullTable!.filter(escape((d: any) => idSet.has(d[parameters.ids])));
+
+    setBrushState({ ...brushState, selection: e.ctrlKey || e.metaKey ? [...brushState.selection, ...selection] : selection });
     setFilteredTable(_filteredTable);
   }, [brushState, fullTable, parameters.ids]);
 
@@ -305,7 +306,7 @@ export function BrushPlot({ parameters, setAnswer }: StimulusParams<BrushParams>
             </Center>
           </Box>
         ) : null} */}
-        <Bar data={dataForScatter as any} parameters={parameters} barsTable={barsTable} />
+        <Bar fullTable={fullTable} setSelection={setSelection} data={dataForScatter as any} parameters={parameters} barsTable={barsTable} />
 
       </Group>
 

@@ -71,8 +71,7 @@ export function Violin({
   brushState: BrushState,
   setBrushedSpace: (brush: [[number | null, number | null], [number | null, number | null]], xScale: any, yScale: any, selType: 'drag' | 'handle' | 'clear' | null, id: number, ids?: string[]) => void,
   brushType: BrushNames,
-  setSelection: (sel: string[]) => void,
-
+  setSelection: (sel: string[], e: React.MouseEvent) => void,
   onClose: (id: number) => void
   isPaintbrushSelect: boolean;
 }) {
@@ -147,10 +146,10 @@ export function Violin({
       <g>
         {xScale.domain().map((xVal: string) => (
           <g key={xVal}>
-            <path onClick={() => setSelection(binnedTable.objects().filter((d: any) => d[brushState.xCol] === xVal && d.Survived === 'Yes').map((d: any) => (d.ids)).flat())} opacity={0.7} transform={`translate(${xScale(xVal)}, 0)`} d={`${linePositive(binnedTable.objects().filter((d: any) => d[brushState.xCol] === xVal && d.Survived === 'Yes').map((d: any) => ([d.group, d.count])))}L${xScale.bandwidth() / 2},${yScale.range()[0]}L${xScale.bandwidth() / 2},${yScale.range()[1]}Z`} fill="lightgray" />
-            <path onClick={() => setSelection(binnedTable.objects().filter((d: any) => d[brushState.xCol] === xVal && d.Survived === 'No').map((d: any) => (d.ids)).flat())} opacity={0.7} transform={`translate(${xScale(xVal)}, 0)`} d={`${lineNegative(binnedTable.objects().filter((d: any) => d[brushState.xCol] === xVal && d.Survived === 'No').map((d: any) => ([d.group, d.count])))}L${xScale.bandwidth() / 2},${yScale.range()[0]}L${xScale.bandwidth() / 2},${yScale.range()[1]}Z`} fill="lightgray" />
-            <path onClick={() => setSelection(binnedTable.objects().filter((d: any) => d[brushState.xCol] === xVal && d.Survived === 'Yes').map((d: any) => (d.ids)).flat())} transform={`translate(${xScale(xVal)}, 0)`} d={`${linePositive(binnedPartialTable.objects().filter((d: any) => d[brushState.xCol] === xVal && d.Survived === 'Yes').map((d: any) => ([d.group, d.count])))}L${xScale.bandwidth() / 2},${yScale.range()[0]}L${xScale.bandwidth() / 2},${yScale.range()[1]}Z`} fill="#f28e2c" />
-            <path onClick={() => setSelection(binnedTable.objects().filter((d: any) => d[brushState.xCol] === xVal && d.Survived === 'No').map((d: any) => (d.ids)).flat())} transform={`translate(${xScale(xVal)}, 0)`} d={`${lineNegative(binnedPartialTable.objects().filter((d: any) => d[brushState.xCol] === xVal && d.Survived === 'No').map((d: any) => ([d.group, d.count])))}L${xScale.bandwidth() / 2},${yScale.range()[0]}L${xScale.bandwidth() / 2},${yScale.range()[1]}Z`} fill="#4e79a7" />
+            <path onClick={(e) => setSelection(binnedTable.objects().filter((d: any) => d[brushState.xCol] === xVal && d.Survived === 'Yes').map((d: any) => (d.ids)).flat(), e)} opacity={0.7} transform={`translate(${xScale(xVal)}, 0)`} d={`${linePositive(binnedTable.objects().filter((d: any) => d[brushState.xCol] === xVal && d.Survived === 'Yes').map((d: any) => ([d.group, d.count])))}L${xScale.bandwidth() / 2},${yScale.range()[0]}L${xScale.bandwidth() / 2},${yScale.range()[1]}Z`} fill="lightgray" />
+            <path onClick={(e) => setSelection(binnedTable.objects().filter((d: any) => d[brushState.xCol] === xVal && d.Survived === 'No').map((d: any) => (d.ids)).flat(), e)} opacity={0.7} transform={`translate(${xScale(xVal)}, 0)`} d={`${lineNegative(binnedTable.objects().filter((d: any) => d[brushState.xCol] === xVal && d.Survived === 'No').map((d: any) => ([d.group, d.count])))}L${xScale.bandwidth() / 2},${yScale.range()[0]}L${xScale.bandwidth() / 2},${yScale.range()[1]}Z`} fill="lightgray" />
+            <path onClick={(e) => setSelection(binnedTable.objects().filter((d: any) => d[brushState.xCol] === xVal && d.Survived === 'Yes').map((d: any) => (d.ids)).flat(), e)} transform={`translate(${xScale(xVal)}, 0)`} d={`${linePositive(binnedPartialTable.objects().filter((d: any) => d[brushState.xCol] === xVal && d.Survived === 'Yes').map((d: any) => ([d.group, d.count])))}L${xScale.bandwidth() / 2},${yScale.range()[0]}L${xScale.bandwidth() / 2},${yScale.range()[1]}Z`} fill="#f28e2c" />
+            <path onClick={(e) => setSelection(binnedTable.objects().filter((d: any) => d[brushState.xCol] === xVal && d.Survived === 'No').map((d: any) => (d.ids)).flat(), e)} transform={`translate(${xScale(xVal)}, 0)`} d={`${lineNegative(binnedPartialTable.objects().filter((d: any) => d[brushState.xCol] === xVal && d.Survived === 'No').map((d: any) => ([d.group, d.count])))}L${xScale.bandwidth() / 2},${yScale.range()[0]}L${xScale.bandwidth() / 2},${yScale.range()[1]}Z`} fill="#4e79a7" />
           </g>
         ))}
       </g>
