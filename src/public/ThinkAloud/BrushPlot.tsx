@@ -306,7 +306,7 @@ export function BrushPlot({ parameters, setAnswer }: StimulusParams<BrushParams>
             </Center>
           </Box>
         ) : null} */}
-        <Bar fullTable={fullTable} setSelection={setSelection} data={dataForScatter as any} parameters={parameters} barsTable={barsTable} />
+        {parameters.hideCat ? null : <Bar fullTable={fullTable} setSelection={setSelection} data={dataForScatter as any} parameters={parameters} barsTable={barsTable} /> }
 
       </Group>
 

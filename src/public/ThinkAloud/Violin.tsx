@@ -90,51 +90,24 @@ export function Violin({
 
   const xScale = useMemo(() => d3.scaleBand([margin.left, width + margin.left]).domain([...new Set(allData.map((d) => d[brushState.xCol].toString()))].sort()).paddingInner(0.01), [width, allData, brushState.xCol]);
 
-  //   const paths = useMemo(() => {
-  //     if (!xScale) {
-  //       return null;
-  //     }
-
-  //     const survivedDensities = xScale.domain().map((cat) => {
-  //       const catSurvived = data.filter((d) => d[brushState.xCol] === cat && d.Survived === 'Yes');
-  //       const silvermansInfo: { variance: number; q1: number; q3: number } = table({ values: catSurvived.map((d) => d[brushState.yCol]) })
-  //         .rollup({
-  //           variance: op.variance('values'),
-  //           q1: op.quantile('values', 0.25),
-  //           q3: op.quantile('values', 0.75),
-  //         })
-  //         .objects()[0] as { variance: number; q1: number; q3: number };
-
-  //       const kde = kernelDensityEstimator(
-  //         kernelEpanechnikov(silvermans(silvermansInfo.q3 - silvermansInfo.q1, silvermansInfo.variance, catSurvived.length)),
-  //         yScale.ticks(25),
-  //       );
-
-  //       const density: number[][] = kde(catSurvived.map((d) => d[brushState.yCol])) as number[][];
-
-  //       console.log(density);
-
-  //       const widthScale = d3.scaleLinear([0, xScale.bandwidth() / 2]).domain([0, d3.max(density.map((d) => Math.abs(d[1]))) || 1]);
-
-  //       const line = d3.line((d) => widthScale(d[1]) + xScale.bandwidth() / 2, (d) => yScale(d[0])).curve(d3.curveBasis);
-
-  //       return {
-  //         density, cat, length: catSurvived.length, line,
-  //       };
-  //     });
-
   const fullTable = useMemo(() => from(allData.map((d) => ({ ...d, Age: +d.Age }))), [allData]);
   const partialTable = useMemo(() => from(data.map((d) => ({ ...d, Age: +d.Age }))), [data]);
 
   const histogram = useMemo(() => {
-    const binnedTable = fullTable
-      .groupby(brushState.xCol, 'Survived', { group: bin(brushState.yCol, { maxbins: 20 }), group_max: bin(brushState.yCol, { maxbins: 20, offset: 1 }) })
-      .rollup({ ids: op.array_agg(params.ids), count: op.count() })
+    let binnedTable = params.hideCat ? fullTable
+      .groupby(brushState.xCol, { group: bin(brushState.yCol, { maxbins: 20 }), group_max: bin(brushState.yCol, { maxbins: 20, offset: 1 }) })
+      : fullTable
+        .groupby(brushState.xCol, 'Survived', { group: bin(brushState.yCol, { maxbins: 20 }), group_max: bin(brushState.yCol, { maxbins: 20, offset: 1 }) });
+
+    binnedTable = binnedTable.rollup({ ids: op.array_agg(params.ids), count: op.count() })
       .orderby('group');
 
-    const binnedPartialTable = partialTable
-      .groupby(brushState.xCol, 'Survived', { group: bin(brushState.yCol, { maxbins: 20 }), group_max: bin(brushState.yCol, { maxbins: 20, offset: 1 }) })
-      .rollup({ ids: op.array_agg(params.ids), count: op.count() })
+    let binnedPartialTable = params.hideCat ? partialTable
+      .groupby(brushState.xCol, { group: bin(brushState.yCol, { maxbins: 20 }), group_max: bin(brushState.yCol, { maxbins: 20, offset: 1 }) })
+      : partialTable
+        .groupby(brushState.xCol, 'Survived', { group: bin(brushState.yCol, { maxbins: 20 }), group_max: bin(brushState.yCol, { maxbins: 20, offset: 1 }) });
+
+    binnedPartialTable = binnedPartialTable.rollup({ ids: op.array_agg(params.ids), count: op.count() })
       .orderby('group');
 
     const widthScale = d3.scaleLinear([0, xScale.bandwidth() / 2]).domain([0, d3.max<number>(binnedTable.array('count'))!]);
@@ -146,15 +119,28 @@ export function Violin({
       <g>
         {xScale.domain().map((xVal: string) => (
           <g key={xVal}>
-            <path onClick={(e) => setSelection(binnedTable.objects().filter((d: any) => d[brushState.xCol] === xVal && d.Survived === 'Yes').map((d: any) => (d.ids)).flat(), e)} opacity={0.7} transform={`translate(${xScale(xVal)}, 0)`} d={`${linePositive(binnedTable.objects().filter((d: any) => d[brushState.xCol] === xVal && d.Survived === 'Yes').map((d: any) => ([d.group, d.count])))}L${xScale.bandwidth() / 2},${yScale.range()[0]}L${xScale.bandwidth() / 2},${yScale.range()[1]}Z`} fill="lightgray" />
-            <path onClick={(e) => setSelection(binnedTable.objects().filter((d: any) => d[brushState.xCol] === xVal && d.Survived === 'No').map((d: any) => (d.ids)).flat(), e)} opacity={0.7} transform={`translate(${xScale(xVal)}, 0)`} d={`${lineNegative(binnedTable.objects().filter((d: any) => d[brushState.xCol] === xVal && d.Survived === 'No').map((d: any) => ([d.group, d.count])))}L${xScale.bandwidth() / 2},${yScale.range()[0]}L${xScale.bandwidth() / 2},${yScale.range()[1]}Z`} fill="lightgray" />
-            <path onClick={(e) => setSelection(binnedTable.objects().filter((d: any) => d[brushState.xCol] === xVal && d.Survived === 'Yes').map((d: any) => (d.ids)).flat(), e)} transform={`translate(${xScale(xVal)}, 0)`} d={`${linePositive(binnedPartialTable.objects().filter((d: any) => d[brushState.xCol] === xVal && d.Survived === 'Yes').map((d: any) => ([d.group, d.count])))}L${xScale.bandwidth() / 2},${yScale.range()[0]}L${xScale.bandwidth() / 2},${yScale.range()[1]}Z`} fill="#f28e2c" />
-            <path onClick={(e) => setSelection(binnedTable.objects().filter((d: any) => d[brushState.xCol] === xVal && d.Survived === 'No').map((d: any) => (d.ids)).flat(), e)} transform={`translate(${xScale(xVal)}, 0)`} d={`${lineNegative(binnedPartialTable.objects().filter((d: any) => d[brushState.xCol] === xVal && d.Survived === 'No').map((d: any) => ([d.group, d.count])))}L${xScale.bandwidth() / 2},${yScale.range()[0]}L${xScale.bandwidth() / 2},${yScale.range()[1]}Z`} fill="#4e79a7" />
+
+            {params.hideCat ? (
+              <g>
+                <path onClick={(e) => setSelection(binnedTable.objects().filter((d: any) => d[brushState.xCol] === xVal).map((d: any) => (d.ids)).flat(), e)} opacity={0.7} transform={`translate(${xScale(xVal)}, 0)`} d={`${linePositive(binnedTable.objects().filter((d: any) => d[brushState.xCol] === xVal).map((d: any) => ([d.group, d.count])))}L${xScale.bandwidth() / 2},${yScale.range()[0]}L${xScale.bandwidth() / 2},${yScale.range()[1]}Z`} fill="lightgray" />
+                <path onClick={(e) => setSelection(binnedTable.objects().filter((d: any) => d[brushState.xCol] === xVal).map((d: any) => (d.ids)).flat(), e)} opacity={0.7} transform={`translate(${xScale(xVal)}, 0)`} d={`${lineNegative(binnedTable.objects().filter((d: any) => d[brushState.xCol] === xVal).map((d: any) => ([d.group, d.count])))}L${xScale.bandwidth() / 2},${yScale.range()[0]}L${xScale.bandwidth() / 2},${yScale.range()[1]}Z`} fill="lightgray" />
+                <path onClick={(e) => setSelection(binnedTable.objects().filter((d: any) => d[brushState.xCol] === xVal).map((d: any) => (d.ids)).flat(), e)} transform={`translate(${xScale(xVal)}, 0)`} d={`${linePositive(binnedPartialTable.objects().filter((d: any) => d[brushState.xCol] === xVal).map((d: any) => ([d.group, d.count])))}L${xScale.bandwidth() / 2},${yScale.range()[0]}L${xScale.bandwidth() / 2},${yScale.range()[1]}Z`} fill="gray" />
+                <path onClick={(e) => setSelection(binnedTable.objects().filter((d: any) => d[brushState.xCol] === xVal).map((d: any) => (d.ids)).flat(), e)} transform={`translate(${xScale(xVal)}, 0)`} d={`${lineNegative(binnedPartialTable.objects().filter((d: any) => d[brushState.xCol] === xVal).map((d: any) => ([d.group, d.count])))}L${xScale.bandwidth() / 2},${yScale.range()[0]}L${xScale.bandwidth() / 2},${yScale.range()[1]}Z`} fill="gray" />
+
+              </g>
+            ) : (
+              <g>
+                <path onClick={(e) => setSelection(binnedTable.objects().filter((d: any) => d[brushState.xCol] === xVal && d.Survived === 'Yes').map((d: any) => (d.ids)).flat(), e)} opacity={0.7} transform={`translate(${xScale(xVal)}, 0)`} d={`${linePositive(binnedTable.objects().filter((d: any) => d[brushState.xCol] === xVal && d.Survived === 'Yes').map((d: any) => ([d.group, d.count])))}L${xScale.bandwidth() / 2},${yScale.range()[0]}L${xScale.bandwidth() / 2},${yScale.range()[1]}Z`} fill="lightgray" />
+                <path onClick={(e) => setSelection(binnedTable.objects().filter((d: any) => d[brushState.xCol] === xVal && d.Survived === 'No').map((d: any) => (d.ids)).flat(), e)} opacity={0.7} transform={`translate(${xScale(xVal)}, 0)`} d={`${lineNegative(binnedTable.objects().filter((d: any) => d[brushState.xCol] === xVal && d.Survived === 'No').map((d: any) => ([d.group, d.count])))}L${xScale.bandwidth() / 2},${yScale.range()[0]}L${xScale.bandwidth() / 2},${yScale.range()[1]}Z`} fill="lightgray" />
+                <path onClick={(e) => setSelection(binnedTable.objects().filter((d: any) => d[brushState.xCol] === xVal && d.Survived === 'Yes').map((d: any) => (d.ids)).flat(), e)} transform={`translate(${xScale(xVal)}, 0)`} d={`${linePositive(binnedPartialTable.objects().filter((d: any) => d[brushState.xCol] === xVal && d.Survived === 'Yes').map((d: any) => ([d.group, d.count])))}L${xScale.bandwidth() / 2},${yScale.range()[0]}L${xScale.bandwidth() / 2},${yScale.range()[1]}Z`} fill="#f28e2c" />
+                <path onClick={(e) => setSelection(binnedTable.objects().filter((d: any) => d[brushState.xCol] === xVal && d.Survived === 'No').map((d: any) => (d.ids)).flat(), e)} transform={`translate(${xScale(xVal)}, 0)`} d={`${lineNegative(binnedPartialTable.objects().filter((d: any) => d[brushState.xCol] === xVal && d.Survived === 'No').map((d: any) => ([d.group, d.count])))}L${xScale.bandwidth() / 2},${yScale.range()[0]}L${xScale.bandwidth() / 2},${yScale.range()[1]}Z`} fill="#4e79a7" />
+              </g>
+            )}
           </g>
         ))}
       </g>
     );
-  }, [brushState.xCol, brushState.yCol, fullTable, params.ids, partialTable, setSelection, xScale, yScale]);
+  }, [brushState.xCol, brushState.yCol, fullTable, params.hideCat, params.ids, partialTable, setSelection, xScale, yScale]);
 
   //   histogram.print();
 
@@ -191,10 +177,6 @@ export function Violin({
         ) : null }
 
         {histogram}
-        {/* {paths}
-        {allDataPaths} */}
-        {/* { rects }
-        { survivedRects } */}
       </svg>
     </Stack>
   );

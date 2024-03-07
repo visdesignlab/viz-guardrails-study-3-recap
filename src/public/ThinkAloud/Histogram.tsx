@@ -1,3 +1,4 @@
+/* eslint-disable no-nested-ternary */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { useResizeObserver } from '@mantine/hooks';
@@ -59,10 +60,10 @@ export function Histogram({
   const height = useMemo(() => originalHeight - margin.top - margin.bottom, [originalHeight]);
 
   const allDataTable = useMemo(() => {
-    const binnedTable = dataTable.groupby(brushState.xCol, 'Survived').count();
+    const binnedTable = params.hideCat ? dataTable.groupby(brushState.xCol).count() : dataTable.groupby(brushState.xCol, 'Survived').count();
 
     return binnedTable;
-  }, [brushState.xCol, dataTable]);
+  }, [brushState.xCol, dataTable, params.hideCat]);
 
   const barsTable = useMemo(() => {
     if (!data) {
@@ -71,10 +72,10 @@ export function Histogram({
 
     const tempTable = from(data);
 
-    const binnedTable = tempTable.groupby(brushState.xCol, 'Survived').count();
+    const binnedTable = params.hideCat ? tempTable.groupby(brushState.xCol).count() : tempTable.groupby(brushState.xCol, 'Survived').count();
 
     return binnedTable;
-  }, [brushState.xCol, data]);
+  }, [brushState.xCol, data, params.hideCat]);
 
   const yScale = useMemo(() => {
     if (!allDataTable) {
@@ -100,13 +101,14 @@ export function Histogram({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return (barsTable.objects() as any[]).map((bar: any, i) => (
       <g key={`${i}fullRects`}>
-        <rect onClick={(e: React.MouseEvent) => setSelection(dataTable.objects().filter((d: any) => d[brushState.xCol] === bar[brushState.xCol] && d.Survived === bar.Survived).map((d: any) => d.Name), e)} x={bar.Survived === 'Yes' ? xScale(bar[brushState.xCol]) : xScale(bar[brushState.xCol])! + (xScale.bandwidth() / 2)} y={height - (height - yScale(bar.count))} fill={bar.Survived === 'Yes' ? '#f28e2c' : '#4e79a7'} width={xScale.bandwidth() / 2} height={margin.top + height - yScale(bar.count)} />
-        <text x={xScale(bar[brushState.xCol])! + (bar.Survived === 'Yes' ? xScale.bandwidth() / 4 : xScale.bandwidth() * 0.75)} y={yScale(bar.count) - 10} style={{ textAnchor: 'middle', dominantBaseline: 'middle', fontSize: 14 }}>{bar.count}</text>
+        {params.hideCat ? <rect onClick={(e: React.MouseEvent) => setSelection(dataTable.objects().filter((d: any) => d[brushState.xCol] === bar[brushState.xCol]).map((d: any) => d.Name), e)} x={xScale(bar[brushState.xCol])} y={height - (height - yScale(bar.count))} fill="gray" width={xScale.bandwidth()} height={margin.top + height - yScale(bar.count)} />
+          : <rect onClick={(e: React.MouseEvent) => setSelection(dataTable.objects().filter((d: any) => d[brushState.xCol] === bar[brushState.xCol] && d.Survived === bar.Survived).map((d: any) => d.Name), e)} x={bar.Survived === 'Yes' ? xScale(bar[brushState.xCol]) : xScale(bar[brushState.xCol])! + (xScale.bandwidth() / 2)} y={height - (height - yScale(bar.count))} fill={bar.Survived === 'Yes' ? '#f28e2c' : '#4e79a7'} width={xScale.bandwidth() / 2} height={margin.top + height - yScale(bar.count)} />}
+        <text x={xScale(bar[brushState.xCol])! + (params.hideCat ? xScale.bandwidth() / 2 : (bar.Survived === 'Yes' ? xScale.bandwidth() / 4 : xScale.bandwidth() * 0.75))} y={yScale(bar.count) - 10} style={{ textAnchor: 'middle', dominantBaseline: 'middle', fontSize: 14 }}>{bar.count}</text>
       </g>
     ));
-  }, [barsTable, brushState.xCol, dataTable, height, setSelection, xScale, yScale]);
+  }, [barsTable, brushState.xCol, dataTable, height, params.hideCat, setSelection, xScale, yScale]);
 
-  const survivedRects = useMemo(() => {
+  const unfilteredRect = useMemo(() => {
     if (!xScale || !yScale || !allDataTable) {
       return null;
     }
@@ -114,11 +116,11 @@ export function Histogram({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return (allDataTable.objects() as any[]).map((bar: any, i) => (
       <g key={`${i}survRects`}>
-        <rect onClick={(e) => setSelection(dataTable.objects().filter((d: any) => d[brushState.xCol] === bar[brushState.xCol] && d.Survived === bar.Survived).map((d: any) => d.Name), e)} opacity={0.7} x={bar.Survived === 'Yes' ? xScale(bar[brushState.xCol]) : xScale(bar[brushState.xCol])! + (xScale.bandwidth() / 2)} fill="lightgray" width={xScale.bandwidth() / 2} y={height - (height - yScale(bar.count))} height={margin.top + height - yScale(bar.count)} />
+        <rect onClick={(e) => setSelection(dataTable.objects().filter((d: any) => (d[brushState.xCol] === bar[brushState.xCol] && params.hideCat ? true : d.Survived === bar.Survived)).map((d: any) => d.Name), e)} opacity={0.7} x={bar.Survived === 'Yes' || params.hideCat ? xScale(bar[brushState.xCol]) : xScale(bar[brushState.xCol])! + (xScale.bandwidth() / 2)} fill="lightgray" width={params.hideCat ? xScale.bandwidth() : xScale.bandwidth() / 2} y={height - (height - yScale(bar.count))} height={margin.top + height - yScale(bar.count)} />
         {/* <text x={xScale(bar[brushState.xCol]) + xScale.bandwidth() / 2} y={yScale(bar.count)!} style={{ textAlign: 'center', dominantBaseline: 'middle', fontSize: 14 }}>{bar.count}</text> */}
       </g>
     ));
-  }, [allDataTable, brushState.xCol, dataTable, height, setSelection, xScale, yScale]);
+  }, [allDataTable, brushState.xCol, dataTable, height, params.hideCat, setSelection, xScale, yScale]);
 
   return yScale && xScale && barsTable ? (
     <Stack spacing={0}>
@@ -148,7 +150,7 @@ export function Histogram({
             }))}
           />
         ) : null }
-        { survivedRects }
+        { unfilteredRect }
         { rects }
       </svg>
     </Stack>

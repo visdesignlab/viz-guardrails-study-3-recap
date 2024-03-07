@@ -1,7 +1,7 @@
 {
   "name": "ui-components",
   "private": true,
-  "version": "0.0.0", 
+  "version": "0.0.0",
   "type": "module",
   "scripts": {
     "buildDocs": "yarn typedoc",
@@ -48,6 +48,7 @@
     "react-redux": "^8.0.5",
     "react-router-dom": "^6.10.0",
     "react-spring": "^9.7.3",
+    "react-voice-recorder-player": "^1.1.0",
     "rehype-raw": "^7.0.0",
     "ts-json-schema-generator": "^1.4.1",
     "typedoc": "^0.25.4",

@@ -1,3 +1,4 @@
+/* eslint-disable no-nested-ternary */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { useResizeObserver } from '@mantine/hooks';
@@ -202,9 +203,9 @@ export function Scatter({
 
       const xVal = params.dataType === 'date' ? xScale(new Date(d[params.x])) : xScale(d[params.x]);
 
-      return <Tooltip key={i} withinPortal label={d[params.ids]}><circle key={i} opacity={brushedSet && !brushedSet.has(d[params.ids]) ? 0.3 : 0.7} r={3} fill={brushedSet && !brushedSet.has(d[params.ids]) ? 'lightgray' : colorScale(d[params.category])} cx={xVal} cy={yScale(d[params.y])} /></Tooltip>;
+      return <Tooltip key={i} withinPortal label={d[params.ids]}><circle key={i} opacity={brushedSet && !brushedSet.has(d[params.ids]) ? 0.3 : 0.7} r={3} fill={brushedSet && !brushedSet.has(d[params.ids]) ? 'lightgray' : params.hideCat ? 'gray' : colorScale(d[params.category])} cx={xVal} cy={yScale(d[params.y])} /></Tooltip>;
     });
-  }, [brushedSet, colorScale, data, params.category, params.ids, params.x, params.y, xScale, yScale, params]);
+  }, [brushedSet, colorScale, data, xScale, yScale, params]);
 
   useEffect(() => {
     if (brushType === 'Axis Selection') {

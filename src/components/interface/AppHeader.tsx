@@ -11,6 +11,7 @@ import {
   Title,
   Text,
   Group,
+  Box,
 } from '@mantine/core';
 import {
   IconDotsVertical,
@@ -18,8 +19,13 @@ import {
   IconMicrophone,
   IconSchema,
 } from '@tabler/icons-react';
-import { useState } from 'react';
+import {
+  useCallback, useEffect, useRef, useState,
+} from 'react';
 import { useHref } from 'react-router-dom';
+import { WaveForm, WaveSurfer } from 'wavesurfer-react';
+import WaveSurferRef from 'wavesurfer.js';
+import RecordPlugin from 'wavesurfer.js/dist/plugins/record';
 import { useCurrentStep, useStudyId } from '../../routes';
 import { useStoreDispatch, useStoreSelector, useStoreActions } from '../../store/store';
 import { useStorageEngine } from '../../store/storageEngineHooks';
@@ -61,6 +67,21 @@ export default function AppHeader() {
       });
   }
 
+  const wavesurferRef = useRef<WaveSurferRef | null>(null);
+
+  const handleWSMount = useCallback(
+    (waveSurfer: WaveSurferRef | null) => {
+      wavesurferRef.current = waveSurfer;
+
+      if (wavesurferRef.current) {
+        const record = wavesurferRef.current.registerPlugin(RecordPlugin.create({ scrollingWaveform: true, renderRecordedAudio: false }));
+        record.startRecording();
+        wavesurferRef.current.setOptions({ height: 50, waveColor: '#FA5252' });
+      }
+    },
+    [],
+  );
+
   return (
     <Header height="70" p="md">
       <Grid mt={-7} align="center">
@@ -70,9 +91,13 @@ export default function AppHeader() {
             <Space w="md" />
             <Title order={4}>{studyConfig?.studyMetadata.title}</Title>
             {isRecording ? (
-              <Group spacing={5}>
-                <IconMicrophone color="red" />
+              <Group spacing={20} noWrap>
                 <Text color="red">Recording audio</Text>
+                <Box style={{ width: '70px', height: '50px' }}>
+                  <WaveSurfer onMount={handleWSMount}>
+                    <WaveForm id="waveform" />
+                  </WaveSurfer>
+                </Box>
               </Group>
             ) : null}
           </Group>

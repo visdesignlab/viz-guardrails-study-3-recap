@@ -62,6 +62,7 @@ export default function ComponentController({ provState } : {provState?: unknown
       _stream.then((stream) => {
         const mediaRecorder = new MediaRecorder(stream);
         mediaRecorder.start();
+
         setAudioStream(mediaRecorder);
         dispatch(setIsRecording(true));
       });
