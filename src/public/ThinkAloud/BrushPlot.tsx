@@ -206,7 +206,7 @@ export function BrushPlot({ parameters, setAnswer }: StimulusParams<BrushParams>
               ]}
             />
           ) : null}
-        { parameters.columns ? (
+        { parameters.columns && !parameters.hideCat ? (
           <>
             <ColorSwatch color="#f28e2c" />
             <Text>Survived</Text>
