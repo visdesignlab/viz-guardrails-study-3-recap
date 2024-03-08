@@ -52,7 +52,7 @@ function ConfigSwitcher({ globalConfig, studyConfigs }: Props) {
               </Text>
               <Text c="dimmed">{config.studyMetadata.description}</Text>
               <Text c="dimmed" ta="right" style={{ paddingRight: 5 }}>
-                <Anchor
+                {/* <Anchor
                   target="_blank"
                   onClick={(e) => e.stopPropagation()}
                   href={`${REVISIT_GITHUB_PUBLIC}${url}`}
@@ -60,7 +60,7 @@ function ConfigSwitcher({ globalConfig, studyConfigs }: Props) {
                   View source:
                   {' '}
                   {url}
-                </Anchor>
+                </Anchor> */}
               </Text>
             </Card>
           </UnstyledButton>

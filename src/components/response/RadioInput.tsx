@@ -30,7 +30,7 @@ export default function RadioInput({
       error={generateErrorMessage(response, answer, options)}
     >
       {leftLabel ? <Text>{leftLabel}</Text> : null}
-      <Group mt="xs">
+      <Group mt="xs" noWrap>
         {options.map((radio) => (
           <Radio
             disabled={disabled}

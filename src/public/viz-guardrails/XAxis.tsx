@@ -1,5 +1,6 @@
 /* eslint-disable react/no-unused-prop-types */
 import { Center, Text, Tooltip } from '@mantine/core';
+
 import { useCallback, useMemo } from 'react';
 import * as d3 from 'd3';
 
@@ -39,11 +40,10 @@ export function XAxis({
 
   return (
     <>
-
       {showLines ? <path transform={`translate(0, ${yRange[1]})`} d={['M', xScale.range()[0], 0, 'H', xScale.range()[1]].join(' ')} fill="none" stroke="lightgray" /> : null}
 
       {ticks.map(({ value, offset }) => (
-        <g key={value} transform={`translate(${offset}, ${vertPosition})`}>
+        <g key={`${value}test`} transform={`translate(${offset}, ${vertPosition})`}>
           <line y2="6" stroke="currentColor" />
           {showLines ? <line y2={`${-(yRange[0] - yRange[1])}`} stroke="lightgray" /> : null}
           <foreignObject x={0 - tickWidth / 2} y={10} width={tickWidth} height={20}>
