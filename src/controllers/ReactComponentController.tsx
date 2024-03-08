@@ -1,24 +1,26 @@
-import { Suspense } from 'react';
+import { Suspense, useCallback } from 'react';
 import { ModuleNamespace } from 'vite/types/hot';
 import { ReactComponent } from '../parser/types';
-import { StimulusParams } from '../store/types';
-import { useStoreDispatch, useStoreActions } from '../store/store';
 import { useCurrentStep } from '../routes';
+import { useStoreActions, useStoreDispatch } from '../store/store';
+import { StimulusParams } from '../store/types';
 
 const modules = import.meta.glob(
   '../public/**/*.{mjs,js,mts,ts,jsx,tsx}',
   { eager: true },
 );
 
-function ReactComponentController({ currentConfig }: { currentConfig: ReactComponent; }) {
+function ReactComponentController({ currentConfig, provState }: { currentConfig: ReactComponent; provState?: unknown; }) {
   const currentStep = useCurrentStep();
 
   const reactPath = `../public/${currentConfig.path}`;
+
   const StimulusComponent = (modules[reactPath] as ModuleNamespace).default;
 
   const storeDispatch = useStoreDispatch();
   const { updateResponseBlockValidation, setIframeAnswers } = useStoreActions();
-  function setAnswer({ status, provenanceGraph, answers }: Parameters<StimulusParams<unknown>['setAnswer']>[0]) {
+
+  const setAnswer = useCallback(({ status, provenanceGraph, answers }: Parameters<StimulusParams<unknown, unknown>['setAnswer']>[0]) => {
     storeDispatch(updateResponseBlockValidation({
       location: 'sidebar',
       currentStep,
@@ -30,7 +32,7 @@ function ReactComponentController({ currentConfig }: { currentConfig: ReactCompo
     storeDispatch(setIframeAnswers(
       Object.values(answers).map((value) => value),
     ));
-  }
+  }, [storeDispatch, currentStep]);
 
   return (
     <Suspense fallback={<div>Loading...</div>}>
@@ -38,6 +40,7 @@ function ReactComponentController({ currentConfig }: { currentConfig: ReactCompo
         parameters={currentConfig.parameters}
         // eslint-disable-next-line react/jsx-no-bind
         setAnswer={setAnswer}
+        provenanceState={provState}
       />
     </Suspense>
   );

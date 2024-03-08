@@ -1,10 +1,11 @@
 import {
   useEffect,
+  useMemo,
   useState,
 } from 'react';
 import { Provider } from 'react-redux';
 import {
-  RouteObject, useParams, useRoutes, useSearchParams,
+  RouteObject, useLocation, useMatch, useParams, useRoutes, useSearchParams,
 } from 'react-router-dom';
 import { Box, Center, Loader } from '@mantine/core';
 import { parseStudyConfig } from '../parser/parser';
@@ -18,15 +19,23 @@ import {
   StudyStoreContext,
   StudyStore,
   studyStoreCreator,
+  useStoreDispatch,
+  useStoreActions,
+  useStoreSelector,
 } from '../store/store';
 import { sanitizeStringForUrl } from '../utils/sanitizeStringForUrl';
 
 import ComponentController from '../controllers/ComponentController';
 import { NavigateWithParams } from '../utils/NavigateWithParams';
-import { StepRenderer } from './StepRenderer';
 import { StudyEnd } from './StudyEnd';
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-non-null-assertion
 import { useStorageEngine } from '../store/storageEngineHooks';
 import { generateSequenceArray } from '../utils/handleRandomSequences';
+import { StepRenderer } from './StepRenderer';
+import { ProvenanceWrapper } from './interface/audioAnalysis/ProvenanceWrapper';
+import { StorageEngine } from '../storage/engines/StorageEngine';
+import { AnalysisHome } from './interface/audioAnalysis/AnalysisHome';
 import { PREFIX } from './Prefix';
 
 async function fetchStudyConfig(configLocation: string, configKey: string) {
@@ -34,44 +43,59 @@ async function fetchStudyConfig(configLocation: string, configKey: string) {
   return parseStudyConfig(config, configKey);
 }
 
-export function generateStudiesRoutes(
+export function GenerateStudiesRoutes({ studyId, config, storage }: {
   studyId: Nullable<string>,
   config: Nullable<StudyConfig>,
-  sequence: Nullable<string[]>,
-) {
-  const routes: RouteObject[] = [];
+  storage: StorageEngine}) {
+  const sequence = useStoreSelector((state) => state.sequence);
 
-  if (studyId && config && sequence) {
-    const stepRoutes: RouteObject[] = [];
+  // useEffect(() => {
+  //   if (atEnd && config && config.recordStudyAudio && audioStream) {
+  //     storage.saveAudio(audioStream);
+  //     dispatch(setIsRecording(false));
+  //   }
+  // }, [config, atEnd, audioStream, dispatch, setIsRecording, storage]);
 
-    stepRoutes.push({
-      path: '/',
-      element: <NavigateWithParams to={`${sequence[0]}`} replace />,
-    });
+  const routes = useMemo(() => {
+    if (studyId && config && sequence) {
+      const stepRoutes: RouteObject[] = [];
 
-    sequence.forEach((step: string) => {
-      if (step === 'end') {
-        stepRoutes.push({
-          path: '/end',
-          element: <StudyEnd />,
-        });
-      } else {
-        stepRoutes.push({
-          path: `/${step}`,
-          element: <ComponentController />,
-        });
-      }
-    });
+      stepRoutes.push({
+        path: '/',
+        element: <NavigateWithParams to={`${sequence[0]}`} replace />,
+      });
 
-    const studyRoute: RouteObject = {
-      element: <StepRenderer />,
-      children: stepRoutes,
-    };
+      stepRoutes.push({
+        path: '/analysis/:trrackId/:trialName/',
+        element: <ProvenanceWrapper />,
+      });
 
-    routes.push(studyRoute);
-  }
+      stepRoutes.push({
+        path: '/analysis',
+        element: <AnalysisHome />,
+      });
 
-  return routes;
+      stepRoutes.push({
+        path: '/:trialName',
+        element: <ComponentController />,
+      });
+
+      stepRoutes.push({
+        path: '/end',
+        element: <StudyEnd />,
+      });
+
+      const studyRoute: RouteObject = {
+        element: <StepRenderer />,
+        children: stepRoutes,
+      };
+
+      return [studyRoute];
+    }
+    return [];
+  }, [config, sequence, studyId]);
+
+  return useRoutes(routes);
 }
 
 export function Shell({ globalConfig }: {
@@ -96,7 +120,6 @@ export function Shell({ globalConfig }: {
     }
   }, [globalConfig, studyId]);
 
-  const [routes, setRoutes] = useState<RouteObject[]>([]);
   const [store, setStore] = useState<Nullable<StudyStore>>(null);
   const { storageEngine } = useStorageEngine();
   const [searchParams] = useSearchParams();
@@ -118,18 +141,13 @@ export function Shell({ globalConfig }: {
       const participantSession = await storageEngine.initializeParticipantSession(searchParamsObject, activeConfig, urlParticipantId);
 
       // Initialize the redux stores
-      const newStore = await studyStoreCreator(studyId, activeConfig, participantSession.sequence, participantSession.answers);
-      setStore(newStore);
-
-      // Initialize the routing
-      setRoutes(generateStudiesRoutes(studyId, activeConfig, participantSession.sequence));
+      const _store = await studyStoreCreator(studyId, activeConfig, participantSession.sequence, participantSession.answers);
+      setStore(_store);
     }
     initializeUserStoreRouting();
   }, [storageEngine, activeConfig, studyId, searchParams]);
 
-  const routing = useRoutes(routes);
-
-  return !routing || !store
+  return !store || !storageEngine
     ? (
       <Box style={{ height: '100vh' }}>
         <Center style={{ height: '100%' }}>
@@ -139,7 +157,7 @@ export function Shell({ globalConfig }: {
     ) : (
       <StudyStoreContext.Provider value={store}>
         <Provider store={store.store}>
-          {routing}
+          <GenerateStudiesRoutes studyId={studyId} config={activeConfig} storage={storageEngine} />
         </Provider>
       </StudyStoreContext.Provider>
     );
