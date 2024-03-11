@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   Box, Button, Center, Divider, Group, Highlight, Loader, Menu, Popover, ScrollArea, Stack, Text, TextInput, Tooltip,

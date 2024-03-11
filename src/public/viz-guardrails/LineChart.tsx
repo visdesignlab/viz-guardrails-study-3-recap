@@ -16,7 +16,7 @@ import { OwidDistinctLinesPalette } from './Color';
 const margin = {
   top: 30,
   left: 40,
-  right: 100,
+  right: 80,
   bottom: 50,
 };
 
@@ -79,13 +79,13 @@ export function LineChart({
   // ---------------------------- Setup ----------------------------
 
   /// ////////// Setting sizing
-  const width = 800 - margin.left - margin.right;
+  const width = (parameters.dataset === 'clean_data' ? 800 - margin.left - margin.right - 60 : 800 - margin.left - margin.right);
 
   const height = 400 - margin.top - margin.bottom;
 
   /// ////////// Setting scales
   const {
-    xMin, yMin, xMax, yMax,
+    yMin, yMax,
   } = useMemo(() => {
     let relevant_selection: string[] = [];
     switch (guardrail) {
@@ -97,9 +97,6 @@ export function LineChart({
         break;
     }
 
-    const xData: number[] = data.map((d) => +d[parameters.x_var]).filter((val) => val !== null) as number[];
-    const [xMin, xMax] = d3.extent(xData) as [number, number];
-
     const yData: number[] = data.filter((val) => relevant_selection.includes(val[parameters.cat_var])).map((d) => +d[parameters.y_var]).filter((val) => val !== null) as number[];
     const [yMinSel, yMaxSel] = (parameters.dataset === 'clean_stocks' ? (d3.extent(yData) as [number, number]) : ([0, d3.extent(yData)[1]] as [number, number]));
     const [lowerq, upperq] = [d3.min(avgData.map((val) => val.lowerq)) as number, d3.max(avgData.map((val) => val.upperq)) as number];
@@ -108,12 +105,10 @@ export function LineChart({
     const yMax = (guardrail === 'super_summ' ? d3.max([yMaxSel, upperq]) : yMaxSel) as number;
 
     return {
-      xMin,
-      xMax,
       yMin,
       yMax,
     };
-  }, [data, selection, range, guardrail]);
+  }, [data, selection, guardrail, avgData, controlsSelection, parameters]);
 
   const xScale = useMemo(() => {
     if (range) {
@@ -121,14 +116,14 @@ export function LineChart({
     }
 
     return d3.scaleTime([margin.left, width + margin.left]).domain([new Date(parameters.start_date), new Date(parameters.end_date)]);
-  }, [width, xMax, xMin, range]);
+  }, [width, range, parameters]);
 
   const yScale = useMemo(() => d3.scaleLinear([height + margin.top, margin.top]).domain([yMin, yMax]).nice(), [height, yMax, yMin]);
 
   const colorScale = useMemo(() => {
     const cats = Array.from(new Set(data.map((d) => d[parameters.cat_var])));
     return d3.scaleOrdinal(OwidDistinctLinesPalette).domain(cats);
-  }, [data]);
+  }, [data, parameters]);
 
   // ---------------------------- Draw ----------------------------
   const linePaths = useMemo(() => {
@@ -146,7 +141,7 @@ export function LineChart({
     }));
 
     return paths;
-  }, [data, xScale, yScale, selection, xMax, guardrail]);
+  }, [data, xScale, yScale, selection, parameters]);
 
   const superimposeDatapoints = useMemo(() => {
     if (guardrail !== 'super_data') {
@@ -161,9 +156,8 @@ export function LineChart({
       country: x as string,
       path: lineGenerator(data.filter((val) => (val[parameters.cat_var] === x))) as string,
     }));
-
     return paths;
-  }, [data, xScale, yScale, selection, xMax, guardrail]);
+  }, [data, xScale, yScale, guardrail, controlsSelection, parameters]);
 
   const superimposeSummary = useMemo(() => {
     if (guardrail !== 'super_summ') {
@@ -190,9 +184,29 @@ export function LineChart({
       confidenceBands: confidenceBands as string,
       data: avgData as any[],
     };
-  }, [data, xScale, yScale, selection, xMax, guardrail]);
+  }, [xScale, yScale, guardrail, avgData]);
 
   const averageLabel = useMemo(() => (parameters.dataset === 'clean_stocks' ? 'Market Index' : 'Average'), [parameters]);
+
+  const getPolicyLabel = (country: string) => {
+    if (country === 'Eldoril North') {
+      return 'Policy A';
+    }
+
+    if (country.split(' ')[0] === 'Silvoria') {
+      return 'Policy C';
+    }
+
+    if (country.split(' ')[0] === 'Mystara') {
+      return 'Policy C';
+    }
+
+    if (country === 'Average') {
+      return 'all policies';
+    }
+
+    return 'Policy B';
+  };
 
   // Function to place labels s.t. they don't overlap
   const labelPos = useMemo(() => {
@@ -212,6 +226,7 @@ export function LineChart({
 
     const pos = labels?.map((x) => ({
       country: x as string,
+      country_policy: (parameters.dataset === 'clean_data' ? (`${x} (${getPolicyLabel(x)})`) : x) as string,
       label_pos: (x === averageLabel
         ? (superimposeSummary?.data.slice(-1).map((val) => yScale(val.mean))[0]) as number
         : (data.filter((val) => val[parameters.cat_var] === x).slice(-1).map((val) => yScale(val[parameters.y_var]))[0]) as number),
@@ -233,7 +248,7 @@ export function LineChart({
     }
 
     return pos;
-  }, [data, selection, yScale, guardrail]);
+  }, [data, selection, yScale, guardrail, averageLabel, parameters, superimposeDatapoints, superimposeSummary]);
 
   // ---------------------------- Render ----------------------------
   return (
@@ -319,7 +334,7 @@ export function LineChart({
             </g>
           ))}
           {labelPos?.map((x) => (
-            <foreignObject key={`${x.country}_label`} x={width + margin.left + 5} y={x.label_pos - 7} width={100} height={20}>
+            <foreignObject key={`${x.country}_label`} x={width + margin.left + 5} y={x.label_pos - 7} width={margin.right + 60} height={20}>
               <Text
                 px={2}
                 size={10}
@@ -333,7 +348,7 @@ export function LineChart({
                 }}
                 onMouseOut={() => setHover([])}
               >
-                {(x.country.includes('Policy')) ? x.country.split('(Policy')[0] : x.country}
+                {x.country_policy}
               </Text>
             </foreignObject>
           ))}

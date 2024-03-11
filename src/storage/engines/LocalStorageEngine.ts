@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import localforage from 'localforage';
 import { v4 as uuidv4 } from 'uuid';
 import { StorageEngine } from './StorageEngine';

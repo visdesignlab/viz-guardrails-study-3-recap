@@ -1,12 +1,12 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-nested-ternary */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import {
-  Button, Center, Stack, Text,
+  Center, Stack, Text,
 } from '@mantine/core';
 import {
   useEffect,
-  useState,
 } from 'react';
 import { StimulusParams } from '../../store/types';
 

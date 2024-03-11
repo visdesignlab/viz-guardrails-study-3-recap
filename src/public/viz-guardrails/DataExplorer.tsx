@@ -64,7 +64,7 @@ export function DataExplorer({ parameters, setAnswer }: StimulusParams<ChartPara
     }
 
     return null;
-  }, [data, range]);
+  }, [data, range, parameters.x_var]);
 
   // ---------------------------- Trrack ----------------------------
   const { actions, trrack } = useMemo(() => {
@@ -95,11 +95,11 @@ export function DataExplorer({ parameters, setAnswer }: StimulusParams<ChartPara
       },
       trrack: trrackInst,
     };
-  }, []);
+  }, [parameters.end_date, parameters.start_date]);
 
   const trackRange = useCallback((newRange: [Date, Date]) => {
     trrack.apply('Change daterange', actions.range([newRange[0].toISOString().slice(0, 10), newRange[1].toISOString().slice(0, 10)]));
-  }, [trrack, actions, setRange]);
+  }, [trrack, actions]);
 
   const debouncedTrackRange = useMemo(() => debounce(trackRange, 200), [trackRange]);
 
@@ -132,17 +132,21 @@ export function DataExplorer({ parameters, setAnswer }: StimulusParams<ChartPara
             </Flex>
           )}
           <Group>
-            <Sidebar
-              parameters={parameters}
-              data={filteredData}
-              items={items}
-              selection={selection}
-              setSelection={setSelection}
-              trackSelection={trackSelection}
-              range={range}
-              guardrail={guardrail}
-            />
-            <Divider orientation="vertical" size="xs" />
+            {(parameters.allow_selection === false && parameters.guardrail !== 'juxt_data') ? null : (
+              <Group>
+                <Sidebar
+                  parameters={parameters}
+                  data={filteredData}
+                  items={items}
+                  selection={selection}
+                  setSelection={setSelection}
+                  trackSelection={trackSelection}
+                  range={range}
+                  guardrail={guardrail}
+                />
+                <Divider orientation="vertical" size="xs" />
+              </Group>
+            )}
             <Stack>
               <Group position="apart">
                 <Stack spacing={0} justify="flex-start">

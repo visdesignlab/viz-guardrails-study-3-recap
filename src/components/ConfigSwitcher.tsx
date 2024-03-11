@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   Anchor, Card, Container, Image, Text, UnstyledButton,
 } from '@mantine/core';

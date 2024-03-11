@@ -32,7 +32,7 @@ function ReactComponentController({ currentConfig, provState }: { currentConfig:
     storeDispatch(setIframeAnswers(
       Object.values(answers).map((value) => value),
     ));
-  }, [storeDispatch, currentStep]);
+  }, [storeDispatch, updateResponseBlockValidation, currentStep, setIframeAnswers]);
 
   return (
     <Suspense fallback={<div>Loading...</div>}>
