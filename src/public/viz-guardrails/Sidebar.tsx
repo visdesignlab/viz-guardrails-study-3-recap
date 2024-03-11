@@ -86,6 +86,14 @@ export function Sidebar({
     return paths;
   }, [parameters, guardrail, data, items, xScale, yScale]);
 
+  const displayVar = useMemo(() => {
+    if (parameters.allow_selection === false) {
+      return 'none';
+    }
+
+    return 'block';
+  }, [parameters]);
+
   // ---------------------------- Render ----------------------------
 
   return (
@@ -111,7 +119,7 @@ export function Sidebar({
                 value={item.name}
                 label={item.name}
                 color={parameters.allow_selection ? 'blue' : 'gray'}
-                styles={(guardrail === 'juxt_data') ? { root: { display: 'flex', alignItems: 'flex-end', padding: '2px 0' } } : {}}
+                styles={(guardrail === 'juxt_data') ? { root: { display: 'flex', alignItems: 'flex-end', padding: '2px 0' }, inner: { display: displayVar } } : {}}
               >
                 {item.name}
               </Checkbox>
