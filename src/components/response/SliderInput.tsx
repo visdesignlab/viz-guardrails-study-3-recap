@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   Center,
   Group,
@@ -35,15 +36,13 @@ export default function SliderInput({
         {leftLabel ? <Center><Text>{leftLabel}</Text></Center> : null}
         <Slider
           disabled={disabled}
-        // labelAlwaysOnx
-          label={null}
+          labelAlwaysOn={(answer as any).value !== ''}
+          label={(x) => `$${x}`}
           sx={{ marginTop: '15px', marginBottom: '15px', width: '400px' }}
           marks={options as SliderProps['marks']}
           {...answer}
           defaultValue={50}
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           thumbSize={(answer as any).value === '' ? 0.1 : 17}
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           color={(answer as any).value === '' ? 'gray.2' : 'blue'}
           min={0}
           max={100}

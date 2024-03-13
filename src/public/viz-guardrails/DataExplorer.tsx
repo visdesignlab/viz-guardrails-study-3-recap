@@ -131,9 +131,9 @@ export function DataExplorer({ parameters, setAnswer }: StimulusParams<ChartPara
               </Blockquote>
             </Flex>
           )}
-          <Group>
+          <Group noWrap>
             {(parameters.allow_selection === false && parameters.guardrail !== 'juxt_data') ? null : (
-              <Group>
+              <Group noWrap>
                 <Sidebar
                   parameters={parameters}
                   data={filteredData}
@@ -163,7 +163,7 @@ export function DataExplorer({ parameters, setAnswer }: StimulusParams<ChartPara
                 {parameters.allow_help ? <Help parameters={parameters} /> : null}
               </Group>
               <Stack>
-                <Group>
+                <Group noWrap>
                   {guardrail === 'juxt_summ' ? <StripPlot parameters={parameters} data={filteredData} selection={selection} /> : null}
                   <LineChart
                     parameters={parameters}
