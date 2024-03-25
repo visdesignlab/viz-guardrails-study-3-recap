@@ -19,6 +19,7 @@ const width = 60;
 export function Sidebar({
   parameters,
   data,
+  dataname,
   items,
   selection,
   setSelection,
@@ -28,6 +29,7 @@ export function Sidebar({
 } : {
     parameters: ChartParams,
     data: any[],
+    dataname: string,
     items: any[],
     selection: any[] | null,
     setSelection: (value: Array<string>) => void,
@@ -98,6 +100,7 @@ export function Sidebar({
 
   return (
     <Checkbox.Group
+      key={`${dataname}_checkboxgroup`}
       defaultValue={selection as string[]}
       orientation="vertical"
       onChange={(xs) => { setSelection(xs); trackSelection(xs); }}
@@ -119,7 +122,7 @@ export function Sidebar({
                 value={item.name}
                 label={item.name}
                 color={parameters.allow_selection ? 'blue' : 'gray'}
-                styles={(guardrail === 'juxt_data') ? { root: { display: 'flex', alignItems: 'flex-end', padding: '2px 0' }, inner: { display: displayVar } } : {}}
+                styles={{ root: { display: 'flex', alignItems: 'flex-end', padding: '2px 0' }, inner: { display: displayVar } }}
               >
                 {item.name}
               </Checkbox>

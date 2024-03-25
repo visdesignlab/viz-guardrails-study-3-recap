@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable import/no-named-as-default */
 /* eslint-disable no-shadow */
 /* eslint-disable import/no-cycle */
@@ -40,13 +41,15 @@ export interface ChartParams {
 export function DataExplorer({ parameters, setAnswer }: StimulusParams<ChartParams>) {
   // ---------------------------- Setup & data ----------------------------
   const [data, setData] = useState<any[] | null>(null);
+  const [dataname, setDataname] = useState<string>(parameters.dataset);
   const [selection, setSelection] = useState<string[] | null>(parameters.initial_selection);
   const [items, setItems] = useState<any[] | null>(null);
   const [range, setRange] = useState<[Date, Date] | null>([new Date(parameters.start_date), new Date(parameters.end_date)]);
   const [guardrail, setGuardrail] = useState<string>(parameters.guardrail);
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   useEffect(() => {
-    d3.csv(`./data/${parameters.dataset}.csv`)
+    d3.csv(`./data/${dataname}.csv`)
       .then((data) => {
         setData(data);
         setItems(Array.from(new Set(data.map((row) => (JSON.stringify({
@@ -54,7 +57,7 @@ export function DataExplorer({ parameters, setAnswer }: StimulusParams<ChartPara
           group: row[parameters.group_var],
         }))))).map((row) => JSON.parse(row)));
       });
-  }, [parameters]);
+  }, [dataname, parameters]);
 
   const filteredData = useMemo(() => {
     if (data && range) {
@@ -64,7 +67,12 @@ export function DataExplorer({ parameters, setAnswer }: StimulusParams<ChartPara
     }
 
     return null;
-  }, [data, range, parameters.x_var]);
+  }, [data, range, parameters.x_var, dataname]);
+
+  const updateData = (data: string) => {
+    setDataname(data);
+    setSelection([]);
+  };
 
   // ---------------------------- Trrack ----------------------------
   const { actions, trrack } = useMemo(() => {
@@ -119,7 +127,7 @@ export function DataExplorer({ parameters, setAnswer }: StimulusParams<ChartPara
     <Stack>
       {parameters.allow_guardrail_selector ? (
         <Paper shadow="sm" radius="md" p="md" style={{ width: '500px' }}>
-          <Selector guardrail={guardrail} setGuardrail={setGuardrail} />
+          <Selector guardrail={guardrail} setGuardrail={setGuardrail} dataname={dataname} setDataname={updateData} setSelection={setSelection} />
         </Paper>
       ) : null}
       <Flex>
@@ -137,6 +145,7 @@ export function DataExplorer({ parameters, setAnswer }: StimulusParams<ChartPara
                 <Sidebar
                   parameters={parameters}
                   data={filteredData}
+                  dataname={dataname}
                   items={items}
                   selection={selection}
                   setSelection={setSelection}
@@ -144,14 +153,14 @@ export function DataExplorer({ parameters, setAnswer }: StimulusParams<ChartPara
                   range={range}
                   guardrail={guardrail}
                 />
-                <Divider orientation="vertical" size="xs" />
               </Group>
             )}
+            {(parameters.allow_selection === false && parameters.guardrail !== 'juxt_data') ? null : (<Divider orientation="vertical" size="xs" />)}
             <Stack>
               <Group position="apart">
                 <Stack spacing={0} justify="flex-start">
                   <Text fw={500}>
-                    {parameters.dataset === 'clean_stocks' ? 'Percent change in stock price' : 'Infections per million people'}
+                    {dataname === 'clean_stocks' ? 'Percent change in stock price' : 'Infections per million people'}
                   </Text>
                   {guardrail === 'super_summ' ? (
                     <Text fz="xs" c="dimmed">Shaded area represents the middle 50% of all values.</Text>
@@ -164,10 +173,11 @@ export function DataExplorer({ parameters, setAnswer }: StimulusParams<ChartPara
               </Group>
               <Stack>
                 <Group noWrap>
-                  {guardrail === 'juxt_summ' ? <StripPlot parameters={parameters} data={filteredData} selection={selection} /> : null}
+                  {guardrail === 'juxt_summ' ? <StripPlot parameters={parameters} data={filteredData} selection={selection} dataname={dataname} /> : null}
                   <LineChart
                     parameters={parameters}
                     data={filteredData}
+                    dataname={dataname}
                     items={items}
                     selection={selection}
                     range={range}

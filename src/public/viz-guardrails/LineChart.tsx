@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-shadow */
 /* eslint-disable consistent-return */
 /* eslint-disable no-continue */
@@ -23,6 +24,7 @@ const margin = {
 export function LineChart({
   parameters,
   data,
+  dataname,
   items,
   selection,
   range,
@@ -30,6 +32,7 @@ export function LineChart({
 } : {
     parameters: ChartParams,
     data: any[],
+    dataname: string
     items: any[],
     selection: any[] | null,
     range: [Date, Date] | null,
@@ -54,7 +57,7 @@ export function LineChart({
     const selected_groups = items.filter((val) => selection?.includes(val.name)).map((val) => val.group);
     const controls_selection = items.filter((val) => selected_groups?.includes(val.group)).filter((val) => !selection?.includes(val.name)).map((val) => val.name);
     return controls_selection;
-  }, [selection, items]);
+  }, [selection, items, dataname]);
 
   const avgData = useMemo(() => {
     const selected_groups = items.map((val) => val.group);// .filter((val) => selection?.includes(val.name)).map((val) => val.group);
@@ -74,12 +77,12 @@ export function LineChart({
       date: k as string, mean: v.mean, upperq: v.upperq, lowerq: v.lowerq,
     }));
     return avg_data2;
-  }, [data, items, parameters]);
+  }, [data, items, parameters, dataname]);
 
   // ---------------------------- Setup ----------------------------
 
   /// ////////// Setting sizing
-  const width = (parameters.dataset === 'clean_data' ? 800 - margin.left - margin.right - 60 : 800 - margin.left - margin.right);
+  const width = (dataname === 'clean_data' ? 800 - margin.left - margin.right - 60 : 800 - margin.left - margin.right);
 
   const height = 400 - margin.top - margin.bottom;
 
@@ -98,7 +101,7 @@ export function LineChart({
     }
 
     const yData: number[] = data.filter((val) => relevant_selection.includes(val[parameters.cat_var])).map((d) => +d[parameters.y_var]).filter((val) => val !== null) as number[];
-    const [yMinSel, yMaxSel] = (parameters.dataset === 'clean_stocks' ? (d3.extent(yData) as [number, number]) : ([0, d3.extent(yData)[1]] as [number, number]));
+    const [yMinSel, yMaxSel] = (dataname === 'clean_stocks' ? (d3.extent(yData) as [number, number]) : ([0, d3.extent(yData)[1]] as [number, number]));
     const [lowerq, upperq] = [d3.min(avgData.map((val) => val.lowerq)) as number, d3.max(avgData.map((val) => val.upperq)) as number];
 
     const yMin = (guardrail === 'super_summ' ? d3.min([yMinSel, lowerq]) : yMinSel) as number;
@@ -108,7 +111,7 @@ export function LineChart({
       yMin,
       yMax,
     };
-  }, [data, selection, guardrail, avgData, controlsSelection, parameters]);
+  }, [data, selection, guardrail, avgData, controlsSelection, parameters, dataname]);
 
   const xScale = useMemo(() => {
     if (range) {
@@ -116,14 +119,14 @@ export function LineChart({
     }
 
     return d3.scaleTime([margin.left, width + margin.left]).domain([new Date(parameters.start_date), new Date(parameters.end_date)]);
-  }, [width, range, parameters]);
+  }, [width, range, parameters, dataname]);
 
-  const yScale = useMemo(() => d3.scaleLinear([height + margin.top, margin.top]).domain([yMin, yMax]).nice(), [height, yMax, yMin]);
+  const yScale = useMemo(() => d3.scaleLinear([height + margin.top, margin.top]).domain([yMin, yMax]).nice(), [height, yMax, yMin, dataname]);
 
   const colorScale = useMemo(() => {
     const cats = Array.from(new Set(data.map((d) => d[parameters.cat_var])));
     return d3.scaleOrdinal(OwidDistinctLinesPalette).domain(cats);
-  }, [data, parameters]);
+  }, [data, parameters, dataname]);
 
   // ---------------------------- Draw ----------------------------
   const linePaths = useMemo(() => {
@@ -141,7 +144,7 @@ export function LineChart({
     }));
 
     return paths;
-  }, [data, xScale, yScale, selection, parameters]);
+  }, [data, xScale, yScale, selection, parameters, dataname]);
 
   const superimposeDatapoints = useMemo(() => {
     if (guardrail !== 'super_data') {
@@ -157,7 +160,7 @@ export function LineChart({
       path: lineGenerator(data.filter((val) => (val[parameters.cat_var] === x))) as string,
     }));
     return paths;
-  }, [data, xScale, yScale, guardrail, controlsSelection, parameters]);
+  }, [data, xScale, yScale, guardrail, controlsSelection, parameters, dataname]);
 
   const superimposeSummary = useMemo(() => {
     if (guardrail !== 'super_summ') {
@@ -184,9 +187,9 @@ export function LineChart({
       confidenceBands: confidenceBands as string,
       data: avgData as any[],
     };
-  }, [xScale, yScale, guardrail, avgData]);
+  }, [xScale, yScale, guardrail, avgData, dataname]);
 
-  const averageLabel = useMemo(() => (parameters.dataset === 'clean_stocks' ? 'Market Index' : 'Average'), [parameters]);
+  const averageLabel = useMemo(() => (dataname === 'clean_stocks' ? 'Market Index' : 'Average'), [dataname]);
 
   const getPolicyLabel = (country: string) => {
     if (country === 'Eldoril North') {
@@ -226,7 +229,7 @@ export function LineChart({
 
     const pos = labels?.map((x) => ({
       country: x as string,
-      country_policy: (parameters.dataset === 'clean_data' ? (`${x} (${getPolicyLabel(x)})`) : x) as string,
+      country_policy: (dataname === 'clean_data' ? (`${x} (${getPolicyLabel(x)})`) : x) as string,
       label_pos: (x === averageLabel
         ? (superimposeSummary?.data.slice(-1).map((val) => yScale(val.mean))[0]) as number
         : (data.filter((val) => val[parameters.cat_var] === x).slice(-1).map((val) => yScale(val[parameters.y_var]))[0]) as number),
@@ -246,9 +249,8 @@ export function LineChart({
       }
       pos[i].label_pos = pos[i].label_pos - min_dist + diff;
     }
-
     return pos;
-  }, [data, selection, yScale, guardrail, averageLabel, parameters, superimposeDatapoints, superimposeSummary]);
+  }, [data, selection, yScale, guardrail, averageLabel, parameters, superimposeDatapoints, superimposeSummary, dataname]);
 
   // ---------------------------- Render ----------------------------
   return (
@@ -273,7 +275,7 @@ export function LineChart({
           />
 
           <YAxis
-            dataset={parameters.dataset}
+            dataset={dataname}
             yScale={yScale}
             horizontalPosition={margin.left}
             xRange={xScale.range()}

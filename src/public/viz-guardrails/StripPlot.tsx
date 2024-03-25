@@ -17,10 +17,12 @@ export function StripPlot({
   data,
   selection,
   parameters,
+  dataname,
 } : {
     data: unknown[];
     selection: string[];
-    parameters: ChartParams
+    parameters: ChartParams;
+    dataname: string;
 }) {
   const width = 60;
   const height = 400;
@@ -32,12 +34,12 @@ export function StripPlot({
 
   const selectedDataRange = useMemo(() => {
     const extent = d3.extent(allData.filter(escape((d: any) => selection.includes(d[parameters.cat_var]))).array('value')) as [unknown, unknown] as [number, number];
-    return (parameters.dataset === 'clean_stocks') ? extent : [0, extent[1]];
-  }, [allData, selection, parameters]);
+    return (dataname === 'clean_stocks') ? extent : [0, extent[1]];
+  }, [allData, selection, parameters, dataname]);
 
   const yScale = useMemo(() => d3.scaleLinear([margin.top, height - margin.bottom]).domain(d3.extent(allData.array('value') as number[]).reverse() as unknown as [number, number]), [allData, height]);
 
-  const textFormat = parameters.dataset === 'clean_stocks' ? d3.format('.0%') : d3.format(',.0f');
+  const textFormat = dataname === 'clean_stocks' ? d3.format('.0%') : d3.format(',.0f');
 
   return selection?.length === 0 ? null : (
     <svg style={{ height: '400px', width: '60px', overflow: 'visible' }}>
