@@ -66,8 +66,8 @@ export function LineChart({
     const avg_data = d3.rollup(
       controls_data,
       (v) => ({
-        // mean: d3.mean(v,(d) => d[parameters.y_var]) as number,
-        mean: d3.quantile(v, 0.5, (d) => d[parameters.y_var]) as number,
+        mean: d3.mean(v, (d) => d[parameters.y_var]) as number,
+        // mean: d3.quantile(v, 0.5, (d) => d[parameters.y_var]) as number,
         upperq: d3.quantile(v, 0.75, (d) => d[parameters.y_var]) as number,
         lowerq: d3.quantile(v, 0.25, (d) => d[parameters.y_var]) as number,
       }),
@@ -189,7 +189,7 @@ export function LineChart({
     };
   }, [xScale, yScale, guardrail, avgData, dataname]);
 
-  const averageLabel = useMemo(() => (dataname === 'clean_stocks' ? 'Industry Average' : 'Average'), [dataname]);
+  const averageLabel = useMemo(() => (dataname === 'clean_stocks' ? 'Industry Index' : 'Average'), [dataname]);
 
   const getPolicyLabel = (country: string) => {
     if (country === 'Eldoril North') {
