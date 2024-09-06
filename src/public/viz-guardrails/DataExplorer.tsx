@@ -22,20 +22,20 @@ import { StripPlot } from './StripPlot';
 import { Help } from './Help';
 
 export interface ChartParams {
-    dataset: string,
-    start_date: string,
-    end_date: string,
-    initial_selection: string[],
-    allow_time_slider: boolean,
-    allow_guardrail_selector: boolean,
-    allow_selection: boolean,
-    allow_help: boolean,
-    caption: string,
-    x_var: string,
-    y_var: string,
-    cat_var: string,
-    group_var: string,
-    guardrail: string
+  dataset: string,
+  start_date: string,
+  end_date: string,
+  initial_selection: string[],
+  allow_time_slider: boolean,
+  allow_guardrail_selector: boolean,
+  allow_selection: boolean,
+  allow_help: boolean,
+  caption: string,
+  x_var: string,
+  y_var: string,
+  cat_var: string,
+  group_var: string,
+  guardrail: string
 }
 
 export function DataExplorer({ parameters, setAnswer }: StimulusParams<ChartParams>) {
@@ -134,9 +134,11 @@ export function DataExplorer({ parameters, setAnswer }: StimulusParams<ChartPara
         <Paper shadow="md" radius="md" p="md" withBorder>
           {parameters.caption === '' ? null : (
             <Flex style={{ width: '800px' }}>
-              <Blockquote>
-                {parameters.caption}
-              </Blockquote>
+              {parameters.caption ? (
+                <Blockquote>
+                  {parameters.caption}
+                </Blockquote>
+              ) : null}
             </Flex>
           )}
           <Group noWrap>
@@ -193,7 +195,7 @@ export function DataExplorer({ parameters, setAnswer }: StimulusParams<ChartPara
                         trackRange={debouncedTrackRange}
                       />
                     </div>
-                  ) : null }
+                  ) : null}
               </Stack>
             </Stack>
           </Group>
