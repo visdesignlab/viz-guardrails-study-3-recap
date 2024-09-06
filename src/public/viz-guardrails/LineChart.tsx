@@ -29,14 +29,14 @@ export function LineChart({
   selection,
   range,
   guardrail,
-} : {
-    parameters: ChartParams,
-    data: any[],
-    dataname: string
-    items: any[],
-    selection: any[] | null,
-    range: [Date, Date] | null,
-    guardrail: string
+}: {
+  parameters: ChartParams,
+  data: any[],
+  dataname: string
+  items: any[],
+  selection: any[] | null,
+  range: [Date, Date] | null,
+  guardrail: string
 }) {
   // Handle hovering
   const [hover, setHover] = useState<string[] | null>(null);
@@ -189,7 +189,7 @@ export function LineChart({
     };
   }, [xScale, yScale, guardrail, avgData, dataname]);
 
-  const averageLabel = useMemo(() => (dataname === 'clean_stocks' ? 'Market Index' : 'Average'), [dataname]);
+  const averageLabel = useMemo(() => (dataname === 'clean_stocks' ? 'Industry Average' : 'Average'), [dataname]);
 
   const getPolicyLabel = (country: string) => {
     if (country === 'Eldoril North') {
