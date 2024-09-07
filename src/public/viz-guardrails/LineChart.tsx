@@ -189,7 +189,7 @@ export function LineChart({
     };
   }, [xScale, yScale, guardrail, avgData, dataname]);
 
-  const averageLabel = useMemo(() => (dataname === 'clean_stocks' ? 'Industry Index' : 'Average'), [dataname]);
+  const averageLabel = useMemo(() => (dataname === 'clean_stocks' ? 'Industry Average' : 'Average'), [dataname]);
 
   const getPolicyLabel = (country: string) => {
     if (country === 'Eldoril North') {
@@ -336,7 +336,7 @@ export function LineChart({
             </g>
           ))}
           {labelPos?.map((x) => (
-            <foreignObject key={`${x.country}_label`} x={width + margin.left + 5} y={x.label_pos - 7} width={margin.right + 60} height={20}>
+            <foreignObject key={`${x.country}_label`} x={width + margin.left - 3} y={x.label_pos - 7} width={margin.right + 60} height={20}>
               <Text
                 px={2}
                 size={10}
