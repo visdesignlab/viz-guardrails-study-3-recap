@@ -301,14 +301,14 @@ export function LineChart({
         <svg key="control_bands" style={{ width: `${width}` }}>
           {superimposeSummary ? (
             <g key="summary_g">
-              <path
+              {/* <path
                 id="confidenceBands"
                 key="confidenceBands_key"
                 fill="lightgray"
                 opacity={0.25}
                 stroke="none"
                 d={superimposeSummary.confidenceBands}
-              />
+              /> */}
               <path
                 id="meanLine"
                 key="meanLine_key"

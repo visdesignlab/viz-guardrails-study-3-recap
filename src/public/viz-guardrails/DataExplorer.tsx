@@ -164,7 +164,7 @@ export function DataExplorer({ parameters, setAnswer }: StimulusParams<ChartPara
                   <Text fw={500}>
                     {dataname === 'clean_stocks' ? 'Percent change in stock price' : 'Infections per million people'}
                   </Text>
-                  {guardrail === 'super_summ' ? (
+                  {guardrail === 'super_summDELETE' ? (
                     <Text fz="xs" c="dimmed">Shaded area contains the industry average and shows the middle 50% of all values in the industry.</Text>
                   ) : null}
                   {guardrail === 'juxt_summ' ? (
