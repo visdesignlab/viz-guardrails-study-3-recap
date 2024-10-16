@@ -301,14 +301,6 @@ export function LineChart({
         <svg key="control_bands" style={{ width: `${width}` }}>
           {superimposeSummary ? (
             <g key="summary_g">
-              {/* <path
-                id="confidenceBands"
-                key="confidenceBands_key"
-                fill="lightgray"
-                opacity={0.25}
-                stroke="none"
-                d={superimposeSummary.confidenceBands}
-              /> */}
               <path
                 id="meanLine"
                 key="meanLine_key"
@@ -318,6 +310,28 @@ export function LineChart({
                 strokeWidth={0.5}
                 d={superimposeSummary.meanLine}
               />
+            </g>
+          ) : null}
+          {superimposeSummary ? (
+            <g>
+              <rect
+                x={width - 220}
+                y={10}
+                width={190}
+                height={40}
+                fill="none"
+                stroke="red"
+                strokeWidth={1}
+              />
+              <text
+                x={width - 210}
+                y={35}
+                fill="red"
+                fontSize="14"
+                fontWeight="bold"
+              >
+                Notice the Average Line
+              </text>
             </g>
           ) : null}
         </svg>
