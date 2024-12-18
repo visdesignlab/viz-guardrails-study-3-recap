@@ -36,6 +36,8 @@ export function Selector({
           // { value: 'juxt_data', label: 'Juxt. Data' },
           // { value: 'juxt_summ', label: 'Juxt. Summ.' },
           { value: 'super_data', label: 'Random' },
+          { value: 'median', label: 'Statistical 1' },
+          { value: 'cluster', label: 'Statistical 2' },
         ]}
       />
     </>
