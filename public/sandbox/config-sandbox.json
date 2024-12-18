@@ -25,8 +25,8 @@
             "path": "viz-guardrails/DataExplorer.tsx",
             "parameters": {
                 "dataset": "clean_data",
-                "start_date": "2023-01-03",
-                "end_date": "2023-12-31",
+                "start_date": "2019-01-03",
+                "end_date": "2024-12-01",
                 "initial_selection": [],
                 "allow_time_slider": true,
                 "allow_guardrail_selector": true,

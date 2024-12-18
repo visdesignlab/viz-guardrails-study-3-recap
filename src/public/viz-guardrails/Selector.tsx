@@ -35,7 +35,7 @@ export function Selector({
           // { value: 'super_summ', label: 'Sup. Summ.' },
           // { value: 'juxt_data', label: 'Juxt. Data' },
           // { value: 'juxt_summ', label: 'Juxt. Summ.' },
-          { value: 'random', label: 'Random' },
+          { value: 'super_data', label: 'Random' },
         ]}
       />
     </>
