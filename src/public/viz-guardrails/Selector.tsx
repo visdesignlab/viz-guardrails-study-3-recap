@@ -22,7 +22,7 @@ export function Selector({
         onChange={(x) => { setDataname(x); setSelection([]); }}
         data={[
           { value: 'clean_data', label: 'Viral' },
-          { value: 'clean_stocks', label: 'Stock' },
+          { value: 'sp500_stocks', label: 'Stock' },
         ]}
       />
       <Text>Guardrail:</Text>
@@ -31,10 +31,11 @@ export function Selector({
         onChange={(x) => { setGuardrail(x); }}
         data={[
           { value: 'none', label: 'None' },
-          { value: 'super_data', label: 'Sup. Data' },
-          { value: 'super_summ', label: 'Sup. Summ.' },
-          { value: 'juxt_data', label: 'Juxt. Data' },
-          { value: 'juxt_summ', label: 'Juxt. Summ.' },
+          // { value: 'super_data', label: 'Sup. Data' },
+          // { value: 'super_summ', label: 'Sup. Summ.' },
+          // { value: 'juxt_data', label: 'Juxt. Data' },
+          // { value: 'juxt_summ', label: 'Juxt. Summ.' },
+          { value: 'random', label: 'Random' },
         ]}
       />
     </>

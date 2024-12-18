@@ -162,7 +162,7 @@ export function DataExplorer({ parameters, setAnswer }: StimulusParams<ChartPara
               <Group position="apart">
                 <Stack spacing={0} justify="flex-start">
                   <Text fw={500}>
-                    {dataname === 'clean_stocks' ? 'Percent change in stock price' : 'Infections per million people'}
+                    {(dataname === 'clean_stocks' || dataname === 'sp500_stocks') ? 'Percent change in stock price' : 'Infections per million people'}
                   </Text>
                   {guardrail === 'super_summDELETE' ? (
                     <Text fz="xs" c="dimmed">Shaded area contains the industry average and shows the middle 50% of all values in the industry.</Text>
