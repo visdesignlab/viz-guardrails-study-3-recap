@@ -24,9 +24,9 @@
             "type": "react-component",
             "path": "viz-guardrails/DataExplorer.tsx",
             "parameters": {
-                "dataset": "clean_data",
-                "start_date": "2019-01-03",
-                "end_date": "2024-12-01",
+                "dataset": "sp500_stocks",
+                "start_date": "2023-01-01",
+                "end_date": "2024-12-13",
                 "initial_selection": [],
                 "allow_time_slider": true,
                 "allow_guardrail_selector": true,
