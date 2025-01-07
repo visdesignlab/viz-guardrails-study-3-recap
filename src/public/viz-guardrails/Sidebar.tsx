@@ -115,8 +115,9 @@ export function Sidebar({
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
+      {dataname === 'sp500_stocks' && (
       <TextInput
-        style={{ width: '70%', marginBottom: '10px' }}
+        style={{ width: '300px', marginBottom: '10px' }}
         placeholder="Search"
         value={searchTerm}
         onChange={(event) => setSearchTerm(event.currentTarget.value)}
@@ -128,6 +129,7 @@ export function Sidebar({
         />
         )}
       />
+      )}
       <div style={{ maxHeight: '400px', overflowY: 'auto', padding: '8px' }}>
         <Checkbox.Group
           key={`${dataname}_checkboxgroup`}

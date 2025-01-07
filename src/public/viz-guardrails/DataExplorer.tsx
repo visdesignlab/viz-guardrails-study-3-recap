@@ -142,9 +142,12 @@ export function DataExplorer({ parameters, setAnswer }: StimulusParams<ChartPara
               ) : null}
             </Flex>
           )}
-          <Group noWrap>
+          <Group noWrap align="flex-start" style={{ alignItems: 'flex-start', height: '100%' }}>
             {(parameters.allow_selection === false && parameters.guardrail !== 'juxt_data') ? null : (
-              <Group noWrap>
+              <Group style={{
+                flex: '1', display: 'flex', flexDirection: 'column', height: '100%', alignContent: 'flex-start', ...(dataname === 'sp500_stocks' ? { width: '380px' } : {}),
+              }}
+              >
                 <Sidebar
                   parameters={parameters}
                   data={filteredData}
@@ -187,16 +190,15 @@ export function DataExplorer({ parameters, setAnswer }: StimulusParams<ChartPara
                     guardrail={guardrail}
                   />
                 </Group>
-                {parameters.allow_time_slider
-                  ? (
-                    <div style={{ width: '500px' }}>
-                      <RangeSelector
-                        parameters={parameters}
-                        setRange={setRange}
-                        trackRange={debouncedTrackRange}
-                      />
-                    </div>
-                  ) : null}
+                {parameters.allow_time_slider ? (
+                  <div style={{ width: '500px' }}>
+                    <RangeSelector
+                      parameters={parameters}
+                      setRange={setRange}
+                      trackRange={debouncedTrackRange}
+                    />
+                  </div>
+                ) : null}
               </Stack>
             </Stack>
           </Group>
