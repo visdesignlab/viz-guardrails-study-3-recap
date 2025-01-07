@@ -139,6 +139,42 @@ export function LineChart({
     return d3.scaleOrdinal(OwidDistinctLinesPalette).domain(cats);
   }, [data, parameters, dataname]);
 
+  // ---------------------------- Median Country/Stock ----------------------------
+  const medianCountry = useMemo(() => {
+    if (guardrail !== 'median') {
+      return null;
+    }
+
+    const groupedData = d3.group(data, (d) => d[parameters.cat_var]);
+
+    const totalReturns = Array.from(groupedData).map(([country, values]) => {
+      const totalReturn = values[values.length - 1].value; // Use final 'value' as the total return
+      return { country, totalReturn };
+    });
+
+    totalReturns.sort((a, b) => a.totalReturn - b.totalReturn);
+
+    const medianIndex = Math.floor(totalReturns.length / 2);
+    return totalReturns[medianIndex]?.country;
+  }, [data, parameters, guardrail]);
+
+  const medianLinePath = useMemo(() => {
+    if (!medianCountry || guardrail !== 'median') {
+      return null;
+    }
+
+    const lineGenerator = d3.line();
+    lineGenerator.x((d: any) => xScale(d3.timeParse('%Y-%m-%d')(d[parameters.x_var]) as Date));
+    lineGenerator.y((d: any) => yScale(d[parameters.y_var]));
+    lineGenerator.curve(d3.curveBasis);
+
+    const medianData = data.filter((val) => val[parameters.cat_var] === medianCountry);
+    return {
+      path: lineGenerator(medianData) as string,
+      labelPosition: medianData[medianData.length - 1],
+    };
+  }, [medianCountry, data, xScale, yScale, parameters, guardrail]);
+
   // ---------------------------- Draw ----------------------------
   const linePaths = useMemo(() => {
     if (!xScale || !yScale) {
@@ -266,111 +302,126 @@ export function LineChart({
   }, [data, selection, yScale, guardrail, averageLabel, parameters, superimposeDatapoints, superimposeSummary, dataname]);
 
   // ---------------------------- Render ----------------------------
-  return (
-    selection?.length === 0 ? (
-      <Center style={{ width: '800px', height: '400px' }}>
-        <Text fs="italic" c="dimmed">Select an item to view the chart.</Text>
-      </Center>
-    ) : (
-      <svg id="baseLineChart" style={{ height: '400px', width: '800px', fontFamily: '"Helvetica Neue", "Helvetica", "Arial", sans-serif' }}>
+  return selection?.length === 0 ? (
+    <Center style={{ width: '800px', height: '400px' }}>
+      <Text fs="italic" c="dimmed">Select an item to view the chart.</Text>
+    </Center>
+  ) : (
+    <svg id="baseLineChart" style={{ height: '400px', width: '800px', fontFamily: '"Helvetica Neue", "Helvetica", "Arial", sans-serif' }}>
+      <g id="axes">
+        <XAxis
+          isDate
+          xScale={xScale}
+          yRange={yScale.range() as [number, number]}
+          vertPosition={height + margin.top}
+          showLines={false}
+          ticks={xScale.ticks(6).map((value) => ({
+            value: value.toString(),
+            offset: xScale(value),
+          }))}
+        />
+        <YAxis
+          dataset={dataname}
+          yScale={yScale}
+          horizontalPosition={margin.left}
+          xRange={xScale.range()}
+        />
+      </g>
 
-        <g id="axes">
-          <XAxis
-            isDate
-            xScale={xScale}
-            yRange={yScale.range() as [number, number]}
-            vertPosition={height + margin.top}
-            showLines={false}
-            ticks={xScale.ticks(6).map((value) => ({
-              value: value.toString(),
-              offset: xScale(value),
-            }))}
-          />
-
-          <YAxis
-            dataset={dataname}
-            yScale={yScale}
-            horizontalPosition={margin.left}
-            xRange={xScale.range()}
-          />
-        </g>
-
-        <svg key="control_lines" style={{ width: `${width}` }}>
-          {superimposeDatapoints?.map((x) => (
-            <g key={`${x.country}_g`}>
-              <path
-                id={`${x.country}`}
-                key={`${x.country}_key`}
-                fill="none"
-                stroke={shouldBeColor(x.country) ? colorScale(x.country) : 'gray'}
-                strokeDasharray="4,1"
-                strokeWidth={0.5}
-                d={x.path}
-              />
-            </g>
-          ))}
-        </svg>
-
-        <svg key="control_bands" style={{ width: `${width}` }}>
-          {superimposeSummary ? (
-            <g key="summary_g">
-              {/* <path
-                id="confidenceBands"
-                key="confidenceBands_key"
-                fill="lightgray"
-                opacity={0.25}
-                stroke="none"
-                d={superimposeSummary.confidenceBands}
-              /> */}
-              <path
-                id="meanLine"
-                key="meanLine_key"
-                fill="none"
-                stroke="gray"
-                strokeDasharray="4,1"
-                strokeWidth={0.5}
-                d={superimposeSummary.meanLine}
-              />
-            </g>
-          ) : null}
-        </svg>
-
-        <svg key="lines" style={{ width: `${width}` }}>
-          {linePaths?.map((x) => (
-            <g key={`${x.country}_g`}>
-              <path
-                id={`${x.country}`}
-                key={`${x.country}_key`}
-                fill="none"
-                stroke={shouldBeColor(x.country) ? colorScale(x.country) : 'gainsboro'}
-                strokeWidth={hover?.includes(x.country) ? 2 : 1.5}
-                d={x.path}
-              />
-            </g>
-          ))}
-          {labelPos?.map((x) => (
-            <foreignObject key={`${x.country}_label`} x={width + margin.left - 3} y={x.label_pos - 7} width={margin.right + 60} height={20}>
-              <Text
-                px={2}
-                size={10}
-                color={shouldBeColor(x.country) ? colorScale(x.country) : 'silver'}
-                onMouseOver={(e) => {
-                  const t = e.target as HTMLElement;
-                  if (!selection?.includes(t.innerText)) {
-                    return;
-                  }
-                  setHover([t.innerText]);
-                }}
-                onMouseOut={() => setHover([])}
-              >
-                {x.country_policy}
-              </Text>
-            </foreignObject>
-          ))}
-        </svg>
-
+      <svg key="control_lines" style={{ width: `${width}` }}>
+        {superimposeDatapoints?.map((x) => (
+          <g key={`${x.country}_g`}>
+            <path
+              id={`${x.country}`}
+              key={`${x.country}_key`}
+              fill="none"
+              stroke={shouldBeColor(x.country) ? colorScale(x.country) : 'gray'}
+              strokeDasharray="4,1"
+              strokeWidth={0.5}
+              d={x.path}
+            />
+          </g>
+        ))}
       </svg>
-    )
+
+      <svg key="control_bands" style={{ width: `${width}` }}>
+        {superimposeSummary ? (
+          <g key="summary_g">
+            <path
+              id="meanLine"
+              key="meanLine_key"
+              fill="none"
+              stroke="gray"
+              strokeDasharray="4,1"
+              strokeWidth={0.5}
+              d={superimposeSummary.meanLine}
+            />
+          </g>
+        ) : null}
+      </svg>
+
+      <svg key="lines" style={{ width: `${width}` }}>
+        {linePaths?.map((x) => (
+          <g key={`${x.country}_g`}>
+            <path
+              id={`${x.country}`}
+              key={`${x.country}_key`}
+              fill="none"
+              stroke={shouldBeColor(x.country) ? colorScale(x.country) : 'gainsboro'}
+              strokeWidth={hover?.includes(x.country) ? 2 : 1.5}
+              d={x.path}
+            />
+          </g>
+        ))}
+        {labelPos?.map((x) => (
+          <foreignObject key={`${x.country}_label`} x={width + margin.left - 3} y={x.label_pos - 7} width={margin.right + 60} height={20}>
+            <Text
+              px={2}
+              size={10}
+              color={shouldBeColor(x.country) ? colorScale(x.country) : 'silver'}
+              onMouseOver={(e) => {
+                const t = e.target as HTMLElement;
+                if (!selection?.includes(t.innerText)) {
+                  return;
+                }
+                setHover([t.innerText]);
+              }}
+              onMouseOut={() => setHover([])}
+            >
+              {x.country_policy}
+            </Text>
+          </foreignObject>
+        ))}
+      </svg>
+
+      {medianLinePath && (
+        <>
+          <path
+            d={medianLinePath.path}
+            fill="none"
+            stroke="gainsboro"
+            strokeDasharray="4,1"
+            strokeWidth={1.5}
+          />
+          <foreignObject
+            x={width + margin.left - 3}
+            y={yScale(medianLinePath.labelPosition[parameters.y_var]) - 7}
+            width={margin.right + 60}
+            height={20}
+          >
+            <Text
+              px={2}
+              size={10}
+              color="gainsboro"
+              onMouseOver={() => setHover([medianCountry])}
+              onMouseOut={() => setHover([])}
+            >
+              {medianCountry}
+            </Text>
+          </foreignObject>
+        </>
+      )}
+    </svg>
   );
 }
 
