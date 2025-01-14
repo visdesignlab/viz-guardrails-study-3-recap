@@ -45,14 +45,21 @@ export function Sidebar({
   // ---------------------------- Setup ----------------------------
 
   const filteredItems = useMemo(() => {
-    if (!searchTerm) return items;
+    if (!searchTerm) {
+      if (dataname === 'sp500_stocks') {
+        const selectedItems = items.filter((item) => selection?.includes(item.name));
+        const unselectedItems = items.filter((item) => !selection?.includes(item.name));
+        return [...selectedItems, ...unselectedItems];
+      }
+      return items;
+    }
 
     const lowerCaseSearchTerm = searchTerm.toLowerCase();
     return items.filter(
       (item) => item.name.toLowerCase().includes(lowerCaseSearchTerm)
         || (item.longName && item.longName.toLowerCase().includes(lowerCaseSearchTerm)),
     );
-  }, [searchTerm, items]);
+  }, [searchTerm, items, dataname, selection]);
 
   const xScale = useMemo(() => {
     if (range) {
