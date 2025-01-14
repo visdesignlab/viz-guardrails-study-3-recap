@@ -190,7 +190,7 @@ export function DataExplorer({ parameters, setAnswer }: StimulusParams<ChartPara
                     guardrail={guardrail}
                   />
                 </Group>
-                {parameters.allow_time_slider ? (
+                {/* {parameters.allow_time_slider ? (
                   <div style={{ width: '500px' }}>
                     <RangeSelector
                       parameters={parameters}
@@ -198,7 +198,7 @@ export function DataExplorer({ parameters, setAnswer }: StimulusParams<ChartPara
                       trackRange={debouncedTrackRange}
                     />
                   </div>
-                ) : null}
+                ) : null} */}
               </Stack>
             </Stack>
           </Group>
