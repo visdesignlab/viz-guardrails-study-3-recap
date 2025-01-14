@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import {
   Checkbox, Grid, Divider, TextInput,
+  Button,
 } from '@mantine/core';
 import * as d3 from 'd3';
 import { IconX } from '@tabler/icons-react';
@@ -123,24 +124,41 @@ export function Sidebar({
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
       {dataname === 'sp500_stocks' && (
-      <TextInput
-        style={{ width: '300px', marginBottom: '10px' }}
-        placeholder="Search"
-        value={searchTerm}
-        onChange={(event) => setSearchTerm(event.currentTarget.value)}
-        rightSection={searchTerm && (
-        <IconX
-          size={14}
-          style={{ cursor: 'pointer' }}
-          onClick={() => setSearchTerm('')}
-        />
-        )}
-      />
+        <>
+          <TextInput
+            style={{ width: '300px', marginBottom: '10px' }}
+            placeholder="Search"
+            value={searchTerm}
+            onChange={(event) => setSearchTerm(event.currentTarget.value)}
+            rightSection={searchTerm && (
+              <IconX
+                size={14}
+                style={{ cursor: 'pointer' }}
+                onClick={() => setSearchTerm('')}
+              />
+            )}
+          />
+          {
+            !searchTerm
+          && (
+          <Button
+            variant="filled"
+            style={{ marginBottom: '10px', alignSelf: 'flex-start' }}
+            onClick={() => {
+              setSelection([]);
+              trackSelection([]);
+            }}
+          >
+            Clear Selection
+          </Button>
+          )
+          }
+        </>
       )}
       <div style={{ maxHeight: '400px', overflowY: 'auto', padding: '8px' }}>
         <Checkbox.Group
           key={`${dataname}_checkboxgroup`}
-          defaultValue={selection as string[]}
+          value={selection as string[]}
           orientation="vertical"
           onChange={(xs) => {
             setSelection(xs);
@@ -169,15 +187,10 @@ export function Sidebar({
                     color={parameters.allow_selection ? 'blue' : 'gray'}
                     styles={{
                       root: { display: 'flex', alignItems: 'flex-end', padding: '2px 0' },
-                      inner: { display: displayVar },
+                      inner: { display: 'block' },
                     }}
-                  >
-                    {dataname === 'sp500_stocks'
-                      ? `${item.longName} (${item.name})`
-                      : item.name}
-                  </Checkbox>
+                  />
                 </Grid.Col>
-
                 <Grid.Col key={`${item.name}_grid2`} span={guardrail === 'juxt_data' ? 'auto' : 3}>
                   <svg key={`${item.name}_sparksvg`} style={{ width: `${width}`, height: `${height}` }}>
                     <path
