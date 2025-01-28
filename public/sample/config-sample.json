@@ -1,11 +1,11 @@
 {
     "$schema": "https://raw.githubusercontent.com/visdesignlab/viz-guardrails-study/main/src/parser/StudyConfigSchema.json",
     "studyMetadata": {
-        "title": "Guardrail Sample Sandbox",
+        "title": "Guardrail Sample Study",
         "version": "pilot",
         "authors": ["VDL"],
         "date": "2024-01-11",
-        "description": "A sandbox interface to explore guardrail samples.",
+        "description": "A study evaluating the effectiveness of guardrail samples in stock visualizations.",
         "organizations": ["University of Utah"]
     },
     "uiConfig": {
@@ -19,7 +19,7 @@
     },
     "components": {
         "interface" : {
-            "instruction": "",
+            "instruction": "<br><br><br><br>Please review the stock performance visualization below and answer the following questions.",
             "instructionLocation": "aboveStimulus",
             "type": "react-component",
             "path": "viz-guardrails/DataExplorer.tsx",
@@ -27,23 +27,72 @@
                 "dataset": "sp500_stocks",
                 "start_date": "2023-01-01",
                 "end_date": "2024-12-13",
-                "initial_selection": [],
-                "allow_time_slider": true,
-                "allow_guardrail_selector": true,
-                "allow_selection": true,
+                "initial_selection": ["ADBE"],
+                "allow_time_slider": false,
+                "allow_guardrail_selector": false,
+                "allow_selection": false,
                 "allow_help": false,
-                "guardrail": "none",
+                "guardrail": "super_summ",
                 "caption": "",
                 "x_var": "date",
                 "y_var": "value",
                 "cat_var": "name",
                 "group_var": "region"
             },
-            "nextButtonLocation": "sidebar",
-            "response": []
-        } 
+            "nextButtonLocation": "belowStimulus",
+            "response": [
+                {
+                    "id": "invest",
+                    "type": "likert",
+                    "location": "belowStimulus",
+                    "prompt": "Based on the information provided only, would you like to have invested in the 'ADBE' stock in the past two years?",
+                    "leftLabel": "Extremely unlikely",
+                    "rightLabel": "Extremely likely",
+                    "preset": 5,
+                    "required": true
+                },
+                {
+                    "id": "top10",
+                    "type": "likert",
+                    "location": "belowStimulus",
+                    "prompt": "How confident are you that this stock is among the top 10% best-performing stocks in the market?",
+                    "leftLabel": "Not confident at all",
+                    "rightLabel": "Absolutely confident",
+                    "preset": 5,
+                    "required": true
+                },
+                {
+                    "id": "complete-picture",
+                    "type": "likert",
+                    "location": "belowStimulus",
+                    "prompt": "How confident are you that this visualization gives you a complete picture of the stock's performance?",
+                    "leftLabel": "Not confident at all",
+                    "rightLabel": "Absolutely confident",
+                    "preset": 5,
+                    "required": true
+                },
+                {
+                    "id": "trust",
+                    "type": "likert",
+                    "location": "belowStimulus",
+                    "prompt": "I trust this visualization:",
+                    "leftLabel": "Strongly disagree",
+                    "rightLabel": "Strongly agree",
+                    "preset": 5,
+                    "required": true
+                },
+                {
+                    "id": "explanation",
+                    "type": "longText",
+                    "location": "belowStimulus",
+                    "prompt": "Briefly explain your reasoning for the first four questions. What information in the visualization led you to these decisions? (1-2 sentences)",
+                    "placeholder": "I chose my answer because...",
+                    "required": true
+                }
+            ]
+        }
     },
-    "sequence": { 
+    "sequence": {
         "order": "fixed",
         "components":  [
             "interface"
