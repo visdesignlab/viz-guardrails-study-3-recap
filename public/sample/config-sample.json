@@ -46,8 +46,8 @@
                     "type": "likert",
                     "location": "belowStimulus",
                     "prompt": "Based on the information provided only, would you like to have invested in the 'ADBE' stock in the past two years?",
-                    "leftLabel": "Extremely unlikely",
-                    "rightLabel": "Extremely likely",
+                    "leftLabel": "Very unlikely",
+                    "rightLabel": "Very likely",
                     "preset": 5,
                     "required": true
                 },
@@ -57,7 +57,7 @@
                     "location": "belowStimulus",
                     "prompt": "How confident are you that this stock is among the top 10% best-performing stocks in the market?",
                     "leftLabel": "Not confident at all",
-                    "rightLabel": "Absolutely confident",
+                    "rightLabel": "Very confident",
                     "preset": 5,
                     "required": true
                 },
@@ -67,7 +67,7 @@
                     "location": "belowStimulus",
                     "prompt": "How confident are you that this visualization gives you a complete picture of the stock's performance?",
                     "leftLabel": "Not confident at all",
-                    "rightLabel": "Absolutely confident",
+                    "rightLabel": "Very confident",
                     "preset": 5,
                     "required": true
                 },
