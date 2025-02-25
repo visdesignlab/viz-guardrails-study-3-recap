@@ -36,8 +36,12 @@ export function Selector({
           // { value: 'juxt_data', label: 'Juxt. Data' },
           // { value: 'juxt_summ', label: 'Juxt. Summ.' },
           { value: 'super_data', label: 'Random' },
-          { value: 'median', label: 'Statistical 1' },
-          { value: 'cluster', label: 'Statistical 2' },
+          { value: 'medianEnding', label: 'Median Ending' },
+          { value: 'super_summ', label: 'Average' },
+          { value: 'median', label: 'Median All' },
+          { value: 'medianIQR', label: 'Median +-1.5IQR' },
+          { value: 'cluster1', label: 'Statistical 4' },
+          { value: 'cluster2', label: 'Statistical 5' },
         ]}
       />
     </>
