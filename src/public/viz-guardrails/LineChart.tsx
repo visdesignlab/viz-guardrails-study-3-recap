@@ -108,22 +108,62 @@ export function LineChart({
     }
   }, [guardrail, selection, allCountries]);
 
+  // ---------------------------- Median +- 1.5 IQR ---------------------------- //
+  const medianIQRData = useMemo(() => {
+    if (guardrail !== 'medianIQR') {
+      return null;
+    }
+
+    const groupedData = d3.group(data, (d) => d[parameters.x_var]);
+
+    const medianIQR = Array.from(groupedData, ([date, values]) => {
+      const metricValues = values.map((d) => d[parameters.y_var]).filter((v): v is number => v !== null && v !== undefined);
+
+      if (metricValues.length === 0) return null;
+
+      const medianValue = d3.median(metricValues) ?? 0;
+      const q1 = d3.quantile(metricValues, 0.25) ?? medianValue;
+      const q3 = d3.quantile(metricValues, 0.75) ?? medianValue;
+
+      const iqr = q3 - q1;
+      const upperBound = medianValue + 1.5 * iqr;
+      const lowerBound = medianValue - 1.5 * iqr;
+
+      return {
+        [parameters.x_var]: date,
+        median: medianValue,
+        upper: upperBound,
+        lower: lowerBound,
+      };
+    }).filter((d) => d !== null);
+
+    return medianIQR;
+  }, [data, parameters, guardrail]);
+
   const {
     yMin, yMax,
   } = useMemo(() => {
-    const relevantCountries = selection?.concat(randomCountries) || [];
-    const yData = data
-      .filter((val) => relevantCountries.includes(val[parameters.cat_var]))
+    const selectedYValues = data
+      .filter((val) => selection?.includes(val[parameters.cat_var]))
       .map((d) => +d[parameters.y_var])
       .filter((val) => val !== null) as number[];
 
-    const [yMinSel, yMaxSel] = d3.extent(yData) as [number, number];
-    return {
-      yMin: yMinSel || 0,
-      yMax: yMaxSel || 1,
-    };
-  }, [data, selection, randomCountries, parameters]);
+    let iqrValues: number[] = [];
+    if (guardrail === 'medianIQR' && medianIQRData) {
+      iqrValues = medianIQRData.flatMap((d) => [d.median, d.upper, d.lower]);
+    }
 
+    const allYValues = [...selectedYValues, ...iqrValues];
+
+    const [computedYMin, computedYMax] = d3.extent(allYValues) as [number, number];
+
+    const buffer = (computedYMax - computedYMin) * 0.1;
+
+    return {
+      yMin: computedYMin - buffer,
+      yMax: computedYMax + buffer,
+    };
+  }, [data, selection, medianIQRData, parameters, guardrail]);
   const xScale = useMemo(() => {
     if (range) {
       return d3.scaleTime([margin.left, width + margin.left]).domain(range);
@@ -284,6 +324,40 @@ export function LineChart({
   }, [xScale, yScale, guardrail, avgData, dataname]);
 
   const averageLabel = useMemo(() => (dataname === 'clean_stocks' ? 'Industry Average' : 'Average'), [dataname]);
+
+  // median IQR paths
+  const medianIQRPaths = useMemo(() => {
+    if (!medianIQRData || guardrail !== 'medianIQR') {
+      return null;
+    }
+
+    const lineGenerator = d3.line()
+      .x((d: [number, number]) => xScale(d[0]))
+      .y((d: [number, number]) => yScale(d[1]))
+      .curve(d3.curveBasis);
+    // shaded area between upper and lower bounds
+    const areaGenerator = d3.area<[number, number, number]>()
+      .x((d) => xScale(d[0]))
+      .y0((d) => yScale(d[1] ?? yMin))
+      .y1((d) => yScale(d[2] ?? yMax))
+      .curve(d3.curveBasis);
+
+    const processedData: [number, number, number][] = medianIQRData
+      .map((d) => {
+        const parsedDate = d3.timeParse('%Y-%m-%d')(d[parameters.x_var]);
+        return parsedDate
+          ? [parsedDate.getTime(), d.lower, d.upper] as [number, number, number]
+          : null;
+      })
+      .filter((d): d is [number, number, number] => d !== null);
+
+    return {
+      iqrAreaPath: areaGenerator(processedData) as string,
+      medianPath: lineGenerator(processedData.map(([date, lower, upper]) => [date, (upper + lower) / 2])) as string, // Median path
+      upperPath: lineGenerator(processedData.map(([date, lower, upper]) => [date, upper])) as string, // Upper bound
+      lowerPath: lineGenerator(processedData.map(([date, lower, upper]) => [date, lower])) as string, // Lower bound
+    };
+  }, [medianIQRData, xScale, yScale, parameters, guardrail]);
 
   const getPolicyLabel = (country: string) => {
     if (country === 'Eldoril North') {
@@ -492,6 +566,74 @@ export function LineChart({
           </Text>
         </foreignObject>
       </>
+      )}
+      {medianIQRPaths && medianIQRData && (
+        <>
+          <path
+            d={medianIQRPaths.iqrAreaPath}
+            fill="silver"
+            opacity={0.2}
+            stroke="none"
+          />
+
+          <path
+            d={medianIQRPaths.medianPath}
+            fill="none"
+            stroke="gainsboro"
+            strokeDasharray="4,1"
+            strokeWidth={1.5}
+          />
+
+          <path
+            d={medianIQRPaths.upperPath}
+            fill="none"
+            stroke="gainsboro"
+            strokeDasharray="2,2"
+            strokeWidth={1}
+            opacity={0.7}
+          />
+          <path
+            d={medianIQRPaths.lowerPath}
+            fill="none"
+            stroke="gainsboro"
+            strokeDasharray="2,2"
+            strokeWidth={1}
+            opacity={0.7}
+          />
+
+          <foreignObject
+            x={width + margin.left - 3}
+            y={yScale(medianIQRData[medianIQRData.length - 1].median) - 7}
+            width={margin.right + 60}
+            height={20}
+          >
+            <Text px={2} size={10} color="gainsboro">
+              Median
+            </Text>
+          </foreignObject>
+
+          <foreignObject
+            x={width + margin.left - 3}
+            y={yScale(medianIQRData[medianIQRData.length - 1].upper) - 7}
+            width={margin.right + 60}
+            height={20}
+          >
+            <Text px={2} size={10} color="gainsboro">
+              Median + 1.5 IQR
+            </Text>
+          </foreignObject>
+
+          <foreignObject
+            x={width + margin.left - 3}
+            y={yScale(medianIQRData[medianIQRData.length - 1].lower) - 7}
+            width={margin.right + 60}
+            height={20}
+          >
+            <Text px={2} size={10} color="gainsboro">
+              Median - 1.5 IQR
+            </Text>
+          </foreignObject>
+        </>
       )}
 
     </svg>
