@@ -139,9 +139,9 @@ export function LineChart({
     return d3.scaleOrdinal(OwidDistinctLinesPalette).domain(cats);
   }, [data, parameters, dataname]);
 
-  // ---------------------------- Median Country/Stock ----------------------------
+  // ---------------------------- Median Ending Country/Stock ----------------------------
   const medianCountry = useMemo(() => {
-    if (guardrail !== 'median') {
+    if (guardrail !== 'medianEnding') {
       return null;
     }
 
@@ -158,8 +158,8 @@ export function LineChart({
     return totalReturns[medianIndex]?.country;
   }, [data, parameters, guardrail]);
 
-  const medianLinePath = useMemo(() => {
-    if (!medianCountry || guardrail !== 'median') {
+  const medianLinePathEnding = useMemo(() => {
+    if (!medianCountry || guardrail !== 'medianEnding') {
       return null;
     }
 
@@ -174,6 +174,51 @@ export function LineChart({
       labelPosition: medianData[medianData.length - 1],
     };
   }, [medianCountry, data, xScale, yScale, parameters, guardrail]);
+
+  // ---------------------------- Median at each point ---------------------------- //
+  const medianCountryData = useMemo(() => {
+    if (guardrail !== 'median') {
+      return null;
+    }
+
+    const groupedData = d3.group(data, (d) => d[parameters.x_var]);
+
+    const medianCountry = Array.from(groupedData, ([date, values]) => {
+      const metricValues = values.map((d) => d[parameters.y_var]).filter((v) => v !== null);
+      const medianValue = d3.median(metricValues);
+
+      return {
+        [parameters.x_var]: date,
+        [parameters.y_var]: medianValue,
+      };
+    });
+
+    return medianCountry;
+  }, [data, parameters, guardrail]);
+
+  const medianLinePath = useMemo(() => {
+    if (!medianCountryData || (guardrail !== 'median' && guardrail !== 'medianEnding')) {
+      return null;
+    }
+
+    const lineGenerator = d3.line()
+      .x((d: [number, number]) => xScale(d[0]))
+      .y((d: [number, number]) => yScale(d[1]))
+      .curve(d3.curveBasis);
+
+    const processedData = medianCountryData
+      .map((d) => {
+        const parsedDate = d3.timeParse('%Y-%m-%d')(d[parameters.x_var]);
+        if (!parsedDate || d[parameters.y_var] === undefined) return null;
+        return [parsedDate.getTime(), d[parameters.y_var]] as [number, number];
+      })
+      .filter((d): d is [number, number] => d !== null);
+
+    return {
+      path: lineGenerator(processedData) as string,
+      labelPosition: medianCountryData[medianCountryData.length - 1],
+    };
+  }, [medianCountryData, xScale, yScale, parameters, guardrail]);
 
   // ---------------------------- Draw ----------------------------
   const linePaths = useMemo(() => {
@@ -394,10 +439,10 @@ export function LineChart({
         ))}
       </svg>
 
-      {medianLinePath && (
+      {medianLinePathEnding && (
         <>
           <path
-            d={medianLinePath.path}
+            d={medianLinePathEnding.path}
             fill="none"
             stroke="gainsboro"
             strokeDasharray="4,1"
@@ -405,7 +450,7 @@ export function LineChart({
           />
           <foreignObject
             x={width + margin.left - 3}
-            y={yScale(medianLinePath.labelPosition[parameters.y_var]) - 7}
+            y={medianLinePathEnding ? yScale(medianLinePathEnding.labelPosition[parameters.y_var]) - 7 : 0}
             width={margin.right + 60}
             height={20}
           >
@@ -421,6 +466,34 @@ export function LineChart({
           </foreignObject>
         </>
       )}
+      {medianLinePath && (
+      <>
+        <path
+          d={medianLinePath.path}
+          fill="none"
+          stroke="gainsboro"
+          strokeDasharray="4,1"
+          strokeWidth={1.5}
+        />
+        <foreignObject
+          x={width + margin.left - 3}
+          y={medianLinePath ? yScale(medianLinePath.labelPosition[parameters.y_var]) - 7 : 0}
+          width={margin.right + 60}
+          height={20}
+        >
+          <Text
+            px={2}
+            size={10}
+            color="gainsboro"
+            onMouseOver={() => setHover(['Median Country'])}
+            onMouseOut={() => setHover([])}
+          >
+            Median Country
+          </Text>
+        </foreignObject>
+      </>
+      )}
+
     </svg>
   );
 }
