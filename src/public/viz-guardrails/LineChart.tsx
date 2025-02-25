@@ -140,6 +140,34 @@ export function LineChart({
     return medianIQR;
   }, [data, parameters, guardrail]);
 
+  // ---------------------------- 75th and 25th percentiles ---------------------------- //
+  const percentileData = useMemo(() => {
+    if (guardrail !== 'percentiles') {
+      return null;
+    }
+
+    const groupedData = d3.group(data, (d) => d[parameters.x_var]);
+
+    const medianIQR = Array.from(groupedData, ([date, values]) => {
+      const metricValues = values.map((d) => d[parameters.y_var]).filter((v): v is number => v !== null && v !== undefined);
+
+      if (metricValues.length === 0) return null;
+
+      const medianValue = d3.median(metricValues) ?? 0;
+      const q1 = d3.quantile(metricValues, 0.25) ?? medianValue;
+      const q3 = d3.quantile(metricValues, 0.75) ?? medianValue;
+
+      return {
+        [parameters.x_var]: date,
+        median: medianValue,
+        upper: q3,
+        lower: q1,
+      };
+    }).filter((d) => d !== null);
+
+    return medianIQR;
+  }, [data, parameters, guardrail]);
+
   const {
     yMin, yMax,
   } = useMemo(() => {
@@ -151,6 +179,10 @@ export function LineChart({
     let iqrValues: number[] = [];
     if (guardrail === 'medianIQR' && medianIQRData) {
       iqrValues = medianIQRData.flatMap((d) => [d.median, d.upper, d.lower]);
+    }
+
+    if (guardrail === 'percentiles' && percentileData) {
+      iqrValues = percentileData.flatMap((d) => [d.median, d.upper, d.lower]);
     }
 
     const allYValues = [...selectedYValues, ...iqrValues];
@@ -354,6 +386,39 @@ export function LineChart({
     return {
       iqrAreaPath: areaGenerator(processedData) as string,
       medianPath: lineGenerator(processedData.map(([date, lower, upper]) => [date, (upper + lower) / 2])) as string, // Median path
+      upperPath: lineGenerator(processedData.map(([date, lower, upper]) => [date, upper])) as string, // Upper bound
+      lowerPath: lineGenerator(processedData.map(([date, lower, upper]) => [date, lower])) as string, // Lower bound
+    };
+  }, [medianIQRData, xScale, yScale, parameters, guardrail]);
+
+  // percentile paths
+  const percentilePaths = useMemo(() => {
+    if (!percentileData || guardrail !== 'percentiles') {
+      return null;
+    }
+
+    const lineGenerator = d3.line()
+      .x((d: [number, number]) => xScale(d[0]))
+      .y((d: [number, number]) => yScale(d[1]))
+      .curve(d3.curveBasis);
+    // shaded area between upper and lower bounds
+    const areaGenerator = d3.area<[number, number, number]>()
+      .x((d) => xScale(d[0]))
+      .y0((d) => yScale(d[1] ?? yMin))
+      .y1((d) => yScale(d[2] ?? yMax))
+      .curve(d3.curveBasis);
+
+    const processedData: [number, number, number][] = percentileData
+      .map((d) => {
+        const parsedDate = d3.timeParse('%Y-%m-%d')(d[parameters.x_var]);
+        return parsedDate
+          ? [parsedDate.getTime(), d.lower, d.upper] as [number, number, number]
+          : null;
+      })
+      .filter((d): d is [number, number, number] => d !== null);
+
+    return {
+      percentileAreaPath: areaGenerator(processedData) as string,
       upperPath: lineGenerator(processedData.map(([date, lower, upper]) => [date, upper])) as string, // Upper bound
       lowerPath: lineGenerator(processedData.map(([date, lower, upper]) => [date, lower])) as string, // Lower bound
     };
@@ -631,6 +696,52 @@ export function LineChart({
           >
             <Text px={2} size={10} color="gainsboro">
               Median - 1.5 IQR
+            </Text>
+          </foreignObject>
+        </>
+      )}
+      {percentilePaths && percentileData && (
+        <>
+          <path
+            d={percentilePaths.percentileAreaPath}
+            fill="silver"
+            opacity={0.2}
+            stroke="none"
+          />
+          <path
+            d={percentilePaths.upperPath}
+            fill="none"
+            stroke="gainsboro"
+            strokeDasharray="2,2"
+            strokeWidth={1}
+            opacity={0.7}
+          />
+          <path
+            d={percentilePaths.lowerPath}
+            fill="none"
+            stroke="gainsboro"
+            strokeDasharray="2,2"
+            strokeWidth={1}
+            opacity={0.7}
+          />
+          <foreignObject
+            x={width + margin.left - 3}
+            y={yScale(percentileData[percentileData.length - 1].upper) - 7}
+            width={margin.right + 60}
+            height={20}
+          >
+            <Text px={2} size={10} color="gainsboro">
+              75th Percentile
+            </Text>
+          </foreignObject>
+          <foreignObject
+            x={width + margin.left - 3}
+            y={yScale(percentileData[percentileData.length - 1].lower) - 7}
+            width={margin.right + 60}
+            height={20}
+          >
+            <Text px={2} size={10} color="gainsboro">
+              25th Percentile
             </Text>
           </foreignObject>
         </>
