@@ -204,7 +204,15 @@ export function LineChart({
     return d3.scaleTime([margin.left, width + margin.left]).domain([new Date(parameters.start_date), new Date(parameters.end_date)]);
   }, [width, range, parameters, dataname]);
 
-  const yScale = useMemo(() => d3.scaleLinear([height + margin.top, margin.top]).domain([yMin, yMax]).nice(), [height, yMax, yMin, dataname]);
+  const yScale = useMemo(() => {
+    const scale = d3.scaleLinear([height + margin.top, margin.top]);
+    if (guardrail === 'medianIQRClosest') {
+      scale.domain([-100, 100]); // fixed
+    } else {
+      scale.domain([yMin, yMax]).nice(); // dynamic
+    }
+    return scale;
+  }, [height, yMax, yMin, dataname, guardrail]);
 
   const colorScale = useMemo(() => {
     const cats = Array.from(new Set(data.map((d) => d[parameters.cat_var])));
@@ -346,6 +354,84 @@ export function LineChart({
     return {
       path: lineGenerator(closestData) as string,
       labelPosition: closestData[closestData.length - 1],
+    };
+  }, [data, parameters, guardrail, xScale, yScale]);
+
+  // ---------------------------- Median IQR closest ----------------------------
+  const medianIQRClosestPaths = useMemo(() => {
+    if (guardrail !== 'medianIQRClosest') return null;
+
+    const groupedByDate = d3.group(data, (d) => d[parameters.x_var]);
+    const groupedByCountry = d3.group(data, (d) => d[parameters.cat_var]);
+
+    const boundsMap = new Map<string, { median: number, upper: number, lower: number }>();
+
+    groupedByDate.forEach((entries, date) => {
+      const values = entries.map((d) => d[parameters.y_var]).filter((v): v is number => v != null);
+      const median = d3.median(values) ?? 0;
+      const q1 = d3.quantile(values, 0.25) ?? median;
+      const q3 = d3.quantile(values, 0.75) ?? median;
+      const iqr = q3 - q1;
+
+      boundsMap.set(date, {
+        median,
+        upper: median + 1.5 * iqr,
+        lower: median - 1.5 * iqr,
+      });
+    });
+
+    const findClosest = (
+      target: 'median' | 'upper' | 'lower',
+    ): { name: string; data: any[] } | null => {
+      let closest: { name: string; data: any[] } | null = null;
+      let minDist = Infinity;
+
+      groupedByCountry.forEach((entries, name) => {
+        let totalDist = 0;
+        let count = 0;
+
+        for (const d of entries) {
+          const date = d[parameters.x_var];
+          const y = d[parameters.y_var];
+          const ref = boundsMap.get(date)?.[target];
+          if (ref == null || y == null) continue;
+          const diff = y - ref;
+          totalDist += diff * diff;
+          count += 1;
+        }
+
+        const avgDist = totalDist / (count || 1);
+        if (avgDist < minDist) {
+          minDist = avgDist;
+          closest = { name: name as string, data: entries };
+        }
+      });
+
+      return closest;
+    };
+
+    const median = findClosest('median');
+    const upper = findClosest('upper');
+    const lower = findClosest('lower');
+
+    if (!median || !upper || !lower) return null;
+
+    const fixedYScale = d3.scaleLinear().domain([-100, 100]).range([height + margin.top, margin.top]);
+
+    const lineGenerator = d3.line()
+      .x((d: any) => xScale(d3.timeParse('%Y-%m-%d')(d[parameters.x_var]) as Date))
+      .y((d: any) => fixedYScale(d[parameters.y_var]))
+      .curve(d3.curveBasis);
+
+    return {
+      medianPath: lineGenerator(median.data),
+      upperPath: lineGenerator(upper.data),
+      lowerPath: lineGenerator(lower.data),
+      labelPositions: {
+        median: median.data[median.data.length - 1],
+        upper: upper.data[upper.data.length - 1],
+        lower: lower.data[lower.data.length - 1],
+      },
     };
   }, [data, parameters, guardrail, xScale, yScale]);
 
@@ -782,6 +868,59 @@ export function LineChart({
           </foreignObject>
         </>
       )}
+      {medianIQRClosestPaths && (
+      <>
+        <path
+          d={medianIQRClosestPaths.medianPath ?? undefined}
+          fill="none"
+          stroke="gainsboro"
+          strokeDasharray="4,1"
+          strokeWidth={1.5}
+        />
+        <path
+          d={medianIQRClosestPaths.upperPath ?? undefined}
+          fill="none"
+          stroke="gainsboro"
+          strokeDasharray="2,2"
+          strokeWidth={1.5}
+        />
+        <path
+          d={medianIQRClosestPaths.lowerPath ?? undefined}
+          fill="none"
+          stroke="gainsboro"
+          strokeDasharray="2,2"
+          strokeWidth={1.5}
+        />
+
+        <foreignObject
+          x={width + margin.left - 3}
+          y={yScale(medianIQRClosestPaths.labelPositions.median[parameters.y_var]) - 7}
+          width={margin.right + 60}
+          height={20}
+        >
+          <Text px={2} size={10} color="gainsboro">Median</Text>
+        </foreignObject>
+
+        <foreignObject
+          x={width + margin.left - 3}
+          y={yScale(medianIQRClosestPaths.labelPositions.upper[parameters.y_var]) - 7}
+          width={margin.right + 60}
+          height={20}
+        >
+          <Text px={2} size={10} color="gainsboro">Median + 1.5 IQR</Text>
+        </foreignObject>
+
+        <foreignObject
+          x={width + margin.left - 3}
+          y={yScale(medianIQRClosestPaths.labelPositions.lower[parameters.y_var]) - 7}
+          width={margin.right + 60}
+          height={20}
+        >
+          <Text px={2} size={10} color="gainsboro">Median - 1.5 IQR</Text>
+        </foreignObject>
+      </>
+      )}
+
       {percentilePaths && percentileData && (
         <>
           {/* <path
