@@ -38,7 +38,7 @@ export function Selector({
           { value: 'super_data', label: 'Random' },
           { value: 'medianEnding', label: 'Median Ending' },
           { value: 'super_summ', label: 'Average' },
-          { value: 'median', label: 'Median All' },
+          { value: 'median', label: 'Median At Each Timestamp' },
           { value: 'medianIQR', label: 'Median +-1.5IQR' },
           { value: 'percentiles', label: 'Percentiles' },
           { value: 'cluster1', label: 'Statistical 4' },
