@@ -700,27 +700,27 @@ export function LineChart({
       )}
       {percentilePaths && percentileData && (
         <>
-          <path
+          {/* <path
             d={percentilePaths.percentileAreaPath}
             fill="silver"
             opacity={0.2}
             stroke="none"
-          />
+          /> */}
           <path
             d={percentilePaths.upperPath}
             fill="none"
             stroke="gainsboro"
             strokeDasharray="2,2"
-            strokeWidth={1}
-            opacity={0.7}
+            strokeWidth={1.5}
+            // opacity={0.7}
           />
           <path
             d={percentilePaths.lowerPath}
             fill="none"
             stroke="gainsboro"
             strokeDasharray="2,2"
-            strokeWidth={1}
-            opacity={0.7}
+            strokeWidth={1.5}
+            // opacity={0.7}
           />
           <foreignObject
             x={width + margin.left - 3}

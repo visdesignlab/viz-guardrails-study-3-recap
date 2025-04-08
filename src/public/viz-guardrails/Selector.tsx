@@ -40,7 +40,7 @@ export function Selector({
           { value: 'super_summ', label: 'Average' },
           { value: 'median', label: 'Median At Each Timestamp' },
           { value: 'medianIQR', label: 'Median +-1.5IQR At Each Timestamp' },
-          { value: 'percentiles', label: 'Percentiles' },
+          { value: 'percentiles', label: 'Percentiles At Each Timestamp' },
           { value: 'cluster1', label: 'Statistical 4' },
           { value: 'cluster2', label: 'Statistical 5' },
         ]}
