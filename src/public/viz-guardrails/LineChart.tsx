@@ -499,6 +499,46 @@ export function LineChart({
     };
   }, [data, parameters, guardrail, xScale, yScale]);
 
+  // ---------------------------- Cluster Representatives ----------------------------
+  const [clusterReps, setClusterReps] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (guardrail !== 'cluster') return;
+
+    d3.csv('/sandbox/data/cluster_representatives.csv', d3.autoType).then((data) => {
+      setClusterReps(data);
+    });
+  }, [guardrail]);
+
+  const clusterLines = useMemo(() => {
+    if (guardrail !== 'cluster' || clusterReps.length === 0) return null;
+    const grouped = d3.group(clusterReps, (d) => d.name);
+
+    return Array.from(grouped, ([name, values]) => {
+      const lineGenerator = d3.line<[number, number]>()
+        .x((d) => xScale(d[0]))
+        .y((d) => yScale(d[1]))
+        .curve(d3.curveBasis);
+
+      const parsedData: [number, number][] = values
+        .map((d: any) => {
+          const dateObj = new Date(d.date);
+          const val = parseFloat(d.value);
+          if (Number.isNaN(val)) return null;
+          return [dateObj.getTime(), val];
+        })
+        .filter((d): d is [number, number] => d !== null);
+
+      if (parsedData.length === 0) return null;
+
+      return {
+        name,
+        path: lineGenerator(parsedData) ?? '',
+        lastPoint: parsedData[parsedData.length - 1],
+      };
+    }).filter((d): d is { name: string; path: string; lastPoint: [number, number] } => d !== null);
+  }, [clusterReps, guardrail, xScale, yScale]);
+
   // ---------------------------- Draw ----------------------------
   const linePaths = useMemo(() => {
     if (!xScale || !yScale) {
@@ -1065,6 +1105,27 @@ export function LineChart({
         </foreignObject>
       </>
       )}
+      {clusterLines?.map((line) => (
+        <g key={line.name}>
+          <path
+            d={line.path}
+            fill="none"
+            stroke="gainsboro"
+            strokeWidth={1}
+            strokeDasharray="2,2"
+          />
+          <foreignObject
+            x={width + margin.left - 3}
+            y={yScale(line.lastPoint[1]) - 7}
+            width={margin.right + 60}
+            height={20}
+          >
+            <Text px={2} size={10} color="gainsboro">
+              {line.name}
+            </Text>
+          </foreignObject>
+        </g>
+      ))}
 
     </svg>
   );
