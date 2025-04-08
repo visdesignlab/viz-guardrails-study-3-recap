@@ -292,6 +292,65 @@ export function LineChart({
     };
   }, [medianCountryData, xScale, yScale, parameters, guardrail]);
 
+  // ---------------------------- Closest Median Line  ----------------------------
+  const medianLineClosest = useMemo(() => {
+    if (guardrail !== 'medianClosest') return null;
+
+    const groupedByDate = d3.group(data, (d) => d[parameters.x_var]);
+    const medianMap = new Map<string, number>();
+
+    groupedByDate.forEach((entries, date) => {
+      const values = entries.map((d) => d[parameters.y_var]).filter((v): v is number => v !== null && v !== undefined);
+      const median = d3.median(values);
+      if (median !== undefined) {
+        medianMap.set(date, median);
+      }
+    });
+
+    const groupedByCountry = d3.group(data, (d) => d[parameters.cat_var]);
+
+    let closestCountry = null;
+    let minDistance = Infinity;
+    let closestData: any[] = [];
+
+    groupedByCountry.forEach((entries, country) => {
+      let totalDistance = 0;
+      let count = 0;
+
+      for (const entry of entries) {
+        const date = entry[parameters.x_var];
+        const val = entry[parameters.y_var];
+        const medianVal = medianMap.get(date);
+
+        if (val == null || medianVal == null) continue;
+
+        const diff = val - medianVal;
+        totalDistance += diff * diff;
+        count += 1;
+      }
+
+      const avgDistance = totalDistance / (count || 1);
+
+      if (avgDistance < minDistance) {
+        minDistance = avgDistance;
+        closestCountry = country;
+        closestData = entries;
+      }
+    });
+
+    if (!closestData || closestData.length === 0) return null;
+
+    const lineGenerator = d3.line()
+      .x((d: any) => xScale(d3.timeParse('%Y-%m-%d')(d[parameters.x_var]) as Date))
+      .y((d: any) => yScale(d[parameters.y_var]))
+      .curve(d3.curveBasis);
+
+    return {
+      path: lineGenerator(closestData) as string,
+      labelPosition: closestData[closestData.length - 1],
+    };
+  }, [data, parameters, guardrail, xScale, yScale]);
+
   // ---------------------------- Draw ----------------------------
   const linePaths = useMemo(() => {
     if (!xScale || !yScale) {
@@ -617,6 +676,33 @@ export function LineChart({
         <foreignObject
           x={width + margin.left - 3}
           y={medianLinePath ? yScale(medianLinePath.labelPosition[parameters.y_var]) - 7 : 0}
+          width={margin.right + 60}
+          height={20}
+        >
+          <Text
+            px={2}
+            size={10}
+            color="gainsboro"
+            onMouseOver={() => setHover(['Median Country'])}
+            onMouseOut={() => setHover([])}
+          >
+            Median Country
+          </Text>
+        </foreignObject>
+      </>
+      )}
+      {medianLineClosest && (
+      <>
+        <path
+          d={medianLineClosest.path}
+          fill="none"
+          stroke="gainsboro"
+          strokeDasharray="4,1"
+          strokeWidth={1.5}
+        />
+        <foreignObject
+          x={width + margin.left - 3}
+          y={medianLineClosest ? yScale(medianLineClosest.labelPosition[parameters.y_var]) - 7 : 0}
           width={margin.right + 60}
           height={20}
         >

@@ -39,6 +39,7 @@ export function Selector({
           { value: 'medianEnding', label: 'Median Ending' },
           { value: 'super_summ', label: 'Average' },
           { value: 'median', label: 'Median At Each Timestamp' },
+          { value: 'medianClosest', label: 'Line Closest to Median' },
           { value: 'medianIQR', label: 'Median +-1.5IQR At Each Timestamp' },
           { value: 'percentiles', label: 'Percentiles At Each Timestamp' },
           { value: 'cluster1', label: 'Statistical 4' },
