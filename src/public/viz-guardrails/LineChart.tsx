@@ -435,6 +435,70 @@ export function LineChart({
     };
   }, [data, parameters, guardrail, xScale, yScale]);
 
+  // ---------------------------- Percentile Closest Lines ---------------------------- //
+  const percentileClosestPaths = useMemo(() => {
+    if (guardrail !== 'percentileClosest') return null;
+
+    const groupedByDate = d3.group(data, (d) => d[parameters.x_var]);
+    const groupedByCountry = d3.group(data, (d) => d[parameters.cat_var]);
+
+    const targetMap = new Map<string, { upper: number, lower: number }>();
+
+    groupedByDate.forEach((entries, date) => {
+      const values = entries.map((d) => d[parameters.y_var]).filter((v): v is number => v !== null && v !== undefined);
+      const q1 = d3.quantile(values, 0.25) ?? 0;
+      const q3 = d3.quantile(values, 0.75) ?? 0;
+      targetMap.set(date, { lower: q1, upper: q3 });
+    });
+
+    const findClosest = (target: 'upper' | 'lower'): { name: string; data: any[] } | null => {
+      let closest: { name: string, data: any[] } | null = null;
+      let minDist = Infinity;
+
+      groupedByCountry.forEach((entries, name) => {
+        let total = 0;
+        let count = 0;
+
+        for (const d of entries) {
+          const date = d[parameters.x_var];
+          const y = d[parameters.y_var];
+          const ref = targetMap.get(date)?.[target];
+          if (ref == null || y == null) continue;
+          const diff = y - ref;
+          total += diff * diff;
+          count += 1;
+        }
+
+        const avg = total / (count || 1);
+        if (avg < minDist) {
+          minDist = avg;
+          closest = { name, data: entries };
+        }
+      });
+
+      return closest;
+    };
+
+    const upper = findClosest('upper');
+    const lower = findClosest('lower');
+
+    if (!upper || !lower) return null;
+
+    const lineGenerator = d3.line()
+      .x((d: any) => xScale(d3.timeParse('%Y-%m-%d')(d[parameters.x_var]) as Date))
+      .y((d: any) => yScale(d[parameters.y_var]))
+      .curve(d3.curveBasis);
+
+    return {
+      upperPath: lineGenerator(upper.data),
+      lowerPath: lineGenerator(lower.data),
+      labelPositions: {
+        upper: upper.data[upper.data.length - 1],
+        lower: lower.data[lower.data.length - 1],
+      },
+    };
+  }, [data, parameters, guardrail, xScale, yScale]);
+
   // ---------------------------- Draw ----------------------------
   const linePaths = useMemo(() => {
     if (!xScale || !yScale) {
@@ -966,6 +1030,40 @@ export function LineChart({
             </Text>
           </foreignObject>
         </>
+      )}
+      {percentileClosestPaths && (
+      <>
+        <path
+          d={percentileClosestPaths.upperPath ?? undefined}
+          fill="none"
+          stroke="gainsboro"
+          strokeDasharray="2,2"
+          strokeWidth={1.5}
+        />
+        <path
+          d={percentileClosestPaths.lowerPath ?? undefined}
+          fill="none"
+          stroke="gainsboro"
+          strokeDasharray="2,2"
+          strokeWidth={1.5}
+        />
+        <foreignObject
+          x={width + margin.left - 3}
+          y={yScale(percentileClosestPaths.labelPositions.upper[parameters.y_var]) - 7}
+          width={margin.right + 60}
+          height={20}
+        >
+          <Text px={2} size={10} color="gainsboro">75th Percentile</Text>
+        </foreignObject>
+        <foreignObject
+          x={width + margin.left - 3}
+          y={yScale(percentileClosestPaths.labelPositions.lower[parameters.y_var]) - 7}
+          width={margin.right + 60}
+          height={20}
+        >
+          <Text px={2} size={10} color="gainsboro">25th Percentile</Text>
+        </foreignObject>
+      </>
       )}
 
     </svg>
