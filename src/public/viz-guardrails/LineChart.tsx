@@ -634,12 +634,12 @@ export function LineChart({
       )}
       {medianIQRPaths && medianIQRData && (
         <>
-          <path
+          {/* <path
             d={medianIQRPaths.iqrAreaPath}
             fill="silver"
             opacity={0.2}
             stroke="none"
-          />
+          /> */}
 
           <path
             d={medianIQRPaths.medianPath}
@@ -654,16 +654,14 @@ export function LineChart({
             fill="none"
             stroke="gainsboro"
             strokeDasharray="2,2"
-            strokeWidth={1}
-            opacity={0.7}
+            strokeWidth={1.5}
           />
           <path
             d={medianIQRPaths.lowerPath}
             fill="none"
             stroke="gainsboro"
             strokeDasharray="2,2"
-            strokeWidth={1}
-            opacity={0.7}
+            strokeWidth={1.5}
           />
 
           <foreignObject
