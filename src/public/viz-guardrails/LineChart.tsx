@@ -309,7 +309,6 @@ export function LineChart({
 
     const groupedByCountry = d3.group(data, (d) => d[parameters.cat_var]);
 
-    let closestCountry = null;
     let minDistance = Infinity;
     let closestData: any[] = [];
 
@@ -333,7 +332,6 @@ export function LineChart({
 
       if (avgDistance < minDistance) {
         minDistance = avgDistance;
-        closestCountry = country;
         closestData = entries;
       }
     });
