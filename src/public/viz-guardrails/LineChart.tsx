@@ -874,7 +874,7 @@ export function LineChart({
             onMouseOver={() => setHover(['Median Country'])}
             onMouseOut={() => setHover([])}
           >
-            Median Country
+            Median
           </Text>
         </foreignObject>
       </>
@@ -901,7 +901,7 @@ export function LineChart({
             onMouseOver={() => setHover(['Median Country'])}
             onMouseOut={() => setHover([])}
           >
-            Median Country
+            Median
           </Text>
         </foreignObject>
       </>

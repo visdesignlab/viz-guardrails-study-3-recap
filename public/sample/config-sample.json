@@ -42,16 +42,6 @@
             "nextButtonLocation": "belowStimulus",
             "response": [
                 {
-                    "id": "invest",
-                    "type": "likert",
-                    "location": "belowStimulus",
-                    "prompt": "Based on the information provided only, would you like to have invested in the 'ADBE' stock in the past two years?",
-                    "leftLabel": "Very unlikely",
-                    "rightLabel": "Very likely",
-                    "preset": 5,
-                    "required": true
-                },
-                {
                     "id": "top10",
                     "type": "likert",
                     "location": "belowStimulus",
