@@ -55,6 +55,7 @@ export function DataExplorer({ parameters, setAnswer }: StimulusParams<ChartPara
         setItems(Array.from(new Set(data.map((row) => (JSON.stringify({
           name: row[parameters.cat_var],
           group: row[parameters.group_var],
+          longName: row.LongName || null,
         }))))).map((row) => JSON.parse(row)));
       });
   }, [dataname, parameters]);
@@ -141,9 +142,12 @@ export function DataExplorer({ parameters, setAnswer }: StimulusParams<ChartPara
               ) : null}
             </Flex>
           )}
-          <Group noWrap>
+          <Group noWrap align="flex-start" style={{ alignItems: 'flex-start', height: '100%' }}>
             {(parameters.allow_selection === false && parameters.guardrail !== 'juxt_data') ? null : (
-              <Group noWrap>
+              <Group style={{
+                flex: '1', display: 'flex', flexDirection: 'column', height: '100%', alignContent: 'flex-start', ...(dataname === 'sp500_stocks' ? { width: '380px' } : {}),
+              }}
+              >
                 <Sidebar
                   parameters={parameters}
                   data={filteredData}
@@ -162,7 +166,7 @@ export function DataExplorer({ parameters, setAnswer }: StimulusParams<ChartPara
               <Group position="apart">
                 <Stack spacing={0} justify="flex-start">
                   <Text fw={500}>
-                    {dataname === 'clean_stocks' ? 'Percent change in stock price' : 'Infections per million people'}
+                    {(dataname === 'clean_stocks' || dataname === 'sp500_stocks') ? 'Percent change in stock price' : 'Infections per million people'}
                   </Text>
                   {guardrail === 'super_summDELETE' ? (
                     <Text fz="xs" c="dimmed">Shaded area contains the industry average and shows the middle 50% of all values in the industry.</Text>
@@ -186,16 +190,15 @@ export function DataExplorer({ parameters, setAnswer }: StimulusParams<ChartPara
                     guardrail={guardrail}
                   />
                 </Group>
-                {parameters.allow_time_slider
-                  ? (
-                    <div style={{ width: '500px' }}>
-                      <RangeSelector
-                        parameters={parameters}
-                        setRange={setRange}
-                        trackRange={debouncedTrackRange}
-                      />
-                    </div>
-                  ) : null}
+                {/* {parameters.allow_time_slider ? (
+                  <div style={{ width: '500px' }}>
+                    <RangeSelector
+                      parameters={parameters}
+                      setRange={setRange}
+                      trackRange={debouncedTrackRange}
+                    />
+                  </div>
+                ) : null} */}
               </Stack>
             </Stack>
           </Group>
