@@ -539,6 +539,38 @@ export function LineChart({
     }).filter((d): d is { name: string; path: string; lastPoint: [number, number] } => d !== null);
   }, [clusterReps, guardrail, xScale, yScale]);
 
+  // ---------------------------- Metadata based representatives ----------------------------
+  const metadataLines = useMemo(() => {
+    if (guardrail !== 'metadata') return null;
+
+    const representatives = ['RMD', 'FDX', 'EFX', 'TPR']; // hardcoded feature-based clustering representatives here
+
+    return representatives.map((symbol) => {
+      const stockData = data.filter((d) => d.name === symbol);
+      if (stockData.length === 0) return null;
+
+      const parsedData: [number, number][] = stockData
+        .map((d) => {
+          const date = d3.timeParse('%Y-%m-%d')(d.date);
+          const val = +d.value;
+          if (!date || Number.isNaN(val)) return null;
+          return [date.getTime(), val];
+        })
+        .filter((d): d is [number, number] => d !== null);
+
+      const lineGenerator = d3.line<[number, number]>()
+        .x((d) => xScale(d[0]))
+        .y((d) => yScale(d[1]))
+        .curve(d3.curveBasis);
+
+      return {
+        name: symbol,
+        path: lineGenerator(parsedData),
+        labelPos: stockData[stockData.length - 1],
+      };
+    }).filter((d): d is { name: string; path: string; labelPos: any } => d !== null);
+  }, [data, guardrail, xScale, yScale]);
+
   // ---------------------------- Draw ----------------------------
   const linePaths = useMemo(() => {
     if (!xScale || !yScale) {
@@ -1126,7 +1158,31 @@ export function LineChart({
           </foreignObject>
         </g>
       ))}
-
+      {metadataLines && (
+      <>
+        {metadataLines.map((x) => (
+          <g key={`${x.name}_group`}>
+            <path
+              d={x.path}
+              fill="none"
+              stroke="gainsboro"
+              strokeDasharray="4,1"
+              strokeWidth={1.5}
+            />
+            <foreignObject
+              x={width + margin.left - 3}
+              y={yScale(x.labelPos.value) - 7}
+              width={margin.right + 60}
+              height={20}
+            >
+              <Text px={2} size={10} color="gainsboro">
+                {x.name}
+              </Text>
+            </foreignObject>
+          </g>
+        ))}
+      </>
+      )}
     </svg>
   );
 }
