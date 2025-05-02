@@ -1,12 +1,12 @@
 {
   "$schema": "https://raw.githubusercontent.com/reVISit-studies/study/main/src/parser/GlobalConfigSchema.json",
-  "configsList": ["sandbox", "browser", "sample"],
+  "configsList": ["sandbox", "sandbox-sector-metadata", "sample"],
   "configs": {
     "sandbox": {
       "path": "sandbox/config-sandbox.json"
     },
-    "browser": {
-      "path": "browser/config-browser.json"
+    "sandbox-sector-metadata": {
+      "path": "sandbox-sector-metadata/config-sandbox.json"
     },
     "sample": {
       "path": "sample/config-sample.json"
