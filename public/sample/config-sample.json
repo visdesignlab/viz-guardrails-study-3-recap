@@ -42,13 +42,24 @@
             "nextButtonLocation": "belowStimulus",
             "response": [
                 {
-                    "id": "top10",
-                    "type": "likert",
+                    "id": "performance-percentile",
+                    "prompt": "Where do you think this stock ranks in terms of performance compared to other stocks in the market (or S&P500)?",
                     "location": "belowStimulus",
-                    "prompt": "How confident are you that this stock is among the top 10% best-performing stocks in the market?",
-                    "leftLabel": "Not confident at all",
-                    "rightLabel": "Very confident",
-                    "preset": 5,
+                    "type": "slider",
+                    "options": [
+                        {
+                        "label": "1 (Worst)",
+                        "value": 1
+                        },
+                        {
+                        "label": "50 (Average)",
+                        "value": 50
+                        },
+                        {
+                        "label": "99 (Best)",
+                        "value": 99
+                        }
+                    ],
                     "required": true
                 },
                 {
