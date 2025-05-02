@@ -45,7 +45,8 @@ export function Selector({
           { value: 'percentiles', label: 'Percentiles of All Lines At Each Timestamp' },
           { value: 'percentileClosest', label: 'Actual Percentiles Closest' },
           { value: 'cluster', label: 'Cluster Rep' },
-          { value: 'metadata', label: 'Metadata Based Rep' },
+          { value: 'all', label: 'All' },
+          // { value: 'metadata', label: 'Metadata Based Rep' },
         ]}
       />
     </>
