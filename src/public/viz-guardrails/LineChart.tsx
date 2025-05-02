@@ -571,6 +571,37 @@ export function LineChart({
     }).filter((d): d is { name: string; path: string; labelPos: any } => d !== null);
   }, [data, guardrail, xScale, yScale]);
 
+  // ---------------------------- All ----------------------------
+  const allBackgroundLines = useMemo(() => {
+    if (guardrail !== 'all') return null;
+
+    const selectedSet = new Set(selection);
+    const allLines = d3.group(data, (d) => d[parameters.cat_var]);
+
+    return Array.from(allLines.entries())
+      .filter(([name]) => !selectedSet.has(name)) // only unselected
+      .map(([name, values]) => {
+        const parsedData: [number, number][] = values
+          .map((d) => {
+            const date = d3.timeParse('%Y-%m-%d')(d[parameters.x_var]);
+            const val = +d[parameters.y_var];
+            if (!date || Number.isNaN(val)) return null;
+            return [date.getTime(), val];
+          })
+          .filter((d): d is [number, number] => d !== null);
+
+        const lineGenerator = d3.line<[number, number]>()
+          .x((d) => xScale(d[0]))
+          .y((d) => yScale(d[1]))
+          .curve(d3.curveBasis);
+
+        return {
+          name,
+          path: lineGenerator(parsedData),
+        };
+      });
+  }, [data, selection, guardrail, parameters, xScale, yScale]);
+
   // ---------------------------- Draw ----------------------------
   const linePaths = useMemo(() => {
     if (!xScale || !yScale) {
@@ -1181,6 +1212,20 @@ export function LineChart({
             </foreignObject>
           </g>
         ))}
+      </>
+      )}
+      {allBackgroundLines && (
+      <>
+        {allBackgroundLines.map((x) => (x.path ? (
+          <path
+            key={`bg_${x.name}`}
+            d={x.path}
+            fill="none"
+            stroke="lightgray"
+            strokeWidth={1}
+            opacity={0.6}
+          />
+        ) : null))}
       </>
       )}
     </svg>
