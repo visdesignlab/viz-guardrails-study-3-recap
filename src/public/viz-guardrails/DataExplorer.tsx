@@ -35,7 +35,8 @@ export interface ChartParams {
   y_var: string,
   cat_var: string,
   group_var: string,
-  guardrail: string
+  guardrail: string,
+  metadata_filtered: boolean,
 }
 
 export function DataExplorer({ parameters, setAnswer }: StimulusParams<ChartParams>) {
@@ -46,7 +47,7 @@ export function DataExplorer({ parameters, setAnswer }: StimulusParams<ChartPara
   const [items, setItems] = useState<any[] | null>(null);
   const [range, setRange] = useState<[Date, Date] | null>([new Date(parameters.start_date), new Date(parameters.end_date)]);
   const [guardrail, setGuardrail] = useState<string>(parameters.guardrail);
-
+  const metadataFiltered = parameters.metadata_filtered;
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   useEffect(() => {
     d3.csv(`./data/${dataname}.csv`)
@@ -188,6 +189,7 @@ export function DataExplorer({ parameters, setAnswer }: StimulusParams<ChartPara
                     selection={selection}
                     range={range}
                     guardrail={guardrail}
+                    metadataFiltered={metadataFiltered}
                   />
                 </Group>
                 {/* {parameters.allow_time_slider ? (

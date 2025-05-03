@@ -37,7 +37,8 @@
                 "x_var": "date",
                 "y_var": "value",
                 "cat_var": "name",
-                "group_var": "region"
+                "group_var": "region",
+                "metadata_filtered": true
             },
             "nextButtonLocation": "sidebar",
             "response": []
