@@ -29,6 +29,7 @@ export function LineChart({
   selection,
   range,
   guardrail,
+  metadataFiltered,
 }: {
   parameters: ChartParams,
   data: any[],
@@ -36,7 +37,8 @@ export function LineChart({
   items: any[],
   selection: any[] | null,
   range: [Date, Date] | null,
-  guardrail: string
+  guardrail: string,
+  metadataFiltered: boolean,
 }) {
   // Handle hovering
   const [hover, setHover] = useState<string[] | null>(null);
@@ -501,11 +503,11 @@ export function LineChart({
 
   // ---------------------------- Cluster Representatives ----------------------------
   const [clusterReps, setClusterReps] = useState<any[]>([]);
-
+  const clusterRepsDataPath = metadataFiltered ? '/sandbox-sector-metadata/data/cluster_representatives.csv' : '/sandbox/data/cluster_representatives.csv';
   useEffect(() => {
     if (guardrail !== 'cluster') return;
 
-    d3.csv('/sandbox/data/cluster_representatives.csv', d3.autoType).then((data) => {
+    d3.csv(clusterRepsDataPath, d3.autoType).then((data) => {
       setClusterReps(data);
     });
   }, [guardrail]);
