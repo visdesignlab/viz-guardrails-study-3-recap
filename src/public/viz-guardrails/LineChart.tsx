@@ -173,12 +173,24 @@ export function LineChart({
   const {
     yMin, yMax,
   } = useMemo(() => {
-    const selectedYValues = guardrail === 'all'
-      ? data.map((d) => +d[parameters.y_var]).filter((val) => val !== null) as number[]
-      : data
+    const selectedYValues = (() => {
+      if (guardrail === 'all') {
+        return data.map((d) => +d[parameters.y_var]).filter((val) => val !== null) as number[];
+      }
+
+      if (guardrail === 'super_data') {
+        const names = new Set([...(selection || []), ...randomCountries]);
+        return data
+          .filter((d) => names.has(d[parameters.cat_var]))
+          .map((d) => +d[parameters.y_var])
+          .filter((val) => val !== null) as number[];
+      }
+
+      return data
         .filter((val) => selection?.includes(val[parameters.cat_var]))
         .map((d) => +d[parameters.y_var])
         .filter((val) => val !== null) as number[];
+    })();
 
     let iqrValues: number[] = [];
     if (guardrail === 'medianIQR' && medianIQRData) {
