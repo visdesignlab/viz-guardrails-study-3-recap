@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { SegmentedControl, Text } from '@mantine/core';
+import { Select, SegmentedControl, Text } from '@mantine/core';
 
 export function Selector({
   guardrail,
@@ -26,15 +26,12 @@ export function Selector({
         ]}
       />
       <Text>Guardrail:</Text>
-      <SegmentedControl
+      <Select
+        label="Guardrail"
         value={guardrail}
-        onChange={(x) => { setGuardrail(x); }}
+        onChange={(x) => x && setGuardrail(x)}
         data={[
           { value: 'none', label: 'None' },
-          // { value: 'super_data', label: 'Sup. Data' },
-          // { value: 'super_summ', label: 'Sup. Summ.' },
-          // { value: 'juxt_data', label: 'Juxt. Data' },
-          // { value: 'juxt_summ', label: 'Juxt. Summ.' },
           { value: 'super_data', label: 'Random' },
           { value: 'medianEnding', label: 'Median At the Ending time' },
           { value: 'super_summ', label: 'Average of All lines' },
