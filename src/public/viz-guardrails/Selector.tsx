@@ -29,9 +29,10 @@ export function Selector({
           { value: 'sp500_stocks', label: 'Stock' },
         ]}
       />
-      <Text>Guardrail:</Text>
+      <Text style={{ marginTop: '10px' }}>
+        Guardrail:
+      </Text>
       <Select
-        label="Guardrail"
         value={guardrail}
         onChange={(x) => x && setGuardrail(x)}
         data={[
