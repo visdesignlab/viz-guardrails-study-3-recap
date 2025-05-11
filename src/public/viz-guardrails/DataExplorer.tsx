@@ -70,6 +70,31 @@ export function DataExplorer({ parameters, setAnswer }: StimulusParams<ChartPara
     return null;
   }, [data, range, parameters.x_var, dataname]);
 
+  const guardrailFilteredData = useMemo(() => {
+    if (!data || !range) return null;
+
+    const ranged = data.filter((val) => {
+      const date = new Date(val[parameters.x_var]);
+      return date >= range[0] && date <= range[1];
+    });
+
+    if (
+      dataname !== 'clean_data'
+    || !metadataFiltered
+    || guardrail === 'cluster'
+    ) {
+      return ranged;
+    }
+
+    const selectedContinents = new Set(
+      ranged
+        .filter((d) => selection?.includes(d.name))
+        .map((d) => d.continent),
+    );
+
+    return ranged.filter((d) => selectedContinents.has(d.continent));
+  }, [data, range, dataname, metadataFiltered, guardrail, selection, parameters.x_var]);
+
   const updateData = (data: string) => {
     setDataname(data);
     setSelection([]);
@@ -182,7 +207,7 @@ export function DataExplorer({ parameters, setAnswer }: StimulusParams<ChartPara
                   {guardrail === 'juxt_summ' ? <StripPlot parameters={parameters} data={filteredData} selection={selection} dataname={dataname} /> : null}
                   <LineChart
                     parameters={parameters}
-                    data={filteredData}
+                    data={guardrailFilteredData ?? []}
                     dataname={dataname}
                     items={items}
                     selection={selection}
