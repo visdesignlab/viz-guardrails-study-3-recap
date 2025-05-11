@@ -71,29 +71,28 @@ export function DataExplorer({ parameters, setAnswer }: StimulusParams<ChartPara
   }, [data, range, parameters.x_var, dataname]);
 
   const guardrailFilteredData = useMemo(() => {
-    if (!data || !range) return null;
+    if (!filteredData) return null;
 
-    const ranged = data.filter((val) => {
-      const date = new Date(val[parameters.x_var]);
-      return date >= range[0] && date <= range[1];
-    });
-
-    if (
-      dataname !== 'clean_data'
-    || !metadataFiltered
-    || guardrail === 'cluster'
-    ) {
-      return ranged;
+    if (!metadataFiltered || guardrail === 'cluster') {
+      return filteredData;
     }
 
-    const selectedContinents = new Set(
-      ranged
-        .filter((d) => selection?.includes(d.name))
-        .map((d) => d.continent),
-    );
+    if (dataname === 'clean_data') {
+      const selectedContinents = new Set(
+        filteredData.filter((d) => selection?.includes(d.name)).map((d) => d.continent),
+      );
+      return filteredData.filter((d) => selectedContinents.has(d.continent));
+    }
 
-    return ranged.filter((d) => selectedContinents.has(d.continent));
-  }, [data, range, dataname, metadataFiltered, guardrail, selection, parameters.x_var]);
+    if (dataname === 'sp500_stocks') {
+      const selectedSectors = new Set(
+        filteredData.filter((d) => selection?.includes(d.name)).map((d) => d.sector),
+      );
+      return filteredData.filter((d) => selectedSectors.has(d.sector));
+    }
+
+    return filteredData;
+  }, [filteredData, dataname, metadataFiltered, guardrail, selection]);
 
   const updateData = (data: string) => {
     setDataname(data);
