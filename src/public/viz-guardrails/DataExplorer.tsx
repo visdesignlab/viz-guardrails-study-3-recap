@@ -36,7 +36,6 @@ export interface ChartParams {
   cat_var: string,
   group_var: string,
   guardrail: string,
-  metadata_filtered: boolean,
 }
 
 export function DataExplorer({ parameters, setAnswer }: StimulusParams<ChartParams>) {
@@ -46,8 +45,8 @@ export function DataExplorer({ parameters, setAnswer }: StimulusParams<ChartPara
   const [selection, setSelection] = useState<string[] | null>(parameters.initial_selection);
   const [items, setItems] = useState<any[] | null>(null);
   const [range, setRange] = useState<[Date, Date] | null>([new Date(parameters.start_date), new Date(parameters.end_date)]);
+  const [metadataFiltered, setMetadataFiltered] = useState<boolean>(false);
   const [guardrail, setGuardrail] = useState<string>(parameters.guardrail);
-  const metadataFiltered = parameters.metadata_filtered;
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   useEffect(() => {
     d3.csv(`./data/${dataname}.csv`)
@@ -129,7 +128,7 @@ export function DataExplorer({ parameters, setAnswer }: StimulusParams<ChartPara
     <Stack>
       {parameters.allow_guardrail_selector ? (
         <Paper shadow="sm" radius="md" p="md" style={{ width: '500px' }}>
-          <Selector guardrail={guardrail} setGuardrail={setGuardrail} dataname={dataname} setDataname={updateData} setSelection={setSelection} />
+          <Selector guardrail={guardrail} setGuardrail={setGuardrail} dataname={dataname} setDataname={updateData} setSelection={setSelection} setMetadataFiltered={setMetadataFiltered} />
         </Paper>
       ) : null}
       <Flex>

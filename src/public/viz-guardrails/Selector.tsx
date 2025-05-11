@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Select, SegmentedControl, Text } from '@mantine/core';
+import {
+  Select, SegmentedControl, Switch, Text,
+} from '@mantine/core';
 
 export function Selector({
   guardrail,
@@ -7,12 +9,14 @@ export function Selector({
   dataname,
   setDataname,
   setSelection,
+  setMetadataFiltered,
 }: {
     guardrail: string;
     setGuardrail: (value: string) => void;
     dataname: string;
     setDataname: (value: string) => void;
     setSelection: (value: Array<string>) => void;
+    setMetadataFiltered: (value: boolean) => void;
 }) {
   return (
     <>
@@ -45,6 +49,11 @@ export function Selector({
           { value: 'all', label: 'All' },
           // { value: 'metadata', label: 'Metadata Based Rep' },
         ]}
+      />
+      <Switch
+        label="Metadata-based filtering"
+        onChange={(event) => setMetadataFiltered(event.currentTarget.checked)}
+        style={{ marginTop: '10px' }}
       />
     </>
   );
