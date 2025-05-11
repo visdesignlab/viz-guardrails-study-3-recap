@@ -31,7 +31,7 @@ export function YAxis({
 
           <line
             x2={`${xRange[1] - xRange[0]}`}
-            stroke={`${value === 0 ? 'black' : 'gainsboro'}`}
+            stroke={`${value === 0 ? 'black' : 'silver'}`}
             strokeWidth={value === 0 ? 1 : 0.4}
           />
           <text

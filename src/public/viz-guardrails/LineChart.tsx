@@ -877,7 +877,7 @@ export function LineChart({
               id={`${x.country}`}
               key={`${x.country}_key`}
               fill="none"
-              stroke={shouldBeColor(x.country) ? colorScale(x.country) : 'gainsboro'}
+              stroke={shouldBeColor(x.country) ? colorScale(x.country) : 'silver'}
               strokeWidth={hover?.includes(x.country) ? 2 : 1.5}
               d={x.path}
             />
@@ -909,7 +909,7 @@ export function LineChart({
           <path
             d={medianLinePathEnding.path}
             fill="none"
-            stroke="gainsboro"
+            stroke="silver"
             strokeDasharray="4,1"
             strokeWidth={1.5}
           />
@@ -922,7 +922,7 @@ export function LineChart({
             <Text
               px={2}
               size={10}
-              color="gainsboro"
+              color="silver"
               onMouseOver={() => setHover([medianCountry])}
               onMouseOut={() => setHover([])}
             >
@@ -936,7 +936,7 @@ export function LineChart({
         <path
           d={medianLinePath.path}
           fill="none"
-          stroke="gainsboro"
+          stroke="silver"
           strokeDasharray="4,1"
           strokeWidth={1.5}
         />
@@ -949,7 +949,7 @@ export function LineChart({
           <Text
             px={2}
             size={10}
-            color="gainsboro"
+            color="silver"
             onMouseOver={() => setHover(['Median Country'])}
             onMouseOut={() => setHover([])}
           >
@@ -963,7 +963,7 @@ export function LineChart({
         <path
           d={medianLineClosest.path}
           fill="none"
-          stroke="gainsboro"
+          stroke="silver"
           strokeDasharray="4,1"
           strokeWidth={1.5}
         />
@@ -976,7 +976,7 @@ export function LineChart({
           <Text
             px={2}
             size={10}
-            color="gainsboro"
+            color="silver"
             onMouseOver={() => setHover(['Median Country'])}
             onMouseOut={() => setHover([])}
           >
@@ -997,7 +997,7 @@ export function LineChart({
           <path
             d={medianIQRPaths.medianPath}
             fill="none"
-            stroke="gainsboro"
+            stroke="silver"
             strokeDasharray="4,1"
             strokeWidth={1.5}
           />
@@ -1005,14 +1005,14 @@ export function LineChart({
           <path
             d={medianIQRPaths.upperPath}
             fill="none"
-            stroke="gainsboro"
+            stroke="silver"
             strokeDasharray="2,2"
             strokeWidth={1.5}
           />
           <path
             d={medianIQRPaths.lowerPath}
             fill="none"
-            stroke="gainsboro"
+            stroke="silver"
             strokeDasharray="2,2"
             strokeWidth={1.5}
           />
@@ -1023,7 +1023,7 @@ export function LineChart({
             width={margin.right + 60}
             height={20}
           >
-            <Text px={2} size={10} color="gainsboro">
+            <Text px={2} size={10} color="silver">
               Median
             </Text>
           </foreignObject>
@@ -1034,7 +1034,7 @@ export function LineChart({
             width={margin.right + 60}
             height={20}
           >
-            <Text px={2} size={10} color="gainsboro">
+            <Text px={2} size={10} color="silver">
               Median + 1.5 IQR
             </Text>
           </foreignObject>
@@ -1045,7 +1045,7 @@ export function LineChart({
             width={margin.right + 60}
             height={20}
           >
-            <Text px={2} size={10} color="gainsboro">
+            <Text px={2} size={10} color="silver">
               Median - 1.5 IQR
             </Text>
           </foreignObject>
@@ -1056,21 +1056,21 @@ export function LineChart({
         <path
           d={medianIQRClosestPaths.medianPath ?? undefined}
           fill="none"
-          stroke="gainsboro"
+          stroke="silver"
           strokeDasharray="4,1"
           strokeWidth={1.5}
         />
         <path
           d={medianIQRClosestPaths.upperPath ?? undefined}
           fill="none"
-          stroke="gainsboro"
+          stroke="silver"
           strokeDasharray="2,2"
           strokeWidth={1.5}
         />
         <path
           d={medianIQRClosestPaths.lowerPath ?? undefined}
           fill="none"
-          stroke="gainsboro"
+          stroke="silver"
           strokeDasharray="2,2"
           strokeWidth={1.5}
         />
@@ -1081,7 +1081,7 @@ export function LineChart({
           width={margin.right + 60}
           height={20}
         >
-          <Text px={2} size={10} color="gainsboro">Median</Text>
+          <Text px={2} size={10} color="silver">Median</Text>
         </foreignObject>
 
         <foreignObject
@@ -1090,7 +1090,7 @@ export function LineChart({
           width={margin.right + 60}
           height={20}
         >
-          <Text px={2} size={10} color="gainsboro">Median + 1.5 IQR</Text>
+          <Text px={2} size={10} color="silver">Median + 1.5 IQR</Text>
         </foreignObject>
 
         <foreignObject
@@ -1099,7 +1099,7 @@ export function LineChart({
           width={margin.right + 60}
           height={20}
         >
-          <Text px={2} size={10} color="gainsboro">Median - 1.5 IQR</Text>
+          <Text px={2} size={10} color="silver">Median - 1.5 IQR</Text>
         </foreignObject>
       </>
       )}
@@ -1115,7 +1115,7 @@ export function LineChart({
           <path
             d={percentilePaths.upperPath}
             fill="none"
-            stroke="gainsboro"
+            stroke="silver"
             strokeDasharray="2,2"
             strokeWidth={1.5}
             // opacity={0.7}
@@ -1123,7 +1123,7 @@ export function LineChart({
           <path
             d={percentilePaths.lowerPath}
             fill="none"
-            stroke="gainsboro"
+            stroke="silver"
             strokeDasharray="2,2"
             strokeWidth={1.5}
             // opacity={0.7}
@@ -1134,7 +1134,7 @@ export function LineChart({
             width={margin.right + 60}
             height={20}
           >
-            <Text px={2} size={10} color="gainsboro">
+            <Text px={2} size={10} color="silver">
               75th Percentile
             </Text>
           </foreignObject>
@@ -1144,7 +1144,7 @@ export function LineChart({
             width={margin.right + 60}
             height={20}
           >
-            <Text px={2} size={10} color="gainsboro">
+            <Text px={2} size={10} color="silver">
               25th Percentile
             </Text>
           </foreignObject>
@@ -1155,14 +1155,14 @@ export function LineChart({
         <path
           d={percentileClosestPaths.upperPath ?? undefined}
           fill="none"
-          stroke="gainsboro"
+          stroke="silver"
           strokeDasharray="2,2"
           strokeWidth={1.5}
         />
         <path
           d={percentileClosestPaths.lowerPath ?? undefined}
           fill="none"
-          stroke="gainsboro"
+          stroke="silver"
           strokeDasharray="2,2"
           strokeWidth={1.5}
         />
@@ -1172,7 +1172,7 @@ export function LineChart({
           width={margin.right + 60}
           height={20}
         >
-          <Text px={2} size={10} color="gainsboro">75th Percentile</Text>
+          <Text px={2} size={10} color="silver">75th Percentile</Text>
         </foreignObject>
         <foreignObject
           x={width + margin.left - 3}
@@ -1180,7 +1180,7 @@ export function LineChart({
           width={margin.right + 60}
           height={20}
         >
-          <Text px={2} size={10} color="gainsboro">25th Percentile</Text>
+          <Text px={2} size={10} color="silver">25th Percentile</Text>
         </foreignObject>
       </>
       )}
@@ -1189,7 +1189,7 @@ export function LineChart({
           <path
             d={line.path}
             fill="none"
-            stroke="gainsboro"
+            stroke="silver"
             strokeWidth={1}
             strokeDasharray="2,2"
           />
@@ -1199,7 +1199,7 @@ export function LineChart({
             width={margin.right + 60}
             height={20}
           >
-            <Text px={2} size={10} color="gainsboro">
+            <Text px={2} size={10} color="silver">
               {line.name}
             </Text>
           </foreignObject>
@@ -1212,7 +1212,7 @@ export function LineChart({
             <path
               d={x.path}
               fill="none"
-              stroke="gainsboro"
+              stroke="silver"
               strokeDasharray="4,1"
               strokeWidth={1.5}
             />
@@ -1222,7 +1222,7 @@ export function LineChart({
               width={margin.right + 60}
               height={20}
             >
-              <Text px={2} size={10} color="gainsboro">
+              <Text px={2} size={10} color="silver">
                 {x.name}
               </Text>
             </foreignObject>
