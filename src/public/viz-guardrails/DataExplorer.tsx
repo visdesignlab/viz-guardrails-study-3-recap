@@ -60,6 +60,15 @@ export function DataExplorer({ parameters, setAnswer }: StimulusParams<ChartPara
       });
   }, [dataname, parameters]);
 
+  // if the dataname is 'clean_data', then range is set to 2023-01-01 to 2024-01-01
+  useEffect(() => {
+    if (dataname === 'clean_data' && data) {
+      const startDate = new Date('2023-01-01');
+      const endDate = new Date('2024-01-01');
+      setRange([startDate, endDate]);
+    }
+  }, [dataname, data, parameters.x_var]);
+
   const filteredData = useMemo(() => {
     if (data && range) {
       return data
