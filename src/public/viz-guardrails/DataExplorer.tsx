@@ -87,10 +87,10 @@ export function DataExplorer({ parameters, setAnswer }: StimulusParams<ChartPara
     }
 
     if (dataname === 'clean_data') {
-      const selectedContinents = new Set(
-        filteredData.filter((d) => selection?.includes(d.name)).map((d) => d.continent),
+      const selectedUNRegions = new Set(
+        filteredData.filter((d) => selection?.includes(d.name)).map((d) => d.subregion),
       );
-      return filteredData.filter((d) => selectedContinents.has(d.continent));
+      return filteredData.filter((d) => selectedUNRegions.has(d.subregion));
     }
 
     if (dataname === 'sp500_stocks') {
