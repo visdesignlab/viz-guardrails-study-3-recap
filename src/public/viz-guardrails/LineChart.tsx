@@ -235,42 +235,6 @@ export function LineChart({
     return d3.scaleOrdinal(OwidDistinctLinesPalette).domain(cats);
   }, [data, parameters, dataname]);
 
-  // ---------------------------- Median Ending Country/Stock ----------------------------
-  const medianCountry = useMemo(() => {
-    if (guardrail !== 'medianEnding') {
-      return null;
-    }
-
-    const groupedData = d3.group(data, (d) => d[parameters.cat_var]);
-
-    const totalReturns = Array.from(groupedData).map(([country, values]) => {
-      const totalReturn = values[values.length - 1].value; // Use final 'value' as the total return
-      return { country, totalReturn };
-    });
-
-    totalReturns.sort((a, b) => a.totalReturn - b.totalReturn);
-
-    const medianIndex = Math.floor(totalReturns.length / 2);
-    return totalReturns[medianIndex]?.country;
-  }, [data, parameters, guardrail]);
-
-  const medianLinePathEnding = useMemo(() => {
-    if (!medianCountry || guardrail !== 'medianEnding') {
-      return null;
-    }
-
-    const lineGenerator = d3.line();
-    lineGenerator.x((d: any) => xScale(d3.timeParse('%Y-%m-%d')(d[parameters.x_var]) as Date));
-    lineGenerator.y((d: any) => yScale(d[parameters.y_var]));
-    lineGenerator.curve(d3.curveBasis);
-
-    const medianData = data.filter((val) => val[parameters.cat_var] === medianCountry);
-    return {
-      path: lineGenerator(medianData) as string,
-      labelPosition: medianData[medianData.length - 1],
-    };
-  }, [medianCountry, data, xScale, yScale, parameters, guardrail]);
-
   // ---------------------------- Median at each point ---------------------------- //
   const medianCountryData = useMemo(() => {
     if (guardrail !== 'median') {
@@ -293,7 +257,7 @@ export function LineChart({
   }, [data, parameters, guardrail]);
 
   const medianLinePath = useMemo(() => {
-    if (!medianCountryData || (guardrail !== 'median' && guardrail !== 'medianEnding')) {
+    if (!medianCountryData || guardrail !== 'median') {
       return null;
     }
 
@@ -903,34 +867,6 @@ export function LineChart({
           </foreignObject>
         ))}
       </svg>
-
-      {medianLinePathEnding && (
-        <>
-          <path
-            d={medianLinePathEnding.path}
-            fill="none"
-            stroke="silver"
-            strokeDasharray="4,1"
-            strokeWidth={1.5}
-          />
-          <foreignObject
-            x={width + margin.left - 3}
-            y={medianLinePathEnding ? yScale(medianLinePathEnding.labelPosition[parameters.y_var]) - 7 : 0}
-            width={margin.right + 60}
-            height={20}
-          >
-            <Text
-              px={2}
-              size={10}
-              color="silver"
-              onMouseOver={() => setHover([medianCountry])}
-              onMouseOut={() => setHover([])}
-            >
-              {medianCountry}
-            </Text>
-          </foreignObject>
-        </>
-      )}
       {medianLinePath && (
       <>
         <path
