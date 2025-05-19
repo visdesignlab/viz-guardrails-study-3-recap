@@ -38,7 +38,6 @@ export function Selector({
         data={[
           { value: 'none', label: 'None' },
           { value: 'super_data', label: 'Random' },
-          { value: 'medianEnding', label: 'Median At the Ending time' },
           { value: 'super_summ', label: 'Average of All lines' },
           { value: 'median', label: 'Median of All Lines At Each Timestamp' },
           { value: 'medianClosest', label: 'Actual Stock Closest to Median' },
