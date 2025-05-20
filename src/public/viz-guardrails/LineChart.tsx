@@ -232,6 +232,60 @@ export function LineChart({
     return medianIQR;
   }, [data, parameters, guardrail]);
 
+  // ---------------------------- Percentile Closest Lines ---------------------------- //
+  const percentileClosestData = useMemo(() => {
+    if (guardrail !== 'percentileClosest') return null;
+
+    const groupedByDate = d3.group(data, (d) => d[parameters.x_var]);
+    const groupedByCountry = d3.group(data, (d) => d[parameters.cat_var]);
+
+    const targetMap = new Map<string, { upper: number, lower: number }>();
+    groupedByDate.forEach((entries, date) => {
+      const values = entries.map((d) => d[parameters.y_var]).filter((v): v is number => v !== null && v !== undefined);
+      const q1 = d3.quantile(values, 0.25) ?? 0;
+      const q3 = d3.quantile(values, 0.75) ?? 0;
+      targetMap.set(date, { lower: q1, upper: q3 });
+    });
+
+    const findClosest = (target: 'upper' | 'lower'): { name: string; data: any[] } | null => {
+      let closest: { name: string, data: any[] } | null = null;
+      let minDist = Infinity;
+
+      groupedByCountry.forEach((entries, name) => {
+        let total = 0;
+        let count = 0;
+
+        for (const d of entries) {
+          const date = d[parameters.x_var];
+          const y = d[parameters.y_var];
+          const ref = targetMap.get(date)?.[target];
+          if (ref == null || y == null) continue;
+          const diff = y - ref;
+          total += diff * diff;
+          count += 1;
+        }
+
+        const avg = total / (count || 1);
+        if (avg < minDist) {
+          minDist = avg;
+          closest = { name, data: entries };
+        }
+      });
+
+      return closest;
+    };
+
+    const upper = findClosest('upper');
+    const lower = findClosest('lower');
+
+    if (!upper || !lower) return null;
+
+    return {
+      upper,
+      lower,
+    };
+  }, [data, parameters, guardrail]);
+  // ---------------------------- Scales ---------------------------- //
   const {
     yMin, yMax,
   } = useMemo(() => {
@@ -463,52 +517,7 @@ export function LineChart({
 
   // ---------------------------- Percentile Closest Lines ---------------------------- //
   const percentileClosestPaths = useMemo(() => {
-    if (guardrail !== 'percentileClosest') return null;
-
-    const groupedByDate = d3.group(data, (d) => d[parameters.x_var]);
-    const groupedByCountry = d3.group(data, (d) => d[parameters.cat_var]);
-
-    const targetMap = new Map<string, { upper: number, lower: number }>();
-
-    groupedByDate.forEach((entries, date) => {
-      const values = entries.map((d) => d[parameters.y_var]).filter((v): v is number => v !== null && v !== undefined);
-      const q1 = d3.quantile(values, 0.25) ?? 0;
-      const q3 = d3.quantile(values, 0.75) ?? 0;
-      targetMap.set(date, { lower: q1, upper: q3 });
-    });
-
-    const findClosest = (target: 'upper' | 'lower'): { name: string; data: any[] } | null => {
-      let closest: { name: string, data: any[] } | null = null;
-      let minDist = Infinity;
-
-      groupedByCountry.forEach((entries, name) => {
-        let total = 0;
-        let count = 0;
-
-        for (const d of entries) {
-          const date = d[parameters.x_var];
-          const y = d[parameters.y_var];
-          const ref = targetMap.get(date)?.[target];
-          if (ref == null || y == null) continue;
-          const diff = y - ref;
-          total += diff * diff;
-          count += 1;
-        }
-
-        const avg = total / (count || 1);
-        if (avg < minDist) {
-          minDist = avg;
-          closest = { name, data: entries };
-        }
-      });
-
-      return closest;
-    };
-
-    const upper = findClosest('upper');
-    const lower = findClosest('lower');
-
-    if (!upper || !lower) return null;
+    if (guardrail !== 'percentileClosest' || !percentileClosestData) return null;
 
     const lineGenerator = d3.line()
       .x((d: any) => xScale(d3.timeParse('%Y-%m-%d')(d[parameters.x_var]) as Date))
@@ -516,14 +525,18 @@ export function LineChart({
       .curve(d3.curveBasis);
 
     return {
-      upperPath: lineGenerator(upper.data),
-      lowerPath: lineGenerator(lower.data),
+      upperPath: lineGenerator(percentileClosestData.upper.data),
+      lowerPath: lineGenerator(percentileClosestData.lower.data),
       labelPositions: {
-        upper: upper.data[upper.data.length - 1],
-        lower: lower.data[lower.data.length - 1],
+        upper: percentileClosestData.upper.data[percentileClosestData.upper.data.length - 1],
+        lower: percentileClosestData.lower.data[percentileClosestData.lower.data.length - 1],
+      },
+      names: {
+        upper: percentileClosestData.upper.name,
+        lower: percentileClosestData.lower.name,
       },
     };
-  }, [data, parameters, guardrail, xScale, yScale]);
+  }, [percentileClosestData, xScale, yScale, parameters, guardrail]);
 
   // ---------------------------- Cluster Representatives ----------------------------
   const [clusterReps, setClusterReps] = useState<any[]>([]);
