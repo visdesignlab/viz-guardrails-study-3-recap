@@ -821,6 +821,98 @@ export function LineChart({
     return pos;
   }, [data, selection, yScale, guardrail, averageLabel, parameters, superimposeDatapoints, superimposeSummary, dataname]);
 
+  const allLabelPositions = useMemo(() => {
+    const min_dist = 10;
+    let labels: { label: string, y: number, color?: string }[] = [];
+
+    if (selection) {
+      labels = labels.concat(
+        selection.map((country) => ({
+          label: dataname === 'clean_data' ? `${country} (${getPolicyLabel(country)})` : country,
+          y: data.filter((val) => val[parameters.cat_var] === country).slice(-1).map((val) => yScale(val[parameters.y_var]))[0],
+          color: shouldBeColor(country) ? colorScale(country) : 'silver',
+        })),
+      );
+    }
+
+    if (randomCountries && guardrail === 'super_data') {
+      labels = labels.concat(
+        randomCountries.map((country) => ({
+          label: dataname === 'clean_data' ? `${country} (${getPolicyLabel(country)})` : country,
+          y: data.filter((val) => val[parameters.cat_var] === country).slice(-1).map((val) => yScale(val[parameters.y_var]))[0],
+          color: 'gray',
+        })),
+      );
+    }
+
+    if (superimposeSummary && guardrail === 'super_summ') {
+      labels.push({
+        label: averageLabel,
+        y: yScale(superimposeSummary.data[superimposeSummary.data.length - 1].mean),
+        color: 'gray',
+      });
+    }
+
+    if (medianLineClosest && guardrail === 'medianClosest') {
+      labels.push({
+        label: medianLineClosest.name,
+        y: yScale(medianLineClosest.labelPosition[parameters.y_var]),
+        color: 'silver',
+      });
+    }
+    if (medianIQRClosestPaths && guardrail === 'medianIQRClosest') {
+      labels.push(
+        {
+          label: medianIQRClosestPaths.names.median,
+          y: yScale(medianIQRClosestPaths.labelPositions.median[parameters.y_var]),
+          color: 'silver',
+        },
+        {
+          label: medianIQRClosestPaths.names.upper,
+          y: yScale(medianIQRClosestPaths.labelPositions.upper[parameters.y_var]),
+          color: 'silver',
+        },
+        {
+          label: medianIQRClosestPaths.names.lower,
+          y: yScale(medianIQRClosestPaths.labelPositions.lower[parameters.y_var]),
+          color: 'silver',
+        },
+      );
+    }
+    if (percentileClosestPaths && guardrail === 'percentileClosest') {
+      labels.push(
+        {
+          label: percentileClosestPaths.names.upper,
+          y: yScale(percentileClosestPaths.labelPositions.upper[parameters.y_var]),
+          color: 'silver',
+        },
+        {
+          label: percentileClosestPaths.names.lower,
+          y: yScale(percentileClosestPaths.labelPositions.lower[parameters.y_var]),
+          color: 'silver',
+        },
+      );
+    }
+
+    labels = labels.filter((l) => typeof l.y === 'number' && !Number.isNaN(l.y)).sort((a, b) => b.y - a.y);
+
+    let prevY: number | undefined;
+    for (const label of labels) {
+      if (prevY !== undefined) {
+        const diff = prevY - label.y;
+        if (diff < min_dist) {
+          label.y = prevY - min_dist;
+        }
+      }
+      prevY = label.y;
+    }
+
+    return labels;
+  }, [
+    selection, data, parameters, dataname, yScale, colorScale,
+    medianLineClosest, medianIQRClosestPaths, percentileClosestPaths, guardrail,
+  ]);
+
   // ---------------------------- Render ----------------------------
   return selection?.length === 0 ? (
     <Center style={{ width: '800px', height: '400px' }}>
@@ -893,22 +985,16 @@ export function LineChart({
             />
           </g>
         ))}
-        {labelPos?.map((x) => (
-          <foreignObject key={`${x.country}_label`} x={width + margin.left - 3} y={x.label_pos - 7} width={margin.right + 60} height={20}>
-            <Text
-              px={2}
-              size={10}
-              color={shouldBeColor(x.country) ? colorScale(x.country) : 'silver'}
-              onMouseOver={(e) => {
-                const t = e.target as HTMLElement;
-                if (!selection?.includes(t.innerText)) {
-                  return;
-                }
-                setHover([t.innerText]);
-              }}
-              onMouseOut={() => setHover([])}
-            >
-              {x.country_policy}
+        {allLabelPositions.map((x, i) => (
+          <foreignObject
+            key={`label_${x.label}_${i}`}
+            x={width + margin.left - 3}
+            y={x.y - 7}
+            width={margin.right + 60}
+            height={20}
+          >
+            <Text px={2} size={10} color={x.color ?? 'silver'}>
+              {x.label}
             </Text>
           </foreignObject>
         ))}
@@ -949,7 +1035,7 @@ export function LineChart({
           strokeDasharray="4,1"
           strokeWidth={1.5}
         />
-        <foreignObject
+        {/* <foreignObject
           x={width + margin.left - 3}
           y={medianLineClosest ? yScale(medianLineClosest.labelPosition[parameters.y_var]) - 7 : 0}
           width={margin.right + 60}
@@ -964,7 +1050,7 @@ export function LineChart({
           >
             {medianLineClosest.name}
           </Text>
-        </foreignObject>
+        </foreignObject> */}
       </>
       )}
       {medianIQRPaths && medianIQRData && (
@@ -1057,7 +1143,7 @@ export function LineChart({
           strokeWidth={1.5}
         />
 
-        <foreignObject
+        {/* <foreignObject
           x={width + margin.left - 3}
           y={yScale(medianIQRClosestPaths.labelPositions.median[parameters.y_var]) - 7}
           width={margin.right + 60}
@@ -1066,9 +1152,9 @@ export function LineChart({
           <Text px={2} size={10} color="silver">
             {medianIQRClosestPaths.names.median}
           </Text>
-        </foreignObject>
+        </foreignObject> */}
 
-        <foreignObject
+        {/* <foreignObject
           x={width + margin.left - 3}
           y={yScale(medianIQRClosestPaths.labelPositions.upper[parameters.y_var]) - 7}
           width={margin.right + 60}
@@ -1077,9 +1163,9 @@ export function LineChart({
           <Text px={2} size={10} color="silver">
             {medianIQRClosestPaths.names.upper}
           </Text>
-        </foreignObject>
+        </foreignObject> */}
 
-        <foreignObject
+        {/* <foreignObject
           x={width + margin.left - 3}
           y={yScale(medianIQRClosestPaths.labelPositions.lower[parameters.y_var]) - 7}
           width={margin.right + 60}
@@ -1088,7 +1174,7 @@ export function LineChart({
           <Text px={2} size={10} color="silver">
             {medianIQRClosestPaths.names.lower}
           </Text>
-        </foreignObject>
+        </foreignObject> */}
       </>
       )}
 
@@ -1154,7 +1240,7 @@ export function LineChart({
           strokeDasharray="2,2"
           strokeWidth={1.5}
         />
-        <foreignObject
+        {/* <foreignObject
           x={width + margin.left - 3}
           y={yScale(percentileClosestPaths.labelPositions.upper[parameters.y_var]) - 7}
           width={margin.right + 60}
@@ -1163,8 +1249,8 @@ export function LineChart({
           <Text px={2} size={10} color="silver">
             {percentileClosestPaths.names.upper}
           </Text>
-        </foreignObject>
-        <foreignObject
+        </foreignObject> */}
+        {/* <foreignObject
           x={width + margin.left - 3}
           y={yScale(percentileClosestPaths.labelPositions.lower[parameters.y_var]) - 7}
           width={margin.right + 60}
@@ -1173,7 +1259,7 @@ export function LineChart({
           <Text px={2} size={10} color="silver">
             {percentileClosestPaths.names.lower}
           </Text>
-        </foreignObject>
+        </foreignObject> */}
       </>
       )}
       {clusterLines?.map((line) => (
@@ -1185,7 +1271,7 @@ export function LineChart({
             strokeWidth={1}
             strokeDasharray="2,2"
           />
-          <foreignObject
+          {/* <foreignObject
             x={width + margin.left - 3}
             y={yScale(line.lastPoint[1]) - 7}
             width={margin.right + 60}
@@ -1194,7 +1280,7 @@ export function LineChart({
             <Text px={2} size={10} color="silver">
               {line.name}
             </Text>
-          </foreignObject>
+          </foreignObject> */}
         </g>
       ))}
       {allBackgroundLines && (
