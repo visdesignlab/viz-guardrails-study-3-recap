@@ -125,6 +125,7 @@ export function LineChart({
   // ---------------------------- Closest Median Line  ----------------------------
   const medianClosestData = useMemo(() => {
     if (guardrail !== 'medianClosest') return null;
+    let closestCountry = '';
 
     const groupedByDate = d3.group(data, (d) => d[parameters.x_var]);
     const medianMap = new Map<string, number>();
@@ -163,11 +164,12 @@ export function LineChart({
       if (avgDistance < minDistance) {
         minDistance = avgDistance;
         closestData = entries;
+        closestCountry = country;
       }
     });
 
     if (!closestData || closestData.length === 0) return null;
-    return closestData || [];
+    return { data: closestData, name: closestCountry };
   }, [data, parameters, guardrail]);
 
   // ---------------------------- Median +- 1.5 IQR ---------------------------- //
@@ -266,12 +268,12 @@ export function LineChart({
         return [...selY, ...medianY];
       }
 
-      if (guardrail === 'medianClosest' && medianClosestData && medianClosestData.length > 0) {
+      if (guardrail === 'medianClosest' && medianClosestData && medianClosestData.data && medianClosestData.data.length > 0) {
         const selY = data
           .filter((val) => selection?.includes(val[parameters.cat_var]))
           .map((d) => +d[parameters.y_var])
           .filter((val) => !Number.isNaN(val));
-        const medianClosestY = medianClosestData
+        const medianClosestY = medianClosestData.data
           .map((d) => +d[parameters.y_var])
           .filter((val) => !Number.isNaN(val));
         return [...selY, ...medianClosestY];
@@ -355,7 +357,7 @@ export function LineChart({
   const medianLineClosest = useMemo(() => {
     if (guardrail !== 'medianClosest' || !medianClosestData) return null;
 
-    const processedData = medianClosestData
+    const processedData = medianClosestData.data
       .map((d) => {
         const parsedDate = d3.timeParse('%Y-%m-%d')(d[parameters.x_var]);
         const yVal = +d[parameters.y_var];
@@ -364,7 +366,7 @@ export function LineChart({
       })
       .filter((d): d is [number, number] => d !== null);
 
-    const lastValid = [...medianClosestData].reverse().find((d) => {
+    const lastValid = [...medianClosestData.data].reverse().find((d) => {
       const yVal = +d[parameters.y_var];
       return typeof yVal === 'number' && !Number.isNaN(yVal);
     });
@@ -377,6 +379,7 @@ export function LineChart({
     return {
       path: lineGenerator(processedData) as string,
       labelPosition: lastValid,
+      name: medianClosestData.name,
     };
   }, [medianClosestData, xScale, yScale, parameters, guardrail]);
 
@@ -924,10 +927,10 @@ export function LineChart({
             px={2}
             size={10}
             color="silver"
-            onMouseOver={() => setHover(['Median Country'])}
+            onMouseOver={() => setHover([medianLineClosest.name])}
             onMouseOut={() => setHover([])}
           >
-            Median
+            {medianLineClosest.name}
           </Text>
         </foreignObject>
       </>
