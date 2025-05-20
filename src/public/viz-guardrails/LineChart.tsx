@@ -167,7 +167,7 @@ export function LineChart({
     });
 
     if (!closestData || closestData.length === 0) return null;
-    return closestData;
+    return closestData || [];
   }, [data, parameters, guardrail]);
 
   // ---------------------------- Median +- 1.5 IQR ---------------------------- //
@@ -266,6 +266,17 @@ export function LineChart({
         return [...selY, ...medianY];
       }
 
+      if (guardrail === 'medianClosest' && medianClosestData && medianClosestData.length > 0) {
+        const selY = data
+          .filter((val) => selection?.includes(val[parameters.cat_var]))
+          .map((d) => +d[parameters.y_var])
+          .filter((val) => !Number.isNaN(val));
+        const medianClosestY = medianClosestData
+          .map((d) => +d[parameters.y_var])
+          .filter((val) => !Number.isNaN(val));
+        return [...selY, ...medianClosestY];
+      }
+
       return data
         .filter((val) => selection?.includes(val[parameters.cat_var]))
         .map((d) => +d[parameters.y_var])
@@ -291,7 +302,7 @@ export function LineChart({
       yMin: computedYMin - buffer,
       yMax: computedYMax + buffer,
     };
-  }, [data, selection, randomCountries, medianIQRData, avgData, medianCountryData, parameters, guardrail]);
+  }, [data, selection, randomCountries, medianIQRData, avgData, medianCountryData, parameters, guardrail, medianClosestData]);
   const xScale = useMemo(() => {
     if (range) {
       return d3.scaleTime([margin.left, width + margin.left]).domain(range);
@@ -344,14 +355,28 @@ export function LineChart({
   const medianLineClosest = useMemo(() => {
     if (guardrail !== 'medianClosest' || !medianClosestData) return null;
 
-    const lineGenerator = d3.line()
-      .x((d: any) => xScale(d3.timeParse('%Y-%m-%d')(d[parameters.x_var]) as Date))
-      .y((d: any) => yScale(d[parameters.y_var]))
+    const processedData = medianClosestData
+      .map((d) => {
+        const parsedDate = d3.timeParse('%Y-%m-%d')(d[parameters.x_var]);
+        const yVal = +d[parameters.y_var];
+        if (!parsedDate || Number.isNaN(yVal)) return null;
+        return [parsedDate.getTime(), yVal] as [number, number];
+      })
+      .filter((d): d is [number, number] => d !== null);
+
+    const lastValid = [...medianClosestData].reverse().find((d) => {
+      const yVal = +d[parameters.y_var];
+      return typeof yVal === 'number' && !Number.isNaN(yVal);
+    });
+
+    const lineGenerator = d3.line<[number, number]>()
+      .x((d) => xScale(d[0]))
+      .y((d) => yScale(d[1]))
       .curve(d3.curveBasis);
 
     return {
-      path: lineGenerator(medianClosestData) as string,
-      labelPosition: medianClosestData[medianClosestData.length - 1],
+      path: lineGenerator(processedData) as string,
+      labelPosition: lastValid,
     };
   }, [medianClosestData, xScale, yScale, parameters, guardrail]);
 
