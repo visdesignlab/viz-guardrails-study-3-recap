@@ -122,6 +122,54 @@ export function LineChart({
     return medianCountry;
   }, [data, parameters, guardrail]);
 
+  // ---------------------------- Closest Median Line  ----------------------------
+  const medianClosestData = useMemo(() => {
+    if (guardrail !== 'medianClosest') return null;
+
+    const groupedByDate = d3.group(data, (d) => d[parameters.x_var]);
+    const medianMap = new Map<string, number>();
+
+    groupedByDate.forEach((entries, date) => {
+      const values = entries.map((d) => d[parameters.y_var]).filter((v): v is number => v !== null && v !== undefined);
+      const median = d3.median(values);
+      if (median !== undefined) {
+        medianMap.set(date, median);
+      }
+    });
+
+    const groupedByCountry = d3.group(data, (d) => d[parameters.cat_var]);
+
+    let minDistance = Infinity;
+    let closestData: any[] = [];
+
+    groupedByCountry.forEach((entries, country) => {
+      let totalDistance = 0;
+      let count = 0;
+
+      for (const entry of entries) {
+        const date = entry[parameters.x_var];
+        const val = entry[parameters.y_var];
+        const medianVal = medianMap.get(date);
+
+        if (val == null || medianVal == null) continue;
+
+        const diff = val - medianVal;
+        totalDistance += diff * diff;
+        count += 1;
+      }
+
+      const avgDistance = totalDistance / (count || 1);
+
+      if (avgDistance < minDistance) {
+        minDistance = avgDistance;
+        closestData = entries;
+      }
+    });
+
+    if (!closestData || closestData.length === 0) return null;
+    return closestData;
+  }, [data, parameters, guardrail]);
+
   // ---------------------------- Median +- 1.5 IQR ---------------------------- //
   const medianIQRData = useMemo(() => {
     if (guardrail !== 'medianIQR') {
@@ -294,49 +342,7 @@ export function LineChart({
 
   // ---------------------------- Closest Median Line  ----------------------------
   const medianLineClosest = useMemo(() => {
-    if (guardrail !== 'medianClosest') return null;
-
-    const groupedByDate = d3.group(data, (d) => d[parameters.x_var]);
-    const medianMap = new Map<string, number>();
-
-    groupedByDate.forEach((entries, date) => {
-      const values = entries.map((d) => d[parameters.y_var]).filter((v): v is number => v !== null && v !== undefined);
-      const median = d3.median(values);
-      if (median !== undefined) {
-        medianMap.set(date, median);
-      }
-    });
-
-    const groupedByCountry = d3.group(data, (d) => d[parameters.cat_var]);
-
-    let minDistance = Infinity;
-    let closestData: any[] = [];
-
-    groupedByCountry.forEach((entries, country) => {
-      let totalDistance = 0;
-      let count = 0;
-
-      for (const entry of entries) {
-        const date = entry[parameters.x_var];
-        const val = entry[parameters.y_var];
-        const medianVal = medianMap.get(date);
-
-        if (val == null || medianVal == null) continue;
-
-        const diff = val - medianVal;
-        totalDistance += diff * diff;
-        count += 1;
-      }
-
-      const avgDistance = totalDistance / (count || 1);
-
-      if (avgDistance < minDistance) {
-        minDistance = avgDistance;
-        closestData = entries;
-      }
-    });
-
-    if (!closestData || closestData.length === 0) return null;
+    if (guardrail !== 'medianClosest' || !medianClosestData) return null;
 
     const lineGenerator = d3.line()
       .x((d: any) => xScale(d3.timeParse('%Y-%m-%d')(d[parameters.x_var]) as Date))
@@ -344,10 +350,10 @@ export function LineChart({
       .curve(d3.curveBasis);
 
     return {
-      path: lineGenerator(closestData) as string,
-      labelPosition: closestData[closestData.length - 1],
+      path: lineGenerator(medianClosestData) as string,
+      labelPosition: medianClosestData[medianClosestData.length - 1],
     };
-  }, [data, parameters, guardrail, xScale, yScale]);
+  }, [medianClosestData, xScale, yScale, parameters, guardrail]);
 
   // ---------------------------- Median IQR closest ----------------------------
   const medianIQRClosestPaths = useMemo(() => {
