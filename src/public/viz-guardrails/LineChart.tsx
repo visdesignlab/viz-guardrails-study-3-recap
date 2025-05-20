@@ -689,12 +689,31 @@ export function LineChart({
       return null;
     }
 
+    let filteredAvgData = avgData;
+    if (range) {
+      const [start, end] = range;
+      filteredAvgData = avgData.filter((d) => {
+        const date = d3.timeParse('%Y-%m-%d')(d.date);
+        return date && date >= start && date <= end;
+      });
+    }
+    const dedupedMap = new Map<string, any>();
+    for (const d of filteredAvgData) {
+      dedupedMap.set(d.date, d);
+    }
+    let dedupedAvgData = Array.from(dedupedMap.values());
+
+    dedupedAvgData = dedupedAvgData.sort((a, b) => {
+      const da = d3.timeParse('%Y-%m-%d')(a.date);
+      const db = d3.timeParse('%Y-%m-%d')(b.date);
+      return (da?.getTime() ?? 0) - (db?.getTime() ?? 0);
+    });
     // Mean line
     const lineGenerator = d3.line();
     lineGenerator.x((d: any) => xScale(d3.timeParse('%Y-%m-%d')(d.date) as Date));
     lineGenerator.y((d: any) => yScale(d.mean));
     lineGenerator.curve(d3.curveBasis);
-    const meanLine = lineGenerator(avgData) as string;
+    const meanLine = lineGenerator(dedupedAvgData) as string;
 
     // Confidence bands
     const areaGenerator = d3.area();
@@ -702,14 +721,14 @@ export function LineChart({
     areaGenerator.y0((d: any) => yScale(d.lowerq));
     areaGenerator.y1((d: any) => yScale(d.upperq));
     areaGenerator.curve(d3.curveBasis);
-    const confidenceBands = areaGenerator(avgData) as string;
+    const confidenceBands = areaGenerator(dedupedAvgData) as string;
 
     return {
       meanLine: meanLine as string,
       confidenceBands: confidenceBands as string,
-      data: avgData as any[],
+      data: dedupedAvgData as any[],
     };
-  }, [xScale, yScale, guardrail, avgData, dataname]);
+  }, [xScale, yScale, guardrail, avgData, dataname, range]);
 
   const averageLabel = useMemo(() => (dataname === 'clean_stocks' ? 'Industry Average' : 'Average'), [dataname]);
 
