@@ -285,6 +285,27 @@ export function LineChart({
       lower,
     };
   }, [data, parameters, guardrail]);
+
+  // ---------------------------- Cluster Representatives ----------------------------
+  const [clusterReps, setClusterReps] = useState<any[]>([]);
+  const clusterRepsDataPath = metadataFiltered ? '/sandbox-sector-metadata/data/cluster_representatives.csv' : '/sandbox/data/cluster_representatives.csv';
+  useEffect(() => {
+    if (guardrail !== 'cluster') return;
+
+    d3.csv(clusterRepsDataPath, d3.autoType).then((data) => {
+      setClusterReps(data);
+    });
+  }, [guardrail]);
+
+  const clusterRepYValues = useMemo(() => {
+    if (guardrail !== 'cluster' || !clusterReps || clusterReps.length === 0) return [];
+    const grouped = d3.group(clusterReps, (d) => d.name);
+    return Array.from(grouped.values()).map((values) => {
+      const sorted = values.slice().sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+      const last = sorted[sorted.length - 1];
+      return typeof last.value === 'number' ? last.value : parseFloat(last.value);
+    }).filter((val) => typeof val === 'number' && !Number.isNaN(val));
+  }, [clusterReps, guardrail]);
   // ---------------------------- Scales ---------------------------- //
   const {
     yMin, yMax,
@@ -347,6 +368,14 @@ export function LineChart({
         return [...selY, ...upperY, ...lowerY];
       }
 
+      if (guardrail === 'cluster' && clusterRepYValues.length > 0) {
+        const selY = data
+          .filter((val) => selection?.includes(val[parameters.cat_var]))
+          .map((d) => +d[parameters.y_var])
+          .filter((val) => !Number.isNaN(val));
+        return [...selY, ...clusterRepYValues];
+      }
+
       return data
         .filter((val) => selection?.includes(val[parameters.cat_var]))
         .map((d) => +d[parameters.y_var])
@@ -372,7 +401,7 @@ export function LineChart({
       yMin: computedYMin - buffer,
       yMax: computedYMax + buffer,
     };
-  }, [data, selection, randomCountries, medianIQRData, avgData, medianCountryData, parameters, guardrail, medianClosestData, percentileClosestData]);
+  }, [data, selection, randomCountries, medianIQRData, avgData, medianCountryData, parameters, guardrail, medianClosestData, percentileClosestData, clusterRepYValues]);
   const xScale = useMemo(() => {
     if (range) {
       return d3.scaleTime([margin.left, width + margin.left]).domain(range);
@@ -558,15 +587,6 @@ export function LineChart({
   }, [percentileClosestData, xScale, yScale, parameters, guardrail]);
 
   // ---------------------------- Cluster Representatives ----------------------------
-  const [clusterReps, setClusterReps] = useState<any[]>([]);
-  const clusterRepsDataPath = metadataFiltered ? '/sandbox-sector-metadata/data/cluster_representatives.csv' : '/sandbox/data/cluster_representatives.csv';
-  useEffect(() => {
-    if (guardrail !== 'cluster') return;
-
-    d3.csv(clusterRepsDataPath, d3.autoType).then((data) => {
-      setClusterReps(data);
-    });
-  }, [guardrail]);
 
   const clusterLines = useMemo(() => {
     if (guardrail !== 'cluster' || clusterReps.length === 0) return null;
