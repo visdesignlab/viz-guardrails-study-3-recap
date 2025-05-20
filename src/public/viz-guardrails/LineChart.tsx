@@ -177,6 +177,15 @@ export function LineChart({
           .filter((val) => val !== null) as number[];
       }
 
+      if (guardrail === 'super_summ') {
+        const avgY = avgData.flatMap((d) => [d.mean, d.upperq, d.lowerq]).filter((val) => val != null);
+        const selY = data
+          .filter((val) => selection?.includes(val[parameters.cat_var]))
+          .map((d) => +d[parameters.y_var])
+          .filter((val) => val !== null) as number[];
+        return [...selY, ...avgY];
+      }
+
       return data
         .filter((val) => selection?.includes(val[parameters.cat_var]))
         .map((d) => +d[parameters.y_var])
@@ -202,7 +211,7 @@ export function LineChart({
       yMin: computedYMin - buffer,
       yMax: computedYMax + buffer,
     };
-  }, [data, selection, randomCountries, medianIQRData, parameters, guardrail]);
+  }, [data, selection, randomCountries, medianIQRData, avgData, parameters, guardrail]);
   const xScale = useMemo(() => {
     if (range) {
       return d3.scaleTime([margin.left, width + margin.left]).domain(range);
