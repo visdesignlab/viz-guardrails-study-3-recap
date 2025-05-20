@@ -101,6 +101,27 @@ export function LineChart({
     numRandomSamples,
   });
 
+  // ---------------------------- Median at each point ---------------------------- //
+  const medianCountryData = useMemo(() => {
+    if (guardrail !== 'median') {
+      return null;
+    }
+
+    const groupedData = d3.group(data, (d) => d[parameters.x_var]);
+
+    const medianCountry = Array.from(groupedData, ([date, values]) => {
+      const metricValues = values.map((d) => d[parameters.y_var]).filter((v) => v !== null);
+      const medianValue = d3.median(metricValues);
+
+      return {
+        [parameters.x_var]: date,
+        [parameters.y_var]: medianValue,
+      };
+    });
+
+    return medianCountry;
+  }, [data, parameters, guardrail]);
+
   // ---------------------------- Median +- 1.5 IQR ---------------------------- //
   const medianIQRData = useMemo(() => {
     if (guardrail !== 'medianIQR') {
@@ -186,6 +207,17 @@ export function LineChart({
         return [...selY, ...avgY];
       }
 
+      if (guardrail === 'median' && medianCountryData) {
+        const medianY = medianCountryData
+          .map((d) => d[parameters.y_var])
+          .filter((val) => val !== null && val !== undefined) as number[];
+        const selY = data
+          .filter((val) => selection?.includes(val[parameters.cat_var]))
+          .map((d) => +d[parameters.y_var])
+          .filter((val) => val !== null) as number[];
+        return [...selY, ...medianY];
+      }
+
       return data
         .filter((val) => selection?.includes(val[parameters.cat_var]))
         .map((d) => +d[parameters.y_var])
@@ -211,7 +243,7 @@ export function LineChart({
       yMin: computedYMin - buffer,
       yMax: computedYMax + buffer,
     };
-  }, [data, selection, randomCountries, medianIQRData, avgData, parameters, guardrail]);
+  }, [data, selection, randomCountries, medianIQRData, avgData, medianCountryData, parameters, guardrail]);
   const xScale = useMemo(() => {
     if (range) {
       return d3.scaleTime([margin.left, width + margin.left]).domain(range);
@@ -236,26 +268,6 @@ export function LineChart({
   }, [data, parameters, dataname]);
 
   // ---------------------------- Median at each point ---------------------------- //
-  const medianCountryData = useMemo(() => {
-    if (guardrail !== 'median') {
-      return null;
-    }
-
-    const groupedData = d3.group(data, (d) => d[parameters.x_var]);
-
-    const medianCountry = Array.from(groupedData, ([date, values]) => {
-      const metricValues = values.map((d) => d[parameters.y_var]).filter((v) => v !== null);
-      const medianValue = d3.median(metricValues);
-
-      return {
-        [parameters.x_var]: date,
-        [parameters.y_var]: medianValue,
-      };
-    });
-
-    return medianCountry;
-  }, [data, parameters, guardrail]);
-
   const medianLinePath = useMemo(() => {
     if (!medianCountryData || guardrail !== 'median') {
       return null;
