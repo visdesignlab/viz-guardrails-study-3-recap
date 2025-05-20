@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
-  Select, SegmentedControl, Switch, Text,
+  NumberInput, Select, SegmentedControl, Switch, Text,
 } from '@mantine/core';
 
 export function Selector({
@@ -10,6 +10,8 @@ export function Selector({
   setDataname,
   setSelection,
   setMetadataFiltered,
+  numRandomSamples,
+  setNumRandomSamples,
 }: {
     guardrail: string;
     setGuardrail: (value: string) => void;
@@ -17,6 +19,8 @@ export function Selector({
     setDataname: (value: string) => void;
     setSelection: (value: Array<string>) => void;
     setMetadataFiltered: (value: boolean) => void;
+    numRandomSamples: number;
+    setNumRandomSamples: (value: number) => void;
 }) {
   return (
     <>
@@ -54,6 +58,18 @@ export function Selector({
         onChange={(event) => setMetadataFiltered(event.currentTarget.checked)}
         style={{ marginTop: '10px' }}
       />
+      {guardrail === 'super_data' && (
+        <NumberInput
+          label="Number of Random samples"
+          value={numRandomSamples}
+          onChange={(val) => typeof val === 'number' && setNumRandomSamples(val)}
+          min={1}
+          max={5}
+          step={1}
+          style={{ marginTop: '10px' }}
+        />
+      )}
+
     </>
   );
 }
