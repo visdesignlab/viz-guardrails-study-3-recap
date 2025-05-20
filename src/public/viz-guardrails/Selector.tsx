@@ -59,6 +59,7 @@ export function Selector({
         style={{ marginTop: '10px' }}
       />
       {guardrail === 'super_data' && (
+      <div style={{ marginTop: '10px' }}>
         <NumberInput
           label="Number of Random samples"
           value={numRandomSamples}
@@ -66,8 +67,12 @@ export function Selector({
           min={1}
           max={5}
           step={1}
-          style={{ marginTop: '10px' }}
+          style={{ marginTop: '10px', width: '200px' }}
         />
+        <Text size="xs" color="dimmed" mt={4} style={{ marginLeft: '2px' }}>
+          Maximum of 5
+        </Text>
+      </div>
       )}
 
     </>
