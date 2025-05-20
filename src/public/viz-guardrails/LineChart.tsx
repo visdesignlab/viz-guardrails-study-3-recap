@@ -526,6 +526,11 @@ export function LineChart({
         upper: upper.data[upper.data.length - 1],
         lower: lower.data[lower.data.length - 1],
       },
+      names: {
+        median: median.name,
+        upper: upper.name,
+        lower: lower.name,
+      },
     };
   }, [data, parameters, guardrail, xScale, yScale]);
 
@@ -1058,7 +1063,9 @@ export function LineChart({
           width={margin.right + 60}
           height={20}
         >
-          <Text px={2} size={10} color="silver">Median</Text>
+          <Text px={2} size={10} color="silver">
+            {medianIQRClosestPaths.names.median}
+          </Text>
         </foreignObject>
 
         <foreignObject
@@ -1067,7 +1074,9 @@ export function LineChart({
           width={margin.right + 60}
           height={20}
         >
-          <Text px={2} size={10} color="silver">Median + 1.5 IQR</Text>
+          <Text px={2} size={10} color="silver">
+            {medianIQRClosestPaths.names.upper}
+          </Text>
         </foreignObject>
 
         <foreignObject
@@ -1076,7 +1085,9 @@ export function LineChart({
           width={margin.right + 60}
           height={20}
         >
-          <Text px={2} size={10} color="silver">Median - 1.5 IQR</Text>
+          <Text px={2} size={10} color="silver">
+            {medianIQRClosestPaths.names.lower}
+          </Text>
         </foreignObject>
       </>
       )}
