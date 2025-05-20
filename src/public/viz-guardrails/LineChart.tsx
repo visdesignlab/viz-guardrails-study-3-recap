@@ -894,6 +894,16 @@ export function LineChart({
       );
     }
 
+    if (clusterLines && guardrail === 'cluster') {
+      labels = labels.concat(
+        clusterLines.map((line) => ({
+          label: line.name,
+          y: yScale(line.lastPoint[1]),
+          color: 'silver',
+        })),
+      );
+    }
+
     labels = labels.filter((l) => typeof l.y === 'number' && !Number.isNaN(l.y)).sort((a, b) => b.y - a.y);
 
     let prevY: number | undefined;
@@ -910,7 +920,7 @@ export function LineChart({
     return labels;
   }, [
     selection, data, parameters, dataname, yScale, colorScale,
-    medianLineClosest, medianIQRClosestPaths, percentileClosestPaths, guardrail,
+    medianLineClosest, medianIQRClosestPaths, percentileClosestPaths, clusterLines, guardrail,
   ]);
 
   // ---------------------------- Render ----------------------------
