@@ -1149,7 +1149,9 @@ export function LineChart({
           width={margin.right + 60}
           height={20}
         >
-          <Text px={2} size={10} color="silver">75th Percentile</Text>
+          <Text px={2} size={10} color="silver">
+            {percentileClosestPaths.names.upper}
+          </Text>
         </foreignObject>
         <foreignObject
           x={width + margin.left - 3}
@@ -1157,7 +1159,9 @@ export function LineChart({
           width={margin.right + 60}
           height={20}
         >
-          <Text px={2} size={10} color="silver">25th Percentile</Text>
+          <Text px={2} size={10} color="silver">
+            {percentileClosestPaths.names.lower}
+          </Text>
         </foreignObject>
       </>
       )}
