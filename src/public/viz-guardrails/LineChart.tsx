@@ -333,6 +333,20 @@ export function LineChart({
         return [...selY, ...medianClosestY];
       }
 
+      if (guardrail === 'percentileClosest' && percentileClosestData) {
+        const selY = data
+          .filter((val) => selection?.includes(val[parameters.cat_var]))
+          .map((d) => +d[parameters.y_var])
+          .filter((val) => !Number.isNaN(val));
+        const upperY = percentileClosestData.upper.data
+          .map((d) => +d[parameters.y_var])
+          .filter((val) => !Number.isNaN(val));
+        const lowerY = percentileClosestData.lower.data
+          .map((d) => +d[parameters.y_var])
+          .filter((val) => !Number.isNaN(val));
+        return [...selY, ...upperY, ...lowerY];
+      }
+
       return data
         .filter((val) => selection?.includes(val[parameters.cat_var]))
         .map((d) => +d[parameters.y_var])
@@ -358,7 +372,7 @@ export function LineChart({
       yMin: computedYMin - buffer,
       yMax: computedYMax + buffer,
     };
-  }, [data, selection, randomCountries, medianIQRData, avgData, medianCountryData, parameters, guardrail, medianClosestData]);
+  }, [data, selection, randomCountries, medianIQRData, avgData, medianCountryData, parameters, guardrail, medianClosestData, percentileClosestData]);
   const xScale = useMemo(() => {
     if (range) {
       return d3.scaleTime([margin.left, width + margin.left]).domain(range);
