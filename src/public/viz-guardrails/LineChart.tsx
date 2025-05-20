@@ -202,7 +202,7 @@ export function LineChart({
       yMin: computedYMin - buffer,
       yMax: computedYMax + buffer,
     };
-  }, [data, selection, medianIQRData, parameters, guardrail]);
+  }, [data, selection, randomCountries, medianIQRData, parameters, guardrail]);
   const xScale = useMemo(() => {
     if (range) {
       return d3.scaleTime([margin.left, width + margin.left]).domain(range);
