@@ -30,6 +30,7 @@ export function LineChart({
   range,
   guardrail,
   metadataFiltered,
+  numRandomSamples,
 }: {
   parameters: ChartParams,
   data: any[],
@@ -39,6 +40,7 @@ export function LineChart({
   range: [Date, Date] | null,
   guardrail: string,
   metadataFiltered: boolean,
+  numRandomSamples: number,
 }) {
   // Handle hovering
   const [hover, setHover] = useState<string[] | null>(null);
@@ -92,23 +94,19 @@ export function LineChart({
   const allCountries = useMemo(() => Array.from(new Set(data.map((val) => val[parameters.cat_var]))), [data, parameters.cat_var]);
 
   const [randomCountries, setRandomCountries] = useState<string[]>([]);
-  const [randomSelectedFlag, setRandomSelectedFlag] = useState(false);
-
   useEffect(() => {
-    if (guardrail === 'super_data' && !randomSelectedFlag) {
+    if (guardrail === 'super_data') {
       const unselectedCountries = allCountries.filter(
         (country) => !(selection || []).includes(country),
       );
 
-      setRandomCountries(d3.shuffle(unselectedCountries).slice(0, 2));
-      setRandomSelectedFlag(true);
+      setRandomCountries(d3.shuffle(unselectedCountries).slice(0, numRandomSamples));
     }
 
     if (guardrail !== 'super_data') {
       setRandomCountries([]);
-      setRandomSelectedFlag(false);
     }
-  }, [guardrail, selection, allCountries]);
+  }, [guardrail, selection, allCountries, numRandomSamples]);
 
   // ---------------------------- Median +- 1.5 IQR ---------------------------- //
   const medianIQRData = useMemo(() => {

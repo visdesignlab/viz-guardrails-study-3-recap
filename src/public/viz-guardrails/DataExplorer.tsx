@@ -224,6 +224,7 @@ export function DataExplorer({ parameters, setAnswer }: StimulusParams<ChartPara
                     range={range}
                     guardrail={guardrail}
                     metadataFiltered={metadataFiltered}
+                    numRandomSamples={numRandomSamples}
                   />
                 </Group>
                 {/* {parameters.allow_time_slider ? (
