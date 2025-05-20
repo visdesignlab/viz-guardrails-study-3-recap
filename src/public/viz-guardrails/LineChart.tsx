@@ -13,6 +13,7 @@ import { XAxis } from './XAxis';
 import { YAxis } from './YAxis';
 import { ChartParams } from './DataExplorer';
 import { OwidDistinctLinesPalette } from './Color';
+import { useRandomGuardrail } from './hooks/useRandomGuardrail';
 
 const margin = {
   top: 30,
@@ -93,20 +94,12 @@ export function LineChart({
   /// ////////// Setting scales
   const allCountries = useMemo(() => Array.from(new Set(data.map((val) => val[parameters.cat_var]))), [data, parameters.cat_var]);
 
-  const [randomCountries, setRandomCountries] = useState<string[]>([]);
-  useEffect(() => {
-    if (guardrail === 'super_data') {
-      const unselectedCountries = allCountries.filter(
-        (country) => !(selection || []).includes(country),
-      );
-
-      setRandomCountries(d3.shuffle(unselectedCountries).slice(0, numRandomSamples));
-    }
-
-    if (guardrail !== 'super_data') {
-      setRandomCountries([]);
-    }
-  }, [guardrail, selection, allCountries, numRandomSamples]);
+  const randomCountries = useRandomGuardrail({
+    guardrail,
+    selection,
+    allCountries,
+    numRandomSamples,
+  });
 
   // ---------------------------- Median +- 1.5 IQR ---------------------------- //
   const medianIQRData = useMemo(() => {
