@@ -181,9 +181,11 @@ export function Sidebar({
                   <Checkbox
                     key={`${item.name}_checkbox`}
                     value={item.name}
-                    label={dataname === 'sp500_stocks'
-                      ? `${item.longName} (${item.name})`
-                      : item.name}
+                    label={
+                      dataname === 'sp500_stocks'
+                        ? `${item.longName} (${item.name}${guardrail === 'cluster' && item.sector ? `, ${item.sector}` : ''})`
+                        : item.name
+                    }
                     color={parameters.allow_selection ? 'blue' : 'gray'}
                     styles={{
                       root: { display: 'flex', alignItems: 'flex-end', padding: '2px 0' },
