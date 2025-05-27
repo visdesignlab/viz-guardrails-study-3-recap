@@ -991,11 +991,11 @@ export function LineChart({
 
   // ---------------------------- Render ----------------------------
   return selection?.length === 0 ? (
-    <Center style={{ width: '800px', height: '400px' }}>
+    <Center style={{ width: `${(guardrail === 'cluster') ? '900px' : '800px'}`, height: '400px' }}>
       <Text fs="italic" c="dimmed">Select an item to view the chart.</Text>
     </Center>
   ) : (
-    <svg id="baseLineChart" style={{ height: '400px', width: '800px', fontFamily: '"Helvetica Neue", "Helvetica", "Arial", sans-serif' }}>
+    <svg id="baseLineChart" style={{ height: '400px', width: `${(guardrail === 'cluster') ? '900px' : '800px'}`, fontFamily: '"Helvetica Neue", "Helvetica", "Arial", sans-serif' }}>
       <g id="axes">
         <XAxis
           isDate
@@ -1060,19 +1060,6 @@ export function LineChart({
               d={x.path}
             />
           </g>
-        ))}
-        {allLabelPositions.map((x, i) => (
-          <foreignObject
-            key={`label_${x.label}_${i}`}
-            x={width + margin.left - 3}
-            y={x.y - 7}
-            width={margin.right + 60}
-            height={20}
-          >
-            <Text px={2} size={10} color={x.color ?? 'silver'}>
-              {x.label}
-            </Text>
-          </foreignObject>
         ))}
       </svg>
       {medianLinePath && (
@@ -1373,6 +1360,19 @@ export function LineChart({
         ) : null))}
       </>
       )}
+      {allLabelPositions.map((x, i) => (
+        <foreignObject
+          key={`label_${x.label}_${i}`}
+          x={width + margin.left - 3}
+          y={x.y - 7}
+          width={margin.right + 120}
+          height={20}
+        >
+          <Text px={2} size={10} color={x.color ?? 'silver'}>
+            {x.label}
+          </Text>
+        </foreignObject>
+      ))}
     </svg>
   );
 }
