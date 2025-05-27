@@ -587,12 +587,25 @@ export function LineChart({
   }, [percentileClosestData, xScale, yScale, parameters, guardrail]);
 
   // ---------------------------- Cluster Representatives ----------------------------
+  const selectedSectors = useMemo(() => {
+    if (!selection || !items) return [];
+    return Array.from(new Set(
+      selection
+        .map((name) => items.find((it) => it.name === name)?.sector)
+        .filter(Boolean),
+    ));
+  }, [selection, items]);
+
+  const filteredClusterReps = useMemo(() => {
+    if (guardrail !== 'cluster' || !selectedSectors.length) return [];
+    return clusterReps.filter((rep) => selectedSectors.includes(rep.sector));
+  }, [clusterReps, selectedSectors, guardrail]);
 
   const clusterLines = useMemo(() => {
-    if (guardrail !== 'cluster' || clusterReps.length === 0) return null;
-    const grouped = d3.group(clusterReps, (d) => d.name);
-
-    return Array.from(grouped, ([name, values]) => {
+    if (guardrail !== 'cluster' || filteredClusterReps.length === 0) return null;
+    const symbols = Array.from(new Set(filteredClusterReps.map((rep) => rep.symbol || rep.name)));
+    return symbols.map((symbol) => {
+      const values = data.filter((d) => d[parameters.cat_var] === symbol);
       const lineGenerator = d3.line<[number, number]>()
         .x((d) => xScale(d[0]))
         .y((d) => yScale(d[1]))
@@ -600,9 +613,9 @@ export function LineChart({
 
       const parsedData: [number, number][] = values
         .map((d: any) => {
-          const dateObj = new Date(d.date);
-          const val = parseFloat(d.value);
-          if (Number.isNaN(val)) return null;
+          const dateObj = d3.timeParse('%Y-%m-%d')(d[parameters.x_var]);
+          const val = +d[parameters.y_var];
+          if (!dateObj || Number.isNaN(val)) return null;
           return [dateObj.getTime(), val];
         })
         .filter((d): d is [number, number] => d !== null);
@@ -610,12 +623,12 @@ export function LineChart({
       if (parsedData.length === 0) return null;
 
       return {
-        name,
+        name: symbol,
         path: lineGenerator(parsedData) ?? '',
         lastPoint: parsedData[parsedData.length - 1],
       };
-    }).filter((d): d is { name: string; path: string; lastPoint: [number, number] } => d !== null);
-  }, [clusterReps, guardrail, xScale, yScale]);
+    }).filter(Boolean);
+  }, [filteredClusterReps, data, xScale, yScale, parameters, guardrail]);
 
   // ---------------------------- All ----------------------------
   const allBackgroundLines = useMemo(() => {
@@ -944,15 +957,19 @@ export function LineChart({
 
     if (clusterLines && guardrail === 'cluster') {
       labels = labels.concat(
-        clusterLines.map((line) => {
-          const item = items.find((it) => it.name === line.name);
-          const sector = item?.sector ? ` (${item.sector})` : '';
-          return {
-            label: `${line.name}${sector}`,
-            y: yScale(line.lastPoint[1]),
-            color: 'silver',
-          };
-        }),
+        clusterLines
+          .filter((line) => line !== null)
+          .map((line) => {
+            if (!line) return null;
+            const item = items.find((it) => it.name === line.name);
+            const sector = item?.sector ? ` (${item.sector})` : '';
+            return {
+              label: `${line.name}${sector}`,
+              y: yScale(line.lastPoint[1]),
+              color: 'silver',
+            };
+          })
+          .filter((label) => label !== null),
       );
     }
 
@@ -1324,7 +1341,7 @@ export function LineChart({
         </foreignObject> */}
       </>
       )}
-      {clusterLines?.map((line) => (
+      {clusterLines?.map((line) => (line ? (
         <g key={line.name}>
           <path
             d={line.path}
@@ -1334,17 +1351,17 @@ export function LineChart({
             strokeDasharray="2,2"
           />
           {/* <foreignObject
-            x={width + margin.left - 3}
-            y={yScale(line.lastPoint[1]) - 7}
-            width={margin.right + 60}
-            height={20}
-          >
-            <Text px={2} size={10} color="silver">
-              {line.name}
-            </Text>
-          </foreignObject> */}
+              x={width + margin.left - 3}
+              y={yScale(line.lastPoint[1]) - 7}
+              width={margin.right + 60}
+              height={20}
+            >
+              <Text px={2} size={10} color="silver">
+                {line.name}
+              </Text>
+            </foreignObject> */}
         </g>
-      ))}
+      ) : null))}
       {allBackgroundLines && (
       <>
         {allBackgroundLines.map((x) => (x.path ? (
