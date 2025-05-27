@@ -866,11 +866,20 @@ export function LineChart({
 
     if (selection) {
       labels = labels.concat(
-        selection.map((country) => ({
-          label: dataname === 'clean_data' ? `${country} (${getPolicyLabel(country)})` : country,
-          y: data.filter((val) => val[parameters.cat_var] === country).slice(-1).map((val) => yScale(val[parameters.y_var]))[0],
-          color: shouldBeColor(country) ? colorScale(country) : 'silver',
-        })),
+        selection.map((country) => {
+          const item = items.find((it) => it.name === country);
+          let label = country;
+          if (dataname === 'clean_data') {
+            label = `${country} (${getPolicyLabel(country)})`;
+          } else if (guardrail === 'cluster' && item?.sector) {
+            label = `${country} (${item.sector})`;
+          }
+          return {
+            label,
+            y: data.filter((val) => val[parameters.cat_var] === country).slice(-1).map((val) => yScale(val[parameters.y_var]))[0],
+            color: shouldBeColor(country) ? colorScale(country) : 'silver',
+          };
+        }),
       );
     }
 
@@ -935,11 +944,15 @@ export function LineChart({
 
     if (clusterLines && guardrail === 'cluster') {
       labels = labels.concat(
-        clusterLines.map((line) => ({
-          label: line.name,
-          y: yScale(line.lastPoint[1]),
-          color: 'silver',
-        })),
+        clusterLines.map((line) => {
+          const item = items.find((it) => it.name === line.name);
+          const sector = item?.sector ? ` (${item.sector})` : '';
+          return {
+            label: `${line.name}${sector}`,
+            y: yScale(line.lastPoint[1]),
+            color: 'silver',
+          };
+        }),
       );
     }
 
