@@ -288,14 +288,18 @@ export function LineChart({
 
   // ---------------------------- Cluster Representatives ----------------------------
   const [clusterReps, setClusterReps] = useState<any[]>([]);
-  const clusterRepsDataPath = metadataFiltered ? '/sandbox-sector-metadata/data/cluster_representatives.csv' : '/sandbox/data/cluster_representatives.csv';
+  const hardcodedClusterReps = ['FTV', 'PPL', 'UPS', 'JPM'];
+  const clusterRepsDataPath = '/sandbox/data/cluster_representatives.csv';
   useEffect(() => {
     if (guardrail !== 'cluster') return;
-
+    if (!metadataFiltered) {
+      setClusterReps(hardcodedClusterReps.map((name) => ({ symbol: name, name })));
+      return;
+    }
     d3.csv(clusterRepsDataPath, d3.autoType).then((data) => {
       setClusterReps(data);
     });
-  }, [guardrail]);
+  }, [guardrail, metadataFiltered]);
 
   const selectedSectors = useMemo(() => {
     if (!selection || !items) return [];
@@ -307,9 +311,13 @@ export function LineChart({
   }, [selection, items]);
 
   const filteredClusterReps = useMemo(() => {
-    if (guardrail !== 'cluster' || !selectedSectors.length) return [];
+    if (guardrail !== 'cluster') return [];
+    if (!metadataFiltered) {
+      return clusterReps;
+    }
+    if (!selectedSectors.length) return [];
     return clusterReps.filter((rep) => selectedSectors.includes(rep.sector));
-  }, [clusterReps, selectedSectors, guardrail]);
+  }, [clusterReps, selectedSectors, guardrail, metadataFiltered]);
   // ---------------------------- Scales ---------------------------- //
   const {
     yMin, yMax,
