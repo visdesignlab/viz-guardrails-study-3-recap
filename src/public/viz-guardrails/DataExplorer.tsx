@@ -57,7 +57,8 @@ export function DataExplorer({ parameters, setAnswer }: StimulusParams<ChartPara
         setItems(Array.from(new Set(data.map((row) => (JSON.stringify({
           name: row[parameters.cat_var],
           group: row[parameters.group_var],
-          longName: row.LongName || null,
+          longName: row.long_name || null,
+          sector: row.sector || null,
         }))))).map((row) => JSON.parse(row)));
       });
   }, [dataname, parameters]);
