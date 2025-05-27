@@ -297,15 +297,19 @@ export function LineChart({
     });
   }, [guardrail]);
 
-  const clusterRepYValues = useMemo(() => {
-    if (guardrail !== 'cluster' || !clusterReps || clusterReps.length === 0) return [];
-    const grouped = d3.group(clusterReps, (d) => d.name);
-    return Array.from(grouped.values()).map((values) => {
-      const sorted = values.slice().sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-      const last = sorted[sorted.length - 1];
-      return typeof last.value === 'number' ? last.value : parseFloat(last.value);
-    }).filter((val) => typeof val === 'number' && !Number.isNaN(val));
-  }, [clusterReps, guardrail]);
+  const selectedSectors = useMemo(() => {
+    if (!selection || !items) return [];
+    return Array.from(new Set(
+      selection
+        .map((name) => items.find((it) => it.name === name)?.sector)
+        .filter(Boolean),
+    ));
+  }, [selection, items]);
+
+  const filteredClusterReps = useMemo(() => {
+    if (guardrail !== 'cluster' || !selectedSectors.length) return [];
+    return clusterReps.filter((rep) => selectedSectors.includes(rep.sector));
+  }, [clusterReps, selectedSectors, guardrail]);
   // ---------------------------- Scales ---------------------------- //
   const {
     yMin, yMax,
@@ -368,12 +372,18 @@ export function LineChart({
         return [...selY, ...upperY, ...lowerY];
       }
 
-      if (guardrail === 'cluster' && clusterRepYValues.length > 0) {
+      if (guardrail === 'cluster' && filteredClusterReps.length > 0) {
         const selY = data
           .filter((val) => selection?.includes(val[parameters.cat_var]))
           .map((d) => +d[parameters.y_var])
           .filter((val) => !Number.isNaN(val));
-        return [...selY, ...clusterRepYValues];
+        // Get all y-values for all cluster rep symbols in the selected sector(s)
+        const clusterRepSymbols = Array.from(new Set(filteredClusterReps.map((rep) => rep.symbol || rep.name)));
+        const clusterY = data
+          .filter((val) => clusterRepSymbols.includes(val[parameters.cat_var]))
+          .map((d) => +d[parameters.y_var])
+          .filter((val) => !Number.isNaN(val));
+        return [...selY, ...clusterY];
       }
 
       return data
@@ -401,7 +411,7 @@ export function LineChart({
       yMin: computedYMin - buffer,
       yMax: computedYMax + buffer,
     };
-  }, [data, selection, randomCountries, medianIQRData, avgData, medianCountryData, parameters, guardrail, medianClosestData, percentileClosestData, clusterRepYValues]);
+  }, [data, selection, randomCountries, medianIQRData, avgData, medianCountryData, parameters, guardrail, medianClosestData, percentileClosestData, filteredClusterReps]);
   const xScale = useMemo(() => {
     if (range) {
       return d3.scaleTime([margin.left, width + margin.left]).domain(range);
@@ -587,19 +597,6 @@ export function LineChart({
   }, [percentileClosestData, xScale, yScale, parameters, guardrail]);
 
   // ---------------------------- Cluster Representatives ----------------------------
-  const selectedSectors = useMemo(() => {
-    if (!selection || !items) return [];
-    return Array.from(new Set(
-      selection
-        .map((name) => items.find((it) => it.name === name)?.sector)
-        .filter(Boolean),
-    ));
-  }, [selection, items]);
-
-  const filteredClusterReps = useMemo(() => {
-    if (guardrail !== 'cluster' || !selectedSectors.length) return [];
-    return clusterReps.filter((rep) => selectedSectors.includes(rep.sector));
-  }, [clusterReps, selectedSectors, guardrail]);
 
   const clusterLines = useMemo(() => {
     if (guardrail !== 'cluster' || filteredClusterReps.length === 0) return null;
