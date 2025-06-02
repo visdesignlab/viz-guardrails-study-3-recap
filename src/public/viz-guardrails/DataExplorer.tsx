@@ -63,19 +63,6 @@ export function DataExplorer({ parameters, setAnswer }: StimulusParams<ChartPara
       });
   }, [dataname, parameters]);
 
-  // if the dataname is 'clean_data', then range is set to 2023-01-01 to 2024-01-01
-  useEffect(() => {
-    if (dataname === 'clean_data' && data) {
-      const startDate = new Date('2020-01-01');
-      const endDate = new Date('2021-01-01');
-      setRange([startDate, endDate]);
-    }
-
-    if (dataname === 'sp500_stocks' && data) {
-      setRange([new Date(parameters.start_date), new Date(parameters.end_date)]);
-    }
-  }, [dataname, data, parameters.x_var]);
-
   useEffect(() => {
     setSelection(parameters.initial_selection ?? []);
     setMetadataFiltered(false);
