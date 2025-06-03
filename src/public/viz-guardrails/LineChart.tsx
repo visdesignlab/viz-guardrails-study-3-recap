@@ -95,26 +95,13 @@ export function LineChart({
     numRandomSamples,
   });
 
-  // Restrict data range for clean_data
-  const filteredData = useMemo(() => {
-    if (dataname === 'clean_data') {
-      const start = new Date('2023-01-01');
-      const end = new Date('2024-01-01');
-      return data.filter((d) => {
-        const date = d3.timeParse('%Y-%m-%d')(d[parameters.x_var]);
-        return date && date >= start && date <= end;
-      });
-    }
-    return data;
-  }, [data, dataname, parameters.x_var]);
-
   // ---------------------------- Median at each point ---------------------------- //
   const medianCountryData = useMemo(() => {
     if (guardrail !== 'median') {
       return null;
     }
 
-    const groupedData = d3.group(filteredData, (d) => d[parameters.x_var]);
+    const groupedData = d3.group(data, (d) => d[parameters.x_var]);
 
     const medianCountry = Array.from(groupedData, ([date, values]) => {
       const metricValues = values.map((d) => d[parameters.y_var]).filter((v) => v !== null);
@@ -127,14 +114,14 @@ export function LineChart({
     });
 
     return medianCountry;
-  }, [filteredData, parameters, guardrail]);
+  }, [data, parameters, guardrail]);
 
   // ---------------------------- Closest Median Line  ----------------------------
   const medianClosestData = useMemo(() => {
     if (guardrail !== 'medianClosest') return null;
     let closestCountry = '';
 
-    const groupedByDate = d3.group(filteredData, (d) => d[parameters.x_var]);
+    const groupedByDate = d3.group(data, (d) => d[parameters.x_var]);
     const medianMap = new Map<string, number>();
 
     groupedByDate.forEach((entries, date) => {
@@ -145,7 +132,7 @@ export function LineChart({
       }
     });
 
-    const groupedByCountry = d3.group(filteredData, (d) => d[parameters.cat_var]);
+    const groupedByCountry = d3.group(data, (d) => d[parameters.cat_var]);
 
     let minDistance = Infinity;
     let closestData: any[] = [];
@@ -177,7 +164,7 @@ export function LineChart({
 
     if (!closestData || closestData.length === 0) return null;
     return { data: closestData, name: closestCountry };
-  }, [filteredData, parameters, guardrail]);
+  }, [data, parameters, guardrail]);
 
   // ---------------------------- Median +- 1.5 IQR ---------------------------- //
   const medianIQRData = useMemo(() => {
@@ -185,7 +172,7 @@ export function LineChart({
       return null;
     }
 
-    const groupedData = d3.group(filteredData, (d) => d[parameters.x_var]);
+    const groupedData = d3.group(data, (d) => d[parameters.x_var]);
 
     const medianIQR = Array.from(groupedData, ([date, values]) => {
       const metricValues = values.map((d) => d[parameters.y_var]).filter((v): v is number => v !== null && v !== undefined);
@@ -209,7 +196,7 @@ export function LineChart({
     }).filter((d) => d !== null);
 
     return medianIQR;
-  }, [filteredData, parameters, guardrail]);
+  }, [data, parameters, guardrail]);
 
   // ---------------------------- 75th and 25th percentiles ---------------------------- //
   const percentileData = useMemo(() => {
@@ -217,7 +204,7 @@ export function LineChart({
       return null;
     }
 
-    const groupedData = d3.group(filteredData, (d) => d[parameters.x_var]);
+    const groupedData = d3.group(data, (d) => d[parameters.x_var]);
 
     const medianIQR = Array.from(groupedData, ([date, values]) => {
       const metricValues = values.map((d) => d[parameters.y_var]).filter((v): v is number => v !== null && v !== undefined);
@@ -237,14 +224,14 @@ export function LineChart({
     }).filter((d) => d !== null);
 
     return medianIQR;
-  }, [filteredData, parameters, guardrail]);
+  }, [data, parameters, guardrail]);
 
   // ---------------------------- Percentile Closest Lines ---------------------------- //
   const percentileClosestData = useMemo(() => {
     if (guardrail !== 'percentileClosest') return null;
 
-    const groupedByDate = d3.group(filteredData, (d) => d[parameters.x_var]);
-    const groupedByCountry = d3.group(filteredData, (d) => d[parameters.cat_var]);
+    const groupedByDate = d3.group(data, (d) => d[parameters.x_var]);
+    const groupedByCountry = d3.group(data, (d) => d[parameters.cat_var]);
 
     const targetMap = new Map<string, { upper: number, lower: number }>();
     groupedByDate.forEach((entries, date) => {
@@ -291,7 +278,7 @@ export function LineChart({
       upper,
       lower,
     };
-  }, [filteredData, parameters, guardrail]);
+  }, [data, parameters, guardrail]);
 
   // ---------------------------- Cluster Representatives ----------------------------
   const [clusterReps, setClusterReps] = useState<any[]>([]);
@@ -331,12 +318,12 @@ export function LineChart({
   } = useMemo(() => {
     const selectedYValues = (() => {
       if (guardrail === 'all') {
-        return filteredData.map((d) => +d[parameters.y_var]).filter((val) => val !== null) as number[];
+        return data.map((d) => +d[parameters.y_var]).filter((val) => val !== null) as number[];
       }
 
       if (guardrail === 'super_data') {
         const names = new Set([...(selection || []), ...randomCountries]);
-        return filteredData
+        return data
           .filter((d) => names.has(d[parameters.cat_var]))
           .map((d) => +d[parameters.y_var])
           .filter((val) => val !== null) as number[];
@@ -344,7 +331,7 @@ export function LineChart({
 
       if (guardrail === 'super_summ') {
         const avgY = avgData.flatMap((d) => [d.mean, d.upperq, d.lowerq]).filter((val) => val != null);
-        const selY = filteredData
+        const selY = data
           .filter((val) => selection?.includes(val[parameters.cat_var]))
           .map((d) => +d[parameters.y_var])
           .filter((val) => val !== null) as number[];
@@ -355,7 +342,7 @@ export function LineChart({
         const medianY = medianCountryData
           .map((d) => d[parameters.y_var])
           .filter((val) => val !== null && val !== undefined) as number[];
-        const selY = filteredData
+        const selY = data
           .filter((val) => selection?.includes(val[parameters.cat_var]))
           .map((d) => +d[parameters.y_var])
           .filter((val) => val !== null) as number[];
@@ -363,7 +350,7 @@ export function LineChart({
       }
 
       if (guardrail === 'medianClosest' && medianClosestData && medianClosestData.data && medianClosestData.data.length > 0) {
-        const selY = filteredData
+        const selY = data
           .filter((val) => selection?.includes(val[parameters.cat_var]))
           .map((d) => +d[parameters.y_var])
           .filter((val) => !Number.isNaN(val));
@@ -374,7 +361,7 @@ export function LineChart({
       }
 
       if (guardrail === 'percentileClosest' && percentileClosestData) {
-        const selY = filteredData
+        const selY = data
           .filter((val) => selection?.includes(val[parameters.cat_var]))
           .map((d) => +d[parameters.y_var])
           .filter((val) => !Number.isNaN(val));
@@ -388,20 +375,20 @@ export function LineChart({
       }
 
       if (guardrail === 'cluster' && filteredClusterReps.length > 0) {
-        const selY = filteredData
+        const selY = data
           .filter((val) => selection?.includes(val[parameters.cat_var]))
           .map((d) => +d[parameters.y_var])
           .filter((val) => !Number.isNaN(val));
         // Get all y-values for all cluster rep symbols in the selected sector(s)
         const clusterRepSymbols = Array.from(new Set(filteredClusterReps.map((rep) => rep.symbol || rep.name)));
-        const clusterY = filteredData
+        const clusterY = data
           .filter((val) => clusterRepSymbols.includes(val[parameters.cat_var]))
           .map((d) => +d[parameters.y_var])
           .filter((val) => !Number.isNaN(val));
         return [...selY, ...clusterY];
       }
 
-      return filteredData
+      return data
         .filter((val) => selection?.includes(val[parameters.cat_var]))
         .map((d) => +d[parameters.y_var])
         .filter((val) => val !== null) as number[];
@@ -426,7 +413,7 @@ export function LineChart({
       yMin: computedYMin - buffer,
       yMax: computedYMax + buffer,
     };
-  }, [filteredData, selection, randomCountries, medianIQRData, avgData, medianCountryData, parameters, guardrail, medianClosestData, percentileClosestData, filteredClusterReps]);
+  }, [data, selection, randomCountries, medianIQRData, avgData, medianCountryData, parameters, guardrail, medianClosestData, percentileClosestData, filteredClusterReps]);
   const xScale = useMemo(() => {
     if (range) {
       return d3.scaleTime([margin.left, width + margin.left]).domain(range);
@@ -509,8 +496,8 @@ export function LineChart({
   const medianIQRClosestPaths = useMemo(() => {
     if (guardrail !== 'medianIQRClosest') return null;
 
-    const groupedByDate = d3.group(filteredData, (d) => d[parameters.x_var]);
-    const groupedByCountry = d3.group(filteredData, (d) => d[parameters.cat_var]);
+    const groupedByDate = d3.group(data, (d) => d[parameters.x_var]);
+    const groupedByCountry = d3.group(data, (d) => d[parameters.cat_var]);
 
     const boundsMap = new Map<string, { median: number, upper: number, lower: number }>();
 
@@ -586,7 +573,7 @@ export function LineChart({
         lower: lower.name,
       },
     };
-  }, [filteredData, parameters, guardrail, xScale, yScale]);
+  }, [data, parameters, guardrail, xScale, yScale]);
 
   // ---------------------------- Percentile Closest Lines ---------------------------- //
   const percentileClosestPaths = useMemo(() => {
@@ -617,7 +604,7 @@ export function LineChart({
     if (guardrail !== 'cluster' || filteredClusterReps.length === 0) return null;
     const symbols = Array.from(new Set(filteredClusterReps.map((rep) => rep.symbol || rep.name)));
     return symbols.map((symbol) => {
-      const values = filteredData.filter((d) => d[parameters.cat_var] === symbol);
+      const values = data.filter((d) => d[parameters.cat_var] === symbol);
       const lineGenerator = d3.line<[number, number]>()
         .x((d) => xScale(d[0]))
         .y((d) => yScale(d[1]))
@@ -640,7 +627,7 @@ export function LineChart({
         lastPoint: parsedData[parsedData.length - 1],
       };
     }).filter(Boolean);
-  }, [filteredClusterReps, filteredData, xScale, yScale, parameters, guardrail]);
+  }, [filteredClusterReps, data, xScale, yScale, parameters, guardrail]);
 
   // ---------------------------- All ----------------------------
   const allBackgroundLines = useMemo(() => {
@@ -685,11 +672,11 @@ export function LineChart({
     lineGenerator.curve(d3.curveBasis);
     const paths = selection?.map((x) => ({
       country: x as string,
-      path: lineGenerator(filteredData.filter((val) => (val[parameters.cat_var] === x))) as string,
+      path: lineGenerator(data.filter((val) => (val[parameters.cat_var] === x))) as string,
     }));
 
     return paths;
-  }, [filteredData, xScale, yScale, selection, parameters, dataname]);
+  }, [data, xScale, yScale, selection, parameters, dataname]);
 
   const superimposeDatapoints = useMemo(() => {
     if (guardrail !== 'super_data') {
@@ -703,11 +690,11 @@ export function LineChart({
 
     const paths = randomCountries.map((country) => ({
       country,
-      path: lineGenerator(filteredData.filter((val) => val[parameters.cat_var] === country)) as string,
+      path: lineGenerator(data.filter((val) => val[parameters.cat_var] === country)) as string,
     }));
 
     return paths;
-  }, [filteredData, xScale, yScale, randomCountries, parameters]);
+  }, [data, xScale, yScale, randomCountries, parameters]);
 
   const superimposeSummary = useMemo(() => {
     if (guardrail !== 'super_summ') {
