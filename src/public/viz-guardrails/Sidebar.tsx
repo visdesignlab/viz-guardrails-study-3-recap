@@ -47,11 +47,9 @@ export function Sidebar({
 
   const filteredItems = useMemo(() => {
     if (!searchTerm) {
-      if (dataname === 'sp500_stocks') {
-        const selectedItems = items.filter((item) => selection?.includes(item.name));
-        const unselectedItems = items.filter((item) => !selection?.includes(item.name));
-        return [...selectedItems, ...unselectedItems];
-      }
+      const selectedItems = items.filter((item) => selection?.includes(item.name));
+      const unselectedItems = items.filter((item) => !selection?.includes(item.name));
+      return [...selectedItems, ...unselectedItems];
       return items;
     }
 
@@ -60,7 +58,7 @@ export function Sidebar({
       (item) => item.name.toLowerCase().includes(lowerCaseSearchTerm)
         || (item.longName && item.longName.toLowerCase().includes(lowerCaseSearchTerm)),
     );
-  }, [searchTerm, items, dataname, selection]);
+  }, [searchTerm, items, selection]);
 
   const xScale = useMemo(() => {
     if (range) {
@@ -123,22 +121,20 @@ export function Sidebar({
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
-      {dataname === 'sp500_stocks' && (
-        <>
-          <TextInput
-            style={{ width: '300px', marginBottom: '10px' }}
-            placeholder="Search"
-            value={searchTerm}
-            onChange={(event) => setSearchTerm(event.currentTarget.value)}
-            rightSection={searchTerm && (
-              <IconX
-                size={14}
-                style={{ cursor: 'pointer' }}
-                onClick={() => setSearchTerm('')}
-              />
-            )}
-          />
-          {
+      <TextInput
+        style={{ width: '300px', marginBottom: '10px' }}
+        placeholder="Search"
+        value={searchTerm}
+        onChange={(event) => setSearchTerm(event.currentTarget.value)}
+        rightSection={searchTerm && (
+        <IconX
+          size={14}
+          style={{ cursor: 'pointer' }}
+          onClick={() => setSearchTerm('')}
+        />
+        )}
+      />
+      {
             !searchTerm
           && (
           <Button
@@ -153,8 +149,6 @@ export function Sidebar({
           </Button>
           )
           }
-        </>
-      )}
       <div style={{ maxHeight: '400px', overflowY: 'auto', padding: '8px' }}>
         <Checkbox.Group
           key={`${dataname}_checkboxgroup`}
