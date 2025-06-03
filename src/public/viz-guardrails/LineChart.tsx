@@ -424,11 +424,7 @@ export function LineChart({
 
   const yScale = useMemo(() => {
     const scale = d3.scaleLinear([height + margin.top, margin.top]);
-    if (guardrail === 'medianIQRClosest') {
-      scale.domain([-100, 100]); // fixed
-    } else {
-      scale.domain([yMin, yMax]).nice(); // dynamic
-    }
+    scale.domain([yMin, yMax]).nice();
     return scale;
   }, [height, yMax, yMin, dataname, guardrail]);
 
