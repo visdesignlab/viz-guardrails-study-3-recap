@@ -232,15 +232,16 @@ export function DataExplorer({ parameters, setAnswer }: StimulusParams<ChartPara
                     numRandomSamples={numRandomSamples}
                   />
                 </Group>
-                {/* {parameters.allow_time_slider ? (
+                {parameters.allow_time_slider && dataname === 'clean_data' ? (
                   <div style={{ width: '500px' }}>
                     <RangeSelector
                       parameters={parameters}
+                      range={range}
                       setRange={setRange}
                       trackRange={debouncedTrackRange}
                     />
                   </div>
-                ) : null} */}
+                ) : null}
               </Stack>
             </Stack>
           </Group>

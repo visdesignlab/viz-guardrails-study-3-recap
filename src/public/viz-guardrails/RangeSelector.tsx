@@ -7,13 +7,15 @@ export function RangeSelector({
   parameters,
   setRange,
   trackRange,
+  range,
 } : {
     parameters: ChartParams,
     setRange: (value: [Date, Date]) => void,
-    trackRange: (value: [Date, Date]) => void
+    trackRange: (value: [Date, Date]) => void,
+    range: [Date, Date],
 }) {
   function numToRange(v: number) {
-    return d3.scaleTime([0, 100]).domain([new Date(parameters.start_date), new Date(parameters.end_date)]).invert(v);
+    return d3.scaleTime([0, 100]).domain([new Date(range[0]), new Date(range[1])]).invert(v);
   }
 
   function numToRangeLabel(v: number) {
