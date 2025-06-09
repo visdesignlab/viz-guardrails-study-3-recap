@@ -54,7 +54,7 @@ export function Selector({
         ]}
       />
       <Switch
-        label="Metadata-based filtering"
+        label={dataname === 'clean_data' ? 'Filter by UN Region (metadata)' : 'Filter by Sector (metadata)'}
         onChange={(event) => setMetadataFiltered(event.currentTarget.checked)}
         style={{ marginTop: '10px' }}
       />
