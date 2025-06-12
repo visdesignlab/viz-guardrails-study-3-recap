@@ -284,34 +284,52 @@ export function LineChart({
   const [clusterReps, setClusterReps] = useState<any[]>([]);
   const hardcodedClusterReps = ['FTV', 'PPL', 'UPS', 'JPM'];
   const clusterRepsDataPath = '/sandbox/data/cluster_representatives.csv';
+  const subregionRepsDataPath = '/sandbox/data/subregion_representatives.csv';
+
   useEffect(() => {
     if (guardrail !== 'cluster') return;
     if (!metadataFiltered) {
       setClusterReps(hardcodedClusterReps.map((name) => ({ symbol: name, name })));
       return;
     }
-    d3.csv(clusterRepsDataPath, d3.autoType).then((data) => {
-      setClusterReps(data);
-    });
-  }, [guardrail, metadataFiltered]);
+    if (dataname === 'clean_data') {
+      d3.csv(subregionRepsDataPath, d3.autoType).then((data) => {
+        setClusterReps(data);
+      });
+    } else {
+      d3.csv(clusterRepsDataPath, d3.autoType).then((data) => {
+        setClusterReps(data);
+      });
+    }
+  }, [guardrail, metadataFiltered, dataname]);
 
-  const selectedSectors = useMemo(() => {
+  const selectedSectorsOrSubregions = useMemo(() => {
     if (!selection || !items) return [];
+    if (dataname === 'clean_data') {
+      return Array.from(new Set(
+        selection
+          .map((name) => items.find((it) => it.name === name)?.subregion)
+          .filter(Boolean),
+      ));
+    }
     return Array.from(new Set(
       selection
         .map((name) => items.find((it) => it.name === name)?.sector)
         .filter(Boolean),
     ));
-  }, [selection, items]);
+  }, [selection, items, dataname]);
 
   const filteredClusterReps = useMemo(() => {
     if (guardrail !== 'cluster') return [];
     if (!metadataFiltered) {
       return clusterReps;
     }
-    if (!selectedSectors.length) return [];
-    return clusterReps.filter((rep) => selectedSectors.includes(rep.sector));
-  }, [clusterReps, selectedSectors, guardrail, metadataFiltered]);
+    if (!selectedSectorsOrSubregions.length) return [];
+    if (dataname === 'clean_data') {
+      return clusterReps.filter((rep) => selectedSectorsOrSubregions.includes(rep.subregion));
+    }
+    return clusterReps.filter((rep) => selectedSectorsOrSubregions.includes(rep.sector));
+  }, [clusterReps, selectedSectorsOrSubregions, guardrail, metadataFiltered, dataname]);
   // ---------------------------- Scales ---------------------------- //
   const {
     yMin, yMax,
@@ -598,7 +616,12 @@ export function LineChart({
 
   const clusterLines = useMemo(() => {
     if (guardrail !== 'cluster' || filteredClusterReps.length === 0) return null;
-    const symbols = Array.from(new Set(filteredClusterReps.map((rep) => rep.symbol || rep.name)));
+    let symbols;
+    if (dataname === 'clean_data') {
+      symbols = Array.from(new Set(filteredClusterReps.map((rep) => rep.country)));
+    } else {
+      symbols = Array.from(new Set(filteredClusterReps.map((rep) => rep.symbol || rep.name)));
+    }
     return symbols.map((symbol) => {
       const values = data.filter((d) => d[parameters.cat_var] === symbol);
       const lineGenerator = d3.line<[number, number]>()
@@ -623,7 +646,7 @@ export function LineChart({
         lastPoint: parsedData[parsedData.length - 1],
       };
     }).filter(Boolean);
-  }, [filteredClusterReps, data, xScale, yScale, parameters, guardrail]);
+  }, [filteredClusterReps, data, xScale, yScale, parameters, guardrail, dataname]);
 
   // ---------------------------- All ----------------------------
   const allBackgroundLines = useMemo(() => {
@@ -939,8 +962,9 @@ export function LineChart({
             if (!line) return null;
             const item = items.find((it) => it.name === line.name);
             const sector = item?.sector ? ` (${item.sector})` : '';
+            const subregion = item?.subregion ? ` (${item.subregion})` : '';
             return {
-              label: `${line.name}${sector}`,
+              label: `${line.name}${sector}${subregion}`,
               y: yScale(line.lastPoint[1]),
               color: 'silver',
             };
