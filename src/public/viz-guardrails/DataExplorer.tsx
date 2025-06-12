@@ -59,6 +59,7 @@ export function DataExplorer({ parameters, setAnswer }: StimulusParams<ChartPara
           group: row[parameters.group_var],
           longName: row.long_name || null,
           sector: row.sector || null,
+          subregion: row.subregion || null,
         }))))).map((row) => JSON.parse(row)));
       });
     // Reset range when dataset changes
