@@ -283,13 +283,18 @@ export function LineChart({
   // ---------------------------- Cluster Representatives ----------------------------
   const [clusterReps, setClusterReps] = useState<any[]>([]);
   const hardcodedClusterReps = ['FTV', 'PPL', 'UPS', 'JPM'];
+  const hardCodedSubregionReps = ['Europe', 'Low-income countries', 'South Korea', 'Iran', 'North America'];
   const clusterRepsDataPath = '/sandbox/data/cluster_representatives.csv';
   const subregionRepsDataPath = '/sandbox/data/subregion_representatives.csv';
 
   useEffect(() => {
     if (guardrail !== 'cluster') return;
     if (!metadataFiltered) {
-      setClusterReps(hardcodedClusterReps.map((name) => ({ symbol: name, name })));
+      if (dataname === 'clean_data') {
+        setClusterReps(hardCodedSubregionReps.map((name) => ({ country: name, name })));
+      } else {
+        setClusterReps(hardcodedClusterReps.map((name) => ({ symbol: name, name })));
+      }
       return;
     }
     if (dataname === 'clean_data') {
