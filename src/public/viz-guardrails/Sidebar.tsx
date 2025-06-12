@@ -178,7 +178,7 @@ export function Sidebar({
                     label={
                       dataname === 'sp500_stocks'
                         ? `${item.longName} (${item.name}, ${item.sector})`
-                        : item.name
+                        : `${item.name} ${item.subregion ? `(${item.subregion})` : ''}`
                     }
                     color={parameters.allow_selection ? 'blue' : 'gray'}
                     styles={{
