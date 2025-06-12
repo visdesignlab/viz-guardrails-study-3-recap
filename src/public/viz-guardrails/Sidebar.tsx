@@ -177,7 +177,7 @@ export function Sidebar({
                     value={item.name}
                     label={
                       dataname === 'sp500_stocks'
-                        ? `${item.longName} (${item.name}${guardrail === 'cluster' && item.sector ? `, ${item.sector}` : ''})`
+                        ? `${item.longName} (${item.name}, ${item.sector})`
                         : item.name
                     }
                     color={parameters.allow_selection ? 'blue' : 'gray'}
