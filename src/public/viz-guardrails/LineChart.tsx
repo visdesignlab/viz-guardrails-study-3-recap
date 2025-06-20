@@ -419,11 +419,15 @@ export function LineChart({
 
     let iqrValues: number[] = [];
     if (guardrail === 'medianIQR' && medianIQRData) {
-      iqrValues = medianIQRData.flatMap((d) => [d.median, d.upper, d.lower]);
+      iqrValues = medianIQRData
+        .filter((d): d is { median: number; upper: number; lower: number } => d !== null)
+        .flatMap((d) => [d.median, d.upper, d.lower]);
     }
 
     if (guardrail === 'percentiles' && percentileData) {
-      iqrValues = percentileData.flatMap((d) => [d.median, d.upper, d.lower]);
+      iqrValues = percentileData
+        .filter((d): d is { median: number; upper: number; lower: number } => d !== null)
+        .flatMap((d) => [d.median, d.upper, d.lower]);
     }
 
     const allYValues = [...selectedYValues, ...iqrValues];
@@ -768,6 +772,7 @@ export function LineChart({
 
     const processedData: [number, number, number][] = medianIQRData
       .map((d) => {
+        if (!d) return null;
         const parsedDate = d3.timeParse('%Y-%m-%d')(d[parameters.x_var]);
         return parsedDate
           ? [parsedDate.getTime(), d.lower, d.upper] as [number, number, number]
@@ -802,6 +807,7 @@ export function LineChart({
 
     const processedData: [number, number, number][] = percentileData
       .map((d) => {
+        if (!d) return null;
         const parsedDate = d3.timeParse('%Y-%m-%d')(d[parameters.x_var]);
         return parsedDate
           ? [parsedDate.getTime(), d.lower, d.upper] as [number, number, number]
