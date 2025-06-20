@@ -1165,7 +1165,7 @@ export function LineChart({
           {medianIQRData && medianIQRData.length > 0 && (
             <foreignObject
               x={width + margin.left - 3}
-              y={medianIQRData ? yScale(medianIQRData[medianIQRData.length - 1].median) - 7 : 0}
+              y={medianIQRData && medianIQRData.length > 0 && medianIQRData[medianIQRData.length - 1] ? yScale(medianIQRData[medianIQRData.length - 1].median) - 7 : 0}
               width={margin.right + 60}
               height={20}
             >
@@ -1178,7 +1178,7 @@ export function LineChart({
           {medianIQRData && medianIQRData.length > 0 && (
             <foreignObject
               x={width + margin.left - 3}
-              y={medianIQRData ? yScale(medianIQRData[medianIQRData.length - 1].upper) - 7 : 0}
+              y={medianIQRData && medianIQRData.length > 0 && medianIQRData[medianIQRData.length - 1] ? yScale(medianIQRData[medianIQRData.length - 1].upper) - 7 : 0}
               width={margin.right + 60}
               height={20}
             >
@@ -1191,7 +1191,7 @@ export function LineChart({
           {medianIQRData && medianIQRData.length > 0 && (
             <foreignObject
               x={width + margin.left - 3}
-              y={medianIQRData ? yScale(medianIQRData[medianIQRData.length - 1].lower) - 7 : 0}
+              y={medianIQRData && medianIQRData.length > 0 && medianIQRData[medianIQRData.length - 1] ? yScale(medianIQRData[medianIQRData.length - 1].lower) - 7 : 0}
               width={margin.right + 60}
               height={20}
             >
@@ -1288,7 +1288,7 @@ export function LineChart({
           {percentileData && percentileData.length > 0 && (
             <foreignObject
               x={width + margin.left - 3}
-              y={percentileData ? yScale(percentileData[percentileData.length - 1].upper) - 7 : 0}
+              y={percentileData && percentileData.length > 0 && percentileData[percentileData.length - 1] ? yScale(percentileData[percentileData.length - 1].upper) - 7 : 0}
               width={margin.right + 60}
               height={20}
             >
@@ -1300,7 +1300,7 @@ export function LineChart({
           {percentileData && percentileData.length > 0 && (
             <foreignObject
               x={width + margin.left - 3}
-              y={percentileData ? yScale(percentileData[percentileData.length - 1].lower) - 7 : 0}
+              y={percentileData && percentileData.length > 0 && percentileData[percentileData.length - 1] ? yScale(percentileData[percentileData.length - 1].lower) - 7 : 0}
               width={margin.right + 60}
               height={20}
             >
