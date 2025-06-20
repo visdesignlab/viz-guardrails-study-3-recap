@@ -1162,38 +1162,44 @@ export function LineChart({
             strokeWidth={1.5}
           />
 
-          <foreignObject
-            x={width + margin.left - 3}
-            y={yScale(medianIQRData[medianIQRData.length - 1].median) - 7}
-            width={margin.right + 60}
-            height={20}
-          >
-            <Text px={2} size={10} color="silver">
-              Median
-            </Text>
-          </foreignObject>
+          {medianIQRData && medianIQRData.length > 0 && (
+            <foreignObject
+              x={width + margin.left - 3}
+              y={yScale(medianIQRData[medianIQRData.length - 1].median) - 7}
+              width={margin.right + 60}
+              height={20}
+            >
+              <Text px={2} size={10} color="silver">
+                Median
+              </Text>
+            </foreignObject>
+          )}
 
-          <foreignObject
-            x={width + margin.left - 3}
-            y={yScale(medianIQRData[medianIQRData.length - 1].upper) - 7}
-            width={margin.right + 60}
-            height={20}
-          >
-            <Text px={2} size={10} color="silver">
-              Median + 1.5 IQR
-            </Text>
-          </foreignObject>
+          {medianIQRData && medianIQRData.length > 0 && (
+            <foreignObject
+              x={width + margin.left - 3}
+              y={yScale(medianIQRData[medianIQRData.length - 1].upper) - 7}
+              width={margin.right + 60}
+              height={20}
+            >
+              <Text px={2} size={10} color="silver">
+                Median + 1.5 IQR
+              </Text>
+            </foreignObject>
+          )}
 
-          <foreignObject
-            x={width + margin.left - 3}
-            y={yScale(medianIQRData[medianIQRData.length - 1].lower) - 7}
-            width={margin.right + 60}
-            height={20}
-          >
-            <Text px={2} size={10} color="silver">
-              Median - 1.5 IQR
-            </Text>
-          </foreignObject>
+          {medianIQRData && medianIQRData.length > 0 && (
+            <foreignObject
+              x={width + margin.left - 3}
+              y={yScale(medianIQRData[medianIQRData.length - 1].lower) - 7}
+              width={margin.right + 60}
+              height={20}
+            >
+              <Text px={2} size={10} color="silver">
+                Median - 1.5 IQR
+              </Text>
+            </foreignObject>
+          )}
         </>
       )}
       {medianIQRClosestPaths && (
@@ -1279,26 +1285,30 @@ export function LineChart({
             strokeWidth={1.5}
             // opacity={0.7}
           />
-          <foreignObject
-            x={width + margin.left - 3}
-            y={yScale(percentileData[percentileData.length - 1].upper) - 7}
-            width={margin.right + 60}
-            height={20}
-          >
-            <Text px={2} size={10} color="silver">
-              75th Percentile
-            </Text>
-          </foreignObject>
-          <foreignObject
-            x={width + margin.left - 3}
-            y={yScale(percentileData[percentileData.length - 1].lower) - 7}
-            width={margin.right + 60}
-            height={20}
-          >
-            <Text px={2} size={10} color="silver">
-              25th Percentile
-            </Text>
-          </foreignObject>
+          {percentileData && percentileData.length > 0 && (
+            <foreignObject
+              x={width + margin.left - 3}
+              y={yScale(percentileData[percentileData.length - 1].upper) - 7}
+              width={margin.right + 60}
+              height={20}
+            >
+              <Text px={2} size={10} color="silver">
+                75th Percentile
+              </Text>
+            </foreignObject>
+          )}
+          {percentileData && percentileData.length > 0 && (
+            <foreignObject
+              x={width + margin.left - 3}
+              y={yScale(percentileData[percentileData.length - 1].lower) - 7}
+              width={margin.right + 60}
+              height={20}
+            >
+              <Text px={2} size={10} color="silver">
+                25th Percentile
+              </Text>
+            </foreignObject>
+          )}
         </>
       )}
       {percentileClosestPaths && (
