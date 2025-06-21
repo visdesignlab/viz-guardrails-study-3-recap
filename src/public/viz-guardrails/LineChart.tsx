@@ -1003,6 +1003,10 @@ export function LineChart({
     medianLineClosest, medianIQRClosestPaths, percentileClosestPaths, clusterLines, guardrail,
   ]);
 
+  // ---------------------------- store -----------------------------
+  const lastMedianIQR = medianIQRData && medianIQRData.length > 0 ? medianIQRData[medianIQRData.length - 1] : null;
+  const lastMedian = lastMedianIQR && lastMedianIQR.median != null ? yScale(lastMedianIQR.median) - 7 : 0;
+
   // ---------------------------- Render ----------------------------
   return selection?.length === 0 ? (
     <Center style={{ width: `${(guardrail === 'cluster') ? '900px' : '800px'}`, height: '400px' }}>
@@ -1165,7 +1169,7 @@ export function LineChart({
           {medianIQRData && medianIQRData.length > 0 && (
             <foreignObject
               x={width + margin.left - 3}
-              y={medianIQRData && medianIQRData.length > 0 && medianIQRData[medianIQRData.length - 1] ? yScale(medianIQRData[medianIQRData.length - 1].median) - 7 : 0}
+              y={lastMedian}
               width={margin.right + 60}
               height={20}
             >
