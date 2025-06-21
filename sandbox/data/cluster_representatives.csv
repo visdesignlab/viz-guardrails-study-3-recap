@@ -1,0 +1,43 @@
+symbol,sector
+PARA,Communication Services
+NWSA,Communication Services
+CMCSA,Communication Services
+RCL,Consumer Discretionary
+LVS,Consumer Discretionary
+MHK,Consumer Discretionary
+DRI,Consumer Discretionary
+KHC,Consumer Staples
+MO,Consumer Staples
+SJM,Consumer Staples
+SYY,Consumer Staples
+CHD,Consumer Staples
+PSX,Energy
+SLB,Energy
+JPM,Financials
+HBAN,Financials
+ACGL,Financials
+BEN,Financials
+BMY,Health Care
+HCA,Health Care
+EW,Health Care
+CTAS,Industrials
+DAY,Industrials
+NDSN,Industrials
+BA,Industrials
+LMT,Industrials
+FICO,Information Technology
+EPAM,Information Technology
+ANSS,Information Technology
+AMAT,Information Technology
+ACN,Information Technology
+IP,Materials
+MOS,Materials
+IFF,Materials
+NUE,Materials
+MAA,Real Estate
+VTR,Real Estate
+CSGP,Real Estate
+FE,Utilities
+ES,Utilities
+NI,Utilities
+EVRG,Utilities

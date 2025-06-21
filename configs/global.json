@@ -1,0 +1,12 @@
+{
+  "$schema": "https://raw.githubusercontent.com/reVISit-studies/study/main/src/parser/GlobalConfigSchema.json",
+  "configsList": ["sandbox", "sample"],
+  "configs": {
+    "sandbox": {
+      "path": "sandbox/config-sandbox.json"
+    },
+    "sample": {
+      "path": "sample/config-sample.json"
+    }
+  }
+}

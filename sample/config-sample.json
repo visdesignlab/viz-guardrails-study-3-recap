@@ -1,0 +1,102 @@
+{
+    "$schema": "https://raw.githubusercontent.com/visdesignlab/viz-guardrails-study/main/src/parser/StudyConfigSchema.json",
+    "studyMetadata": {
+        "title": "Guardrail Sample Study",
+        "version": "pilot",
+        "authors": ["VDL"],
+        "date": "2024-01-11",
+        "description": "A study evaluating the effectiveness of guardrail samples in stock visualizations.",
+        "organizations": ["University of Utah"]
+    },
+    "uiConfig": {
+        "contactEmail": "maxim.lisnic@utah.edu",
+        "logoPath": "assets/revisitLogoSquare.svg",
+        "withProgressBar": true,
+        "autoDownloadStudy": false,
+        "sidebar": false,
+        "urlParticipantIdParam": "PROLIFIC_PID",
+        "studyEndMsg": "**Thank you for completing the study. You may click this link and return to Prolific**: [https://app.prolific.com/submissions/complete?cc=C2GIQBF6](https://app.prolific.com/submissions/complete?cc=C2GIQBF6)"
+    },
+    "components": {
+        "interface" : {
+            "instruction": "<br><br><br><br>Please review the stock performance visualization below and answer the following questions.",
+            "instructionLocation": "aboveStimulus",
+            "type": "react-component",
+            "path": "viz-guardrails/DataExplorer.tsx",
+            "parameters": {
+                "dataset": "sp500_stocks",
+                "start_date": "2023-01-01",
+                "end_date": "2024-12-13",
+                "initial_selection": ["ADBE"],
+                "allow_time_slider": false,
+                "allow_guardrail_selector": false,
+                "allow_selection": false,
+                "allow_help": false,
+                "guardrail": "super_summ",
+                "caption": "",
+                "x_var": "date",
+                "y_var": "value",
+                "cat_var": "name",
+                "group_var": "region"
+            },
+            "nextButtonLocation": "belowStimulus",
+            "response": [
+                {
+                    "id": "performance-percentile",
+                    "prompt": "Where do you think this stock ranks in terms of performance compared to other stocks in the market (or S&P500)?",
+                    "location": "belowStimulus",
+                    "type": "slider",
+                    "options": [
+                        {
+                        "label": "1 (Worst)",
+                        "value": 1
+                        },
+                        {
+                        "label": "50 (Average)",
+                        "value": 50
+                        },
+                        {
+                        "label": "99 (Best)",
+                        "value": 99
+                        }
+                    ],
+                    "required": true
+                },
+                {
+                    "id": "complete-picture",
+                    "type": "likert",
+                    "location": "belowStimulus",
+                    "prompt": "How confident are you that this visualization gives you a complete picture of the stock's performance?",
+                    "leftLabel": "Not confident at all",
+                    "rightLabel": "Very confident",
+                    "preset": 5,
+                    "required": true
+                },
+                {
+                    "id": "trust",
+                    "type": "likert",
+                    "location": "belowStimulus",
+                    "prompt": "I trust this visualization:",
+                    "leftLabel": "Strongly disagree",
+                    "rightLabel": "Strongly agree",
+                    "preset": 5,
+                    "required": true
+                },
+                {
+                    "id": "explanation",
+                    "type": "longText",
+                    "location": "belowStimulus",
+                    "prompt": "Briefly explain your reasoning for the first four questions. What information in the visualization led you to these decisions? (1-2 sentences)",
+                    "placeholder": "I chose my answer because...",
+                    "required": true
+                }
+            ]
+        }
+    },
+    "sequence": {
+        "order": "fixed",
+        "components":  [
+            "interface"
+        ]
+    }
+}
