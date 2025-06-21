@@ -1006,6 +1006,8 @@ export function LineChart({
   // ---------------------------- store -----------------------------
   const lastMedianIQR = medianIQRData && medianIQRData.length > 0 ? medianIQRData[medianIQRData.length - 1] : null;
   const lastMedian = lastMedianIQR && lastMedianIQR.median != null ? yScale(lastMedianIQR.median) - 7 : 0;
+  const lastUpper = lastMedianIQR && lastMedianIQR.upper != null ? yScale(lastMedianIQR.upper) - 7 : 0;
+  const lastLower = lastMedianIQR && lastMedianIQR.lower != null ? yScale(lastMedianIQR.lower) - 7 : 0;
 
   // ---------------------------- Render ----------------------------
   return selection?.length === 0 ? (
@@ -1182,7 +1184,7 @@ export function LineChart({
           {medianIQRData && medianIQRData.length > 0 && (
             <foreignObject
               x={width + margin.left - 3}
-              y={medianIQRData && medianIQRData.length > 0 && medianIQRData[medianIQRData.length - 1] ? yScale(medianIQRData[medianIQRData.length - 1].upper) - 7 : 0}
+              y={lastUpper}
               width={margin.right + 60}
               height={20}
             >
@@ -1195,7 +1197,7 @@ export function LineChart({
           {medianIQRData && medianIQRData.length > 0 && (
             <foreignObject
               x={width + margin.left - 3}
-              y={medianIQRData && medianIQRData.length > 0 && medianIQRData[medianIQRData.length - 1] ? yScale(medianIQRData[medianIQRData.length - 1].lower) - 7 : 0}
+              y={lastLower}
               width={margin.right + 60}
               height={20}
             >
