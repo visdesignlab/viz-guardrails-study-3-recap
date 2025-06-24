@@ -25,7 +25,7 @@
             "path": "viz-guardrails/DataExplorer.tsx",
             "parameters": {
                 "dataset": "sp500_stocks",
-                "start_date": "2023-01-01",
+                "start_date": "2020-01-01",
                 "end_date": "2024-12-13",
                 "initial_selection": ["ADBE"],
                 "allow_time_slider": false,
@@ -43,23 +43,12 @@
             "response": [
                 {
                     "id": "performance-percentile",
-                    "prompt": "Where do you think this stock ranks in terms of performance compared to other stocks in the market (or S&P500)?",
+                    "prompt": "A financial advisor claimed in 2023 that this stock was the best investment for that year. The visualization depicts how it pans out. How likely are you to recommend this financial advisor?",
                     "location": "belowStimulus",
-                    "type": "slider",
-                    "options": [
-                        {
-                        "label": "1 (Worst)",
-                        "value": 1
-                        },
-                        {
-                        "label": "50 (Average)",
-                        "value": 50
-                        },
-                        {
-                        "label": "99 (Best)",
-                        "value": 99
-                        }
-                    ],
+                    "type": "likert",
+                    "leftLabel": "Not confident at all",
+                    "rightLabel": "Very confident",
+                    "preset": 5,
                     "required": true
                 },
                 {

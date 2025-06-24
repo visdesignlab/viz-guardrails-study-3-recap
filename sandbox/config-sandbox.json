@@ -1,7 +1,7 @@
 {
     "$schema": "https://raw.githubusercontent.com/visdesignlab/viz-guardrails-study/main/src/parser/StudyConfigSchema.json",
     "studyMetadata": {
-        "title": "Guardrail Sandbox",
+        "title": "Guardrail Sandbox 2.0",
         "version": "pilot",
         "authors": ["VDL"],
         "date": "2024-01-11",
