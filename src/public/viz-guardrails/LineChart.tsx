@@ -198,6 +198,71 @@ export function LineChart({
     return medianIQR;
   }, [data, parameters, guardrail]);
 
+  // ---------------------------- Median IQR Closest Lines ---------------------------- //
+  const medianIQRClosestData = useMemo(() => {
+    if (guardrail !== 'medianIQRClosest') return null;
+
+    const groupedByDate = d3.group(data, (d) => d[parameters.x_var]);
+    const groupedByCountry = d3.group(data, (d) => d[parameters.cat_var]);
+
+    // Build bounds for each date
+    const boundsMap = new Map<string, { median: number, upper: number, lower: number }>();
+    groupedByDate.forEach((entries, date) => {
+      const values = entries.map((d) => d[parameters.y_var]).filter((v): v is number => v != null);
+      const median = d3.median(values) ?? 0;
+      const q1 = d3.quantile(values, 0.25) ?? median;
+      const q3 = d3.quantile(values, 0.75) ?? median;
+      const iqr = q3 - q1;
+      boundsMap.set(date, {
+        median,
+        upper: median + 1.5 * iqr,
+        lower: median - 1.5 * iqr,
+      });
+    });
+
+    const findClosest = (
+      target: 'median' | 'upper' | 'lower',
+    ): { name: string; data: any[] } | null => {
+      let closest: { name: string; data: any[] } | null = null;
+      let minDist = Infinity;
+
+      groupedByCountry.forEach((entries, name) => {
+        let totalDist = 0;
+        let count = 0;
+
+        for (const d of entries) {
+          const date = d[parameters.x_var];
+          const y = d[parameters.y_var];
+          const ref = boundsMap.get(date)?.[target];
+          if (ref == null || y == null) continue;
+          const diff = y - ref;
+          totalDist += diff * diff;
+          count += 1;
+        }
+
+        const avgDist = totalDist / (count || 1);
+        if (avgDist < minDist) {
+          minDist = avgDist;
+          closest = { name: name as string, data: entries };
+        }
+      });
+
+      return closest;
+    };
+
+    const median = findClosest('median');
+    const upper = findClosest('upper');
+    const lower = findClosest('lower');
+
+    if (!median || !upper || !lower) return null;
+
+    return {
+      median,
+      upper,
+      lower,
+    };
+  }, [data, parameters, guardrail]);
+
   // ---------------------------- 75th and 25th percentiles ---------------------------- //
   const percentileData = useMemo(() => {
     if (guardrail !== 'percentiles') {
@@ -383,6 +448,20 @@ export function LineChart({
         return [...selY, ...medianClosestY];
       }
 
+      if (guardrail === 'medianIQRClosest' && medianIQRClosestData) {
+        const getY = (obj: any) => obj?.data?.map((d: any) => +d[parameters.y_var]).filter((val: number) => !Number.isNaN(val)) ?? [];
+        const selY = data
+          .filter((val) => selection?.includes(val[parameters.cat_var]))
+          .map((d) => +d[parameters.y_var])
+          .filter((val) => !Number.isNaN(val));
+        return [
+          ...selY,
+          ...getY(medianIQRClosestData.median),
+          ...getY(medianIQRClosestData.upper),
+          ...getY(medianIQRClosestData.lower),
+        ];
+      }
+
       if (guardrail === 'percentileClosest' && percentileClosestData) {
         const selY = data
           .filter((val) => selection?.includes(val[parameters.cat_var]))
@@ -440,7 +519,7 @@ export function LineChart({
       yMin: computedYMin - buffer,
       yMax: computedYMax + buffer,
     };
-  }, [data, selection, randomCountries, medianIQRData, avgData, medianCountryData, parameters, guardrail, medianClosestData, percentileClosestData, filteredClusterReps]);
+  }, [data, selection, randomCountries, medianIQRData, avgData, medianCountryData, parameters, guardrail, medianClosestData, medianIQRClosestData, percentileClosestData, filteredClusterReps]);
   const xScale = useMemo(() => {
     if (range) {
       return d3.scaleTime([margin.left, width + margin.left]).domain(range);
@@ -517,86 +596,29 @@ export function LineChart({
 
   // ---------------------------- Median IQR closest ----------------------------
   const medianIQRClosestPaths = useMemo(() => {
-    if (guardrail !== 'medianIQRClosest') return null;
-
-    const groupedByDate = d3.group(data, (d) => d[parameters.x_var]);
-    const groupedByCountry = d3.group(data, (d) => d[parameters.cat_var]);
-
-    const boundsMap = new Map<string, { median: number, upper: number, lower: number }>();
-
-    groupedByDate.forEach((entries, date) => {
-      const values = entries.map((d) => d[parameters.y_var]).filter((v): v is number => v != null);
-      const median = d3.median(values) ?? 0;
-      const q1 = d3.quantile(values, 0.25) ?? median;
-      const q3 = d3.quantile(values, 0.75) ?? median;
-      const iqr = q3 - q1;
-
-      boundsMap.set(date, {
-        median,
-        upper: median + 1.5 * iqr,
-        lower: median - 1.5 * iqr,
-      });
-    });
-
-    const findClosest = (
-      target: 'median' | 'upper' | 'lower',
-    ): { name: string; data: any[] } | null => {
-      let closest: { name: string; data: any[] } | null = null;
-      let minDist = Infinity;
-
-      groupedByCountry.forEach((entries, name) => {
-        let totalDist = 0;
-        let count = 0;
-
-        for (const d of entries) {
-          const date = d[parameters.x_var];
-          const y = d[parameters.y_var];
-          const ref = boundsMap.get(date)?.[target];
-          if (ref == null || y == null) continue;
-          const diff = y - ref;
-          totalDist += diff * diff;
-          count += 1;
-        }
-
-        const avgDist = totalDist / (count || 1);
-        if (avgDist < minDist) {
-          minDist = avgDist;
-          closest = { name: name as string, data: entries };
-        }
-      });
-
-      return closest;
-    };
-
-    const median = findClosest('median');
-    const upper = findClosest('upper');
-    const lower = findClosest('lower');
-
-    if (!median || !upper || !lower) return null;
-
-    const fixedYScale = d3.scaleLinear().domain([-100, 100]).range([height + margin.top, margin.top]);
+    if (guardrail !== 'medianIQRClosest' || !medianIQRClosestData) return null;
 
     const lineGenerator = d3.line()
       .x((d: any) => xScale(d3.timeParse('%Y-%m-%d')(d[parameters.x_var]) as Date))
-      .y((d: any) => fixedYScale(d[parameters.y_var]))
+      .y((d: any) => yScale(d[parameters.y_var]))
       .curve(d3.curveBasis);
 
     return {
-      medianPath: lineGenerator(median.data),
-      upperPath: lineGenerator(upper.data),
-      lowerPath: lineGenerator(lower.data),
+      medianPath: lineGenerator(medianIQRClosestData.median.data),
+      upperPath: lineGenerator(medianIQRClosestData.upper.data),
+      lowerPath: lineGenerator(medianIQRClosestData.lower.data),
       labelPositions: {
-        median: median.data[median.data.length - 1],
-        upper: upper.data[upper.data.length - 1],
-        lower: lower.data[lower.data.length - 1],
+        median: medianIQRClosestData.median.data[medianIQRClosestData.median.data.length - 1],
+        upper: medianIQRClosestData.upper.data[medianIQRClosestData.upper.data.length - 1],
+        lower: medianIQRClosestData.lower.data[medianIQRClosestData.lower.data.length - 1],
       },
       names: {
-        median: median.name,
-        upper: upper.name,
-        lower: lower.name,
+        median: medianIQRClosestData.median.name,
+        upper: medianIQRClosestData.upper.name,
+        lower: medianIQRClosestData.lower.name,
       },
     };
-  }, [data, parameters, guardrail, xScale, yScale]);
+  }, [medianIQRClosestData, xScale, yScale, parameters, guardrail]);
 
   // ---------------------------- Percentile Closest Lines ---------------------------- //
   const percentileClosestPaths = useMemo(() => {
