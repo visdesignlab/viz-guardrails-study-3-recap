@@ -37,15 +37,15 @@ export default function SliderInput({
         <Slider
           disabled={disabled}
           labelAlwaysOn={(answer as any).value !== ''}
-          label={(x) => `$${x}`}
+          label={(x) => `${x}`}
           sx={{ marginTop: '15px', marginBottom: '15px', width: '400px' }}
           marks={options as SliderProps['marks']}
           {...answer}
           defaultValue={50}
           thumbSize={(answer as any).value === '' ? 0.1 : 17}
           color={(answer as any).value === '' ? 'gray.2' : 'blue'}
-          min={0}
-          max={100}
+          min={1}
+          max={99}
           showLabelOnHover={false}
           styles={(theme) => ({
             markFilled: {
