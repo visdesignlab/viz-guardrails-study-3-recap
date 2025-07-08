@@ -279,36 +279,6 @@
         "guardrail": "juxt_summ"
       }
     },
-    "stock-simple-c-n": {
-      "baseComponent": "stock-simple-c",
-      "parameters": {
-        "guardrail": "none"
-      }
-    },
-    "stock-simple-c-sd": {
-      "baseComponent": "stock-simple-c",
-      "parameters": {
-        "guardrail": "super_data"
-      }
-    },
-    "stock-simple-c-ss": {
-      "baseComponent": "stock-simple-c",
-      "parameters": {
-        "guardrail": "super_summ"
-      }
-    },
-    "stock-simple-c-jd": {
-      "baseComponent": "stock-simple-c",
-      "parameters": {
-        "guardrail": "juxt_data"
-      }
-    },
-    "stock-simple-c-js": {
-      "baseComponent": "stock-simple-c",
-      "parameters": {
-        "guardrail": "juxt_summ"
-      }
-    },
     "stock-a-control": {
       "baseComponent": "stock-a",
       "parameters": {
