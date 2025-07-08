@@ -439,6 +439,41 @@
         }
       ]
     },
+    "post-study-quant": {
+      "type": "questionnaire",
+      "response": [
+        {
+          "id": "stocks-familiarity",
+          "type": "likert",
+          "location": "belowStimulus",
+          "prompt": "How familiar are you with stock market concepts and investing?",
+          "required": true,
+          "leftLabel": "Not at all familiar",
+          "rightLabel": "Extremely familiar",
+          "preset": 7
+        },
+        {
+          "id": "comfortable-numbers",
+          "type": "likert",
+          "location": "belowStimulus",
+          "prompt": "How comfortable do you feel interpreting numbers, percentages, and basic statistics?",
+          "required": true,
+          "leftLabel": "Not at all comfortable",
+          "rightLabel": "Extremely comfortable",
+          "preset": 7
+        },
+        {
+          "id": "confident-visuals",
+          "type": "likert",
+          "location": "belowStimulus",
+          "prompt": "How confident are you in your ability to accurately interpret charts, graphs, and other visualizations?",
+          "required": true,
+          "leftLabel": "Not at all confident",
+          "rightLabel": "Extremely confident",
+          "preset": 7
+        }
+      ]
+    },
     "check-month": {
       "type": "questionnaire",
       "instruction": "When asked to select a month, please select 'March'. This is an attention check.",
@@ -504,7 +539,8 @@
           "stock-a-medianIQRClosest",
           "stock-a-cluster"
         ]
-      }
+      },
+      "post-study-quant"
     ]
   }
 }
