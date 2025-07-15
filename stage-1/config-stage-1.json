@@ -1,0 +1,546 @@
+{
+  "$schema": "https://raw.githubusercontent.com/visdesignlab/viz-guardrails-study-3-recap/main/src/parser/StudyConfigSchema.json",
+  "studyMetadata": {
+    "title": "Reviewing Communicating With Interactive Data Visualizations",
+    "version": "pilot",
+    "authors": ["VDL"],
+    "date": "2024-01-11",
+    "description": "A study challenging participants to review linecharts.",
+    "organizations": ["University of Utah"]
+  },
+  "uiConfig": {
+    "contactEmail": "abrar.nadib@utah.edu",
+    "logoPath": "assets/revisitLogoSquare.svg",
+    "withProgressBar": true,
+    "autoDownloadStudy": false,
+    "sidebar": false,
+    "urlParticipantIdParam": "PROLIFIC_PID",
+    "studyEndMsg": "**Thank you for completing the study. You may click this link and return to Prolific**: [Add your link](Add your link)"
+  },
+  "recordStudyAudio": false,
+  "tasksToNotRecordAudio": [
+    "introduction",
+    "consent",
+    "end",
+    "introduction-viral",
+    "introduction-stock",
+    "check-month",
+    "check-text"
+  ],
+  "baseComponents": {
+    "stock-a" : {
+            "instruction": "<br><br><br><br>A financial advisor claimed in 2023 that this stock was one of the best investment for that year. The visualization depicts how it pans out. Please review the visualization of stock performance below and answer the following questions.",
+            "instructionLocation": "aboveStimulus",
+            "type": "react-component",
+            "path": "viz-guardrails/DataExplorer.tsx",
+            "parameters": {
+                "dataset": "sp500_stocks",
+                "start_date": "2023-01-01",
+                "end_date": "2024-12-13",
+                "initial_selection": ["EXPD"],
+                "allow_time_slider": false,
+                "allow_guardrail_selector": false,
+                "allow_selection": false,
+                "allow_help": false,
+                "guardrail": "super_summ",
+                "caption": "",
+                "x_var": "date",
+                "y_var": "value",
+                "cat_var": "name",
+                "group_var": "region"
+            },
+            "nextButtonLocation": "belowStimulus",
+            "response": [
+                {
+                    "id": "completeness",
+                    "type": "likert",
+                    "location": "belowStimulus",
+                    "prompt": "If you were considering investing in this stock, do you feel that you were provided with appropriate context to make an informed decision?",
+                    "leftLabel": "Not at all",
+                    "rightLabel": "Definitely",
+                    "preset": 7,
+                    "required": true
+                },
+                {
+                    "id": "accuracy",
+                    "type": "slider",
+                    "location": "belowStimulus",
+                    "prompt": "Where do you think this stock ranks in performance compared to all other stocks in the S&P500 for 2023?",
+                    "options": [
+                        {
+                            "value": 1,
+                            "label": "1"
+                        },
+                        {
+                            "value": 25,
+                            "label": "25"
+                        },
+                        {
+                            "value": 50,
+                            "label": "50"
+                        },
+                        {
+                            "value": 75,
+                            "label": "75"
+                        },
+                        {
+                            "value": 99,
+                            "label": "99"
+                        }
+                    ],
+                    "required": true
+
+                }
+            ]
+        },
+    "stock-simple-e": {
+      "instruction": "<br><br><br><br>You've come across this visualization of stocks from the same industry that has 5 companies in total.<br>Please review the chart, and then answer the question below.",
+      "instructionLocation": "aboveStimulus",
+      "type": "react-component",
+      "path": "viz-guardrails/DataExplorer.tsx",
+      "parameters": {
+        "dataset": "clean_stocks",
+        "start_date": "2023-01-01",
+        "end_date": "2024-01-01",
+        "allow_time_slider": false,
+        "allow_guardrail_selector": false,
+        "allow_selection": false,
+        "allow_help": false,
+        "x_var": "Date",
+        "y_var": "Value",
+        "cat_var": "name",
+        "group_var": "industry",
+        "initial_selection": ["Stock B", "Stock C", "Stock D", "Stock E"]
+      },
+      "nextButtonLocation": "belowStimulus",
+      "response": [
+        {
+          "id": "agree",
+          "type": "likert",
+          "location": "belowStimulus",
+          "prompt": "The visualization supports the idea that stock E yielded the highest returns in the industry in 2023:",
+          "preset": 5,
+          "leftLabel": "Strongly disagree",
+          "rightLabel": "Strongly agree",
+          "required": true
+        },
+        {
+          "id": "trust",
+          "type": "likert",
+          "location": "belowStimulus",
+          "prompt": "I trust the visualization shown above:",
+          "preset": 5,
+          "leftLabel": "Strongly disagree",
+          "rightLabel": "Strongly agree",
+          "required": true
+        },
+        {
+          "id": "check-text",
+          "prompt": "When asked to input text below, please type in 'Bird'. This is an attention check.<br>Based on the text you read above, what were you asked to type in?",
+          "required": true,
+          "location": "belowStimulus",
+          "type": "shortText",
+          "placeholder": "Type your answer here."
+        },
+        {
+          "id": "explain",
+          "type": "longText",
+          "location": "belowStimulus",
+          "prompt": "Briefly explain your reasoning for the first two questions. What information in the visualization led you to this decision? (1-2 sentences)",
+          "required": true,
+          "placeholder": "I chose my answer because..."
+        }
+      ]
+    },
+    "stock-simple-a": {
+      "instruction": "<br><br><br><br>You've come across this visualization of stocks from the same industry that has 5 companies in total.<br>Please review the chart, and then answer the question below.",
+      "instructionLocation": "aboveStimulus",
+      "type": "react-component",
+      "path": "viz-guardrails/DataExplorer.tsx",
+      "parameters": {
+        "dataset": "clean_stocks",
+        "start_date": "2023-01-01",
+        "end_date": "2024-01-01",
+        "allow_time_slider": false,
+        "allow_guardrail_selector": false,
+        "allow_selection": false,
+        "allow_help": false,
+        "x_var": "Date",
+        "y_var": "Value",
+        "cat_var": "name",
+        "group_var": "industry",
+        "initial_selection": [
+          "Stock B",
+          "Stock C",
+          "Stock D",
+          "Stock E",
+          "Stock A"
+        ]
+      },
+      "nextButtonLocation": "belowStimulus",
+      "response": [
+        {
+          "id": "agree",
+          "type": "likert",
+          "location": "belowStimulus",
+          "prompt": "The visualization supports the idea that stock A yielded the highest returns in the industry in 2023:",
+          "preset": 5,
+          "leftLabel": "Strongly disagree",
+          "rightLabel": "Strongly agree",
+          "required": true
+        },
+        {
+          "id": "trust",
+          "type": "likert",
+          "location": "belowStimulus",
+          "prompt": "I trust the visualization shown above:",
+          "preset": 5,
+          "leftLabel": "Strongly disagree",
+          "rightLabel": "Strongly agree",
+          "required": true
+        },
+        {
+          "id": "check-text",
+          "prompt": "When asked to input text below, please type in 'Bird'. This is an attention check.<br>Based on the text you read above, what were you asked to type in?",
+          "required": true,
+          "location": "belowStimulus",
+          "type": "shortText",
+          "placeholder": "Type your answer here."
+        },
+        {
+          "id": "explain",
+          "type": "longText",
+          "location": "belowStimulus",
+          "prompt": "Briefly explain your reasoning for the first two questions. What information in the visualization led you to this decision? (1-2 sentences)",
+          "required": true,
+          "placeholder": "I chose my answer because..."
+        }
+      ]
+    }
+  },
+  "components": {
+    "stock-simple-a-n": {
+      "baseComponent": "stock-simple-a",
+      "parameters": {
+        "guardrail": "none"
+      }
+    },
+    "stock-simple-a-sd": {
+      "baseComponent": "stock-simple-a",
+      "parameters": {
+        "guardrail": "super_data"
+      }
+    },
+    "stock-simple-a-ss": {
+      "baseComponent": "stock-simple-a",
+      "parameters": {
+        "guardrail": "super_summ"
+      }
+    },
+    "stock-simple-a-jd": {
+      "baseComponent": "stock-simple-a",
+      "parameters": {
+        "guardrail": "juxt_data"
+      }
+    },
+    "stock-simple-a-js": {
+      "baseComponent": "stock-simple-a",
+      "parameters": {
+        "guardrail": "juxt_summ"
+      }
+    },
+    "stock-simple-e-n": {
+      "baseComponent": "stock-simple-e",
+      "parameters": {
+        "guardrail": "none"
+      }
+    },
+    "stock-simple-e-sd": {
+      "baseComponent": "stock-simple-e",
+      "parameters": {
+        "guardrail": "super_data"
+      }
+    },
+    "stock-simple-e-ss": {
+      "baseComponent": "stock-simple-e",
+      "parameters": {
+        "guardrail": "super_summ"
+      }
+    },
+    "stock-simple-e-jd": {
+      "baseComponent": "stock-simple-e",
+      "parameters": {
+        "guardrail": "juxt_data"
+      }
+    },
+    "stock-simple-e-js": {
+      "baseComponent": "stock-simple-e",
+      "parameters": {
+        "guardrail": "juxt_summ"
+      }
+    },
+    "stock-a-control": {
+      "baseComponent": "stock-a",
+      "parameters": {
+        "guardrail": "none"
+      }
+    },
+    "stock-a-random": {
+      "baseComponent": "stock-a",
+      "parameters": {
+        "guardrail": "super_data"
+      }
+    },
+    "stock-a-medianIQR": {
+      "baseComponent": "stock-a",
+      "parameters": {
+        "guardrail": "medianIQR"
+      }
+    },
+    "stock-a-medianIQRClosest": {
+      "baseComponent": "stock-a",
+      "parameters": {
+        "guardrail": "medianIQRClosest"
+      }
+    },
+    "stock-a-cluster": {
+      "baseComponent": "stock-a",
+      "parameters": {
+        "guardrail": "cluster"
+      }
+    },
+    "introduction": {
+      "type": "markdown",
+      "path": "stage-1/introduction.md",
+      "response": [
+        {
+          "id": "prolificId",
+          "prompt": "Please enter your Prolific ID",
+          "required": true,
+          "location": "belowStimulus",
+          "type": "shortText",
+          "placeholder": "Prolific ID",
+          "paramCapture": "PROLIFIC_PID"
+        }
+      ]
+    },
+    "introduction-stock": {
+      "type": "markdown",
+      "path": "stage-1/introduction-stock.md",
+      "response": []
+    },
+    "consent": {
+      "type": "markdown",
+      "path": "stage-1/consent_stage1.md",
+      "nextButtonText": "Agree",
+      "response": [
+        {
+          "id": "accept",
+          "prompt": "Do you consent to the study and wish to continue?",
+          "required": true,
+          "requiredValue": "yes",
+          "location": "belowStimulus",
+          "type": "radio",
+          "options": [
+            {
+              "label": "Decline",
+              "value": "no"
+            },
+            {
+              "label": "Accept",
+              "value": "yes"
+            }
+          ]
+        }
+      ]
+    },
+    "post-study": {
+      "type": "markdown",
+      "path": "stage-1/post-study.md",
+      "response": [
+        {
+          "id": "viz",
+          "type": "likert",
+          "location": "belowStimulus",
+          "prompt": "How familiar are you with data visualizations?",
+          "required": true,
+          "leftLabel": "Not familiar",
+          "rightLabel": "Very familiar",
+          "preset": 5
+        },
+        {
+          "id": "notice",
+          "type": "radio",
+          "location": "belowStimulus",
+          "prompt": "Did you notice a guardrail in place?",
+          "required": true,
+          "options": [
+            {
+              "label": "No",
+              "value": "no"
+            },
+            {
+              "label": "Yes",
+              "value": "yes"
+            }
+          ]
+        },
+        {
+          "id": "clear",
+          "type": "likert",
+          "location": "belowStimulus",
+          "prompt": "How clear was it what the guardrails were showing?",
+          "required": true,
+          "leftLabel": "Not clear",
+          "rightLabel": "Very clear",
+          "preset": 5
+        },
+        {
+          "id": "difficulty",
+          "type": "likert",
+          "location": "belowStimulus",
+          "prompt": "Did the guardrail make the visualizations more or less convincing?",
+          "required": true,
+          "leftLabel": "Less convincing",
+          "rightLabel": "More convincing",
+          "preset": 5
+        },
+        {
+          "id": "experience",
+          "type": "longText",
+          "location": "belowStimulus",
+          "prompt": "Describe how the guardrails impacted your evaluation of visualizations. (If possible, refer to specific guardrails):",
+          "required": true,
+          "placeholder": "Enter your answer here."
+        },
+        {
+          "id": "surveyExperience",
+          "prompt": "Did you experience any problems with our tool?",
+          "required": true,
+          "location": "belowStimulus",
+          "type": "longText",
+          "placeholder": "Enter your answer here."
+        },
+        {
+          "id": "surveyRenderIssues",
+          "prompt": "Did anything not render or display properly?",
+          "required": true,
+          "location": "belowStimulus",
+          "type": "longText",
+          "placeholder": "Enter your answer here"
+        },
+        {
+          "id": "surveyOtherIssues",
+          "prompt": "Any other issues or anything you would like to tell us?",
+          "required": true,
+          "location": "belowStimulus",
+          "type": "longText",
+          "placeholder": "Enter your answer here"
+        }
+      ]
+    },
+    "post-study-quant": {
+      "type": "questionnaire",
+      "response": [
+        {
+          "id": "stocks-familiarity",
+          "type": "likert",
+          "location": "belowStimulus",
+          "prompt": "How familiar are you with stock market concepts and investing?",
+          "required": true,
+          "leftLabel": "Not at all familiar",
+          "rightLabel": "Extremely familiar",
+          "preset": 7
+        },
+        {
+          "id": "comfortable-numbers",
+          "type": "likert",
+          "location": "belowStimulus",
+          "prompt": "How comfortable do you feel interpreting numbers, percentages, and basic statistics?",
+          "required": true,
+          "leftLabel": "Not at all comfortable",
+          "rightLabel": "Extremely comfortable",
+          "preset": 7
+        },
+        {
+          "id": "confident-visuals",
+          "type": "likert",
+          "location": "belowStimulus",
+          "prompt": "How confident are you in your ability to accurately interpret charts, graphs, and other visualizations?",
+          "required": true,
+          "leftLabel": "Not at all confident",
+          "rightLabel": "Extremely confident",
+          "preset": 7
+        }
+      ]
+    },
+    "check-month": {
+      "type": "questionnaire",
+      "instruction": "When asked to select a month, please select 'March'. This is an attention check.",
+      "response": [
+        {
+          "id": "check-month",
+          "prompt": "<br><br><br><br>Based on the text you read above, what month were you asked to select?",
+          "required": true,
+          "location": "belowStimulus",
+          "type": "radio",
+          "options": [
+            {
+              "label": "February",
+              "value": "February"
+            },
+            {
+              "label": "March",
+              "value": "March"
+            },
+            {
+              "label": "April",
+              "value": "April"
+            },
+            {
+              "label": "May",
+              "value": "May"
+            },
+            {
+              "label": "June",
+              "value": "June"
+            }
+          ]
+        }
+      ]
+    },
+    "check-text": {
+      "type": "questionnaire",
+      "instruction": "<br><br><br><br>When asked to input text below, please type in 'Bird'. This is an attention check.",
+      "response": [
+        {
+          "id": "check-text",
+          "prompt": "Based on the text you read above, what were you asked to type in?",
+          "required": true,
+          "location": "belowStimulus",
+          "type": "shortText",
+          "placeholder": "Type your answer here."
+        }
+      ]
+    }
+  },
+  "sequence": {
+    "order": "fixed",
+    "components": [
+      "introduction",
+      "consent",
+      {
+        "order": "latinSquare",
+        "numSamples": 1,
+        "components": [
+          "stock-a-control",
+          "stock-a-random",
+          "stock-a-medianIQR",
+          "stock-a-medianIQRClosest",
+          "stock-a-cluster"
+        ]
+      },
+      "post-study-quant"
+    ]
+  }
+}
