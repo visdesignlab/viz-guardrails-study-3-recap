@@ -291,10 +291,10 @@
         "guardrail": "super_data"
       }
     },
-    "stock-a-medianIQR": {
+    "stock-a-stats": {
       "baseComponent": "stock-a",
       "parameters": {
-        "guardrail": "medianIQR"
+        "guardrail": "percentiles"
       }
     },
     "stock-a-medianIQRClosest": {
