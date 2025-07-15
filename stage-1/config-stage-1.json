@@ -1,7 +1,7 @@
 {
   "$schema": "https://raw.githubusercontent.com/visdesignlab/viz-guardrails-study-3-recap/main/src/parser/StudyConfigSchema.json",
   "studyMetadata": {
-    "title": "Reviewing Communicating With Interactive Data Visualizations",
+    "title": "Stage 1",
     "version": "pilot",
     "authors": ["VDL"],
     "date": "2024-01-11",
