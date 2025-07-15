@@ -263,33 +263,25 @@ export function LineChart({
     };
   }, [data, parameters, guardrail]);
 
-  // ---------------------------- 75th and 25th percentiles ---------------------------- //
+  // ---------------------------- Dynamic Quantiles for Percentile Lines ---------------------------- //
+  const numQuantiles = 6; // number of regions
   const percentileData = useMemo(() => {
-    if (guardrail !== 'percentiles') {
-      return null;
-    }
+    if (guardrail !== 'percentiles') return null;
+
+    const quantiles = Array.from({ length: numQuantiles - 1 }, (_, i) => (i + 1) / numQuantiles);
 
     const groupedData = d3.group(data, (d) => d[parameters.x_var]);
 
-    const medianIQR = Array.from(groupedData, ([date, values]) => {
+    return Array.from(groupedData, ([date, values]) => {
       const metricValues = values.map((d) => d[parameters.y_var]).filter((v): v is number => v !== null && v !== undefined);
-
       if (metricValues.length === 0) return null;
-
-      const medianValue = d3.median(metricValues) ?? 0;
-      const q1 = d3.quantile(metricValues, 0.25) ?? medianValue;
-      const q3 = d3.quantile(metricValues, 0.75) ?? medianValue;
-
+      const quantileValues = quantiles.map((q) => d3.quantile(metricValues, q) ?? 0);
       return {
         [parameters.x_var]: date,
-        median: medianValue,
-        upper: q3,
-        lower: q1,
+        quantiles: quantileValues,
       };
     }).filter((d) => d !== null);
-
-    return medianIQR;
-  }, [data, parameters, guardrail]);
+  }, [data, parameters, guardrail, numQuantiles]);
 
   // ---------------------------- Percentile Closest Lines ---------------------------- //
   // const percentileClosestData = useMemo(() => {
@@ -505,8 +497,8 @@ export function LineChart({
 
     if (guardrail === 'percentiles' && percentileData) {
       iqrValues = percentileData
-        .filter((d): d is { median: number; upper: number; lower: number } => d !== null)
-        .flatMap((d) => [d.median, d.upper, d.lower]);
+        .filter((d): d is { quantiles: number[] } => d !== null && Array.isArray(d.quantiles))
+        .flatMap((d) => d.quantiles);
     }
 
     const allYValues = [...selectedYValues, ...iqrValues];
@@ -812,37 +804,22 @@ export function LineChart({
 
   // percentile paths
   const percentilePaths = useMemo(() => {
-    if (!percentileData || guardrail !== 'percentiles') {
-      return null;
+    if (!percentileData || guardrail !== 'percentiles') return null;
+    const numLines = percentileData[0]?.quantiles?.length ?? 0;
+    if (numLines === 0) return null;
+
+    const paths: (string | undefined)[] = [];
+    for (let i = 0; i < numLines; i += 1) {
+      const lineGenerator = d3.line<any>()
+        .x((d) => xScale(d3.timeParse('%Y-%m-%d')(d[parameters.x_var]) as Date))
+        .y((d) => yScale(d.quantiles[i]))
+        .curve(d3.curveBasis);
+
+      const path = lineGenerator(percentileData) ?? undefined;
+      paths.push(path);
     }
-
-    const lineGenerator = d3.line()
-      .x((d: [number, number]) => xScale(d[0]))
-      .y((d: [number, number]) => yScale(d[1]))
-      .curve(d3.curveBasis);
-    // shaded area between upper and lower bounds
-    const areaGenerator = d3.area<[number, number, number]>()
-      .x((d) => xScale(d[0]))
-      .y0((d) => yScale(d[1] ?? yMin))
-      .y1((d) => yScale(d[2] ?? yMax))
-      .curve(d3.curveBasis);
-
-    const processedData: [number, number, number][] = percentileData
-      .map((d) => {
-        if (!d) return null;
-        const parsedDate = d3.timeParse('%Y-%m-%d')(d[parameters.x_var]);
-        return parsedDate
-          ? [parsedDate.getTime(), d.lower, d.upper] as [number, number, number]
-          : null;
-      })
-      .filter((d): d is [number, number, number] => d !== null);
-
-    return {
-      percentileAreaPath: areaGenerator(processedData) as string,
-      upperPath: lineGenerator(processedData.map(([date, , upper]) => [date, upper])) as string, // Upper bound
-      lowerPath: lineGenerator(processedData.map(([date, lower]) => [date, lower])) as string, // Lower bound
-    };
-  }, [medianIQRData, xScale, yScale, parameters, guardrail]);
+    return paths;
+  }, [percentileData, xScale, yScale, parameters, guardrail]);
 
   const getPolicyLabel = (country: string) => {
     if (country === 'Eldoril North') {
@@ -971,6 +948,19 @@ export function LineChart({
           color: 'silver',
         },
       );
+    }
+    if (percentileData && guardrail === 'percentiles' && percentileData.length > 0) {
+      const numQuantiles = percentileData[0].quantiles.length;
+      const lastPoint = percentileData[percentileData.length - 1];
+
+      for (let i = 0; i < numQuantiles; i += 1) {
+        const percentile = Math.round(((i + 1) * 100) / (numQuantiles + 1));
+        labels.push({
+          label: `${percentile}th percentile`,
+          y: yScale(lastPoint.quantiles[i]),
+          color: 'silver',
+        });
+      }
     }
     // if (percentileClosestPaths && guardrail === 'percentileClosest') {
     //   labels.push(
@@ -1301,56 +1291,19 @@ export function LineChart({
       </>
       )}
 
-      {percentilePaths && percentileData && (
-        <>
-          {/* <path
-            d={percentilePaths.percentileAreaPath}
-            fill="silver"
-            opacity={0.2}
-            stroke="none"
-          /> */}
+      {percentilePaths && percentilePaths.map((path, i) => (
+        path ? (
           <path
-            d={percentilePaths.upperPath}
+            key={`percentile-line-${i}`}
+            d={path}
             fill="none"
             stroke="silver"
             strokeDasharray="2,2"
             strokeWidth={1.5}
-            // opacity={0.7}
           />
-          <path
-            d={percentilePaths.lowerPath}
-            fill="none"
-            stroke="silver"
-            strokeDasharray="2,2"
-            strokeWidth={1.5}
-            // opacity={0.7}
-          />
-          {percentileData && percentileData.length > 0 && (
-            <foreignObject
-              x={width + margin.left - 3}
-              y={lastUpperPercentile}
-              width={margin.right + 60}
-              height={20}
-            >
-              <Text px={2} size={10} color="silver">
-                75th Percentile
-              </Text>
-            </foreignObject>
-          )}
-          {percentileData && percentileData.length > 0 && (
-            <foreignObject
-              x={width + margin.left - 3}
-              y={lastLowerPercentile}
-              width={margin.right + 60}
-              height={20}
-            >
-              <Text px={2} size={10} color="silver">
-                25th Percentile
-              </Text>
-            </foreignObject>
-          )}
-        </>
-      )}
+        ) : null
+      ))}
+
       {/* {percentileClosestPaths && (
       <>
         <path
