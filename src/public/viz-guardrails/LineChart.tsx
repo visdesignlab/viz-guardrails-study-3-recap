@@ -8,7 +8,7 @@
 
 import { useMemo, useState, useEffect } from 'react';
 import * as d3 from 'd3';
-import { Center, Text } from '@mantine/core';
+import { Center, Text, Tooltip } from '@mantine/core';
 import { XAxis } from './XAxis';
 import { YAxis } from './YAxis';
 import { ChartParams } from './DataExplorer';
@@ -57,6 +57,9 @@ export function LineChart({
     }
     return hover.includes(country);
   });
+
+  // Handle hovering for SVG tooltip
+  const [hoveredLabelIdx, setHoveredLabelIdx] = useState<number | null>(null);
 
   // ---------------------------- Compute controls ----------------------------
 
@@ -122,7 +125,7 @@ export function LineChart({
 
   // ---------------------------- Closest Median Line  ----------------------------
   const medianClosestData = useMemo(() => {
-    if (guardrail !== 'medianClosest') return null;
+    if (guardrail !== 'medianClosest' || !data || data.length === 0) return null;
     let closestCountry = '';
 
     const groupedByDate = d3.group(data, (d) => d[parameters.x_var]);
@@ -1033,336 +1036,374 @@ export function LineChart({
     : 0;
 
   // ---------------------------- Render ----------------------------
+  const labelHtmlPositions = allLabelPositions.map((x, i) => {
+    const baseName = x.label.split(' (')[0];
+    const country = items.find((it) => it.name === baseName);
+    const tooltip = country?.longName || undefined;
+    const labelX = width + margin.left - 3;
+    return {
+      label: x.label,
+      y: x.y,
+      color: x.color ?? darkGrayColor,
+      tooltip,
+      left: labelX,
+      top: x.y,
+      idx: i,
+    };
+  });
+
   return selection?.length === 0 ? (
     <Center style={{ width: '850px', height: '400px' }}>
       <Text fs="italic" c="dimmed">Select an item to view the chart.</Text>
     </Center>
   ) : (
-    <svg id="baseLineChart" style={{ height: '400px', width: '850px', fontFamily: '"Helvetica Neue", "Helvetica", "Arial", sans-serif' }}>
-      <g id="axes">
-        <XAxis
-          isDate
-          xScale={xScale}
-          yRange={yScale.range() as [number, number]}
-          vertPosition={height + margin.top}
-          showLines={false}
-          ticks={xScale.ticks(6).map((value) => ({
-            value: value.toString(),
-            offset: xScale(value),
-          }))}
-        />
-        <YAxis
-          dataset={dataname}
-          yScale={yScale}
-          horizontalPosition={margin.left}
-          xRange={xScale.range()}
-        />
-      </g>
+    <div style={{ position: 'relative', width: 850, height: 400 }}>
+      <svg
+        id="baseLineChart"
+        style={{
+          height: '400px', width: '850px', fontFamily: '"Helvetica Neue", "Helvetica", "Arial", sans-serif', position: 'absolute', left: 0, top: 0, zIndex: 1,
+        }}
+      >
+        <g id="axes">
+          <XAxis
+            isDate
+            xScale={xScale}
+            yRange={yScale.range() as [number, number]}
+            vertPosition={height + margin.top}
+            showLines={false}
+            ticks={xScale.ticks(6).map((value) => ({
+              value: value.toString(),
+              offset: xScale(value),
+            }))}
+          />
+          <YAxis
+            dataset={dataname}
+            yScale={yScale}
+            horizontalPosition={margin.left}
+            xRange={xScale.range()}
+          />
+        </g>
 
-      <svg key="control_lines" style={{ width: `${width}` }}>
-        {superimposeDatapoints?.map((x) => (
-          <g key={`${x.country}_g`}>
-            <path
-              id={`${x.country}`}
-              key={`${x.country}_key`}
-              fill="none"
-              stroke={shouldBeColor(x.country) ? colorScale(x.country) : darkGrayColor}
-              strokeDasharray="4,1"
-              strokeWidth={0.5}
-              d={x.path}
-            />
-          </g>
-        ))}
-      </svg>
+        <svg key="control_lines" style={{ width: `${width}` }}>
+          {superimposeDatapoints?.map((x) => (
+            <g key={`${x.country}_g`}>
+              <path
+                id={`${x.country}`}
+                key={`${x.country}_key`}
+                fill="none"
+                stroke={shouldBeColor(x.country) ? colorScale(x.country) : darkGrayColor}
+                strokeDasharray="4,1"
+                strokeWidth={0.5}
+                d={x.path}
+              />
+            </g>
+          ))}
+        </svg>
 
-      <svg key="control_bands" style={{ width: `${width}` }}>
-        {superimposeSummary ? (
-          <g key="summary_g">
-            <path
-              id="meanLine"
-              key="meanLine_key"
-              fill="none"
-              stroke={darkGrayColor}
-              strokeDasharray="4,1"
-              strokeWidth={0.5}
-              d={superimposeSummary.meanLine}
-            />
-          </g>
-        ) : null}
-      </svg>
+        <svg key="control_bands" style={{ width: `${width}` }}>
+          {superimposeSummary ? (
+            <g key="summary_g">
+              <path
+                id="meanLine"
+                key="meanLine_key"
+                fill="none"
+                stroke={darkGrayColor}
+                strokeDasharray="4,1"
+                strokeWidth={0.5}
+                d={superimposeSummary.meanLine}
+              />
+            </g>
+          ) : null}
+        </svg>
 
-      <svg key="lines" style={{ width: `${width}` }}>
-        {linePaths?.map((x) => (
-          <g key={`${x.country}_g`}>
-            <path
-              id={`${x.country}`}
-              key={`${x.country}_key`}
-              fill="none"
-              stroke={shouldBeColor(x.country) ? colorScale(x.country) : darkGrayColor}
-              strokeWidth={hover?.includes(x.country) ? 2 : 1.5}
-              d={x.path}
-            />
-          </g>
-        ))}
-      </svg>
-      {medianLinePath && (
-      <>
-        <path
-          d={medianLinePath.path}
-          fill="none"
-          stroke={darkGrayColor}
-          strokeDasharray="4,1"
-          strokeWidth={1.0}
-        />
-        <foreignObject
-          x={width + margin.left - 3}
-          y={medianLinePath ? yScale(medianLinePath.labelPosition[parameters.y_var]) - 7 : 0}
-          width={margin.right + 60}
-          height={20}
-        >
-          <Text
-            px={2}
-            size={10}
-            color={darkGrayColor}
-            onMouseOver={() => setHover(['Median Country'])}
-            onMouseOut={() => setHover([])}
-          >
-            Median
-          </Text>
-        </foreignObject>
-      </>
-      )}
-      {medianLineClosest && (
-      <>
-        <path
-          d={medianLineClosest.path}
-          fill="none"
-          stroke={darkGrayColor}
-          strokeDasharray="4,1"
-          strokeWidth={1.0}
-        />
-        {/* <foreignObject
-          x={width + margin.left - 3}
-          y={medianLineClosest ? yScale(medianLineClosest.labelPosition[parameters.y_var]) - 7 : 0}
-          width={margin.right + 60}
-          height={20}
-        >
-          <Text
-            px={2}
-            size={10}
-            color="silver"
-            onMouseOver={() => setHover([medianLineClosest.name])}
-            onMouseOut={() => setHover([])}
-          >
-            {medianLineClosest.name}
-          </Text>
-        </foreignObject> */}
-      </>
-      )}
-      {medianIQRPaths && medianIQRData && (
+        <svg key="lines" style={{ width: `${width}` }}>
+          {linePaths?.map((x) => (
+            <g key={`${x.country}_g`}>
+              <path
+                id={`${x.country}`}
+                key={`${x.country}_key`}
+                fill="none"
+                stroke={shouldBeColor(x.country) ? colorScale(x.country) : darkGrayColor}
+                strokeWidth={hover?.includes(x.country) ? 2 : 1.5}
+                d={x.path}
+              />
+            </g>
+          ))}
+        </svg>
+        {medianLinePath && (
         <>
-          {/* <path
-            d={medianIQRPaths.iqrAreaPath}
-            fill="silver"
-            opacity={0.2}
-            stroke="none"
-          /> */}
-
           <path
-            d={medianIQRPaths.medianPath}
+            d={medianLinePath.path}
             fill="none"
             stroke={darkGrayColor}
             strokeDasharray="4,1"
             strokeWidth={1.0}
           />
-
-          <path
-            d={medianIQRPaths.upperPath}
-            fill="none"
-            stroke={darkGrayColor}
-            strokeDasharray="2,2"
-            strokeWidth={1.0}
-          />
-          <path
-            d={medianIQRPaths.lowerPath}
-            fill="none"
-            stroke={darkGrayColor}
-            strokeDasharray="2,2"
-            strokeWidth={1.0}
-          />
-
-          {medianIQRData && medianIQRData.length > 0 && (
-            <foreignObject
-              x={width + margin.left - 3}
-              y={lastMedian}
-              width={margin.right + 60}
-              height={20}
+          <foreignObject
+            x={width + margin.left - 3}
+            y={medianLinePath ? yScale(medianLinePath.labelPosition[parameters.y_var]) - 7 : 0}
+            width={margin.right + 60}
+            height={20}
+          >
+            <Text
+              px={2}
+              size={10}
+              color={darkGrayColor}
+              onMouseOver={() => setHover(['Median Country'])}
+              onMouseOut={() => setHover([])}
             >
-              <Text px={2} size={10} color={darkGrayColor}>
-                Median
-              </Text>
-            </foreignObject>
-          )}
-
-          {medianIQRData && medianIQRData.length > 0 && (
-            <foreignObject
-              x={width + margin.left - 3}
-              y={lastUpper}
-              width={margin.right + 60}
-              height={20}
-            >
-              <Text px={2} size={10} color={darkGrayColor}>
-                Median + 1.5 IQR
-              </Text>
-            </foreignObject>
-          )}
-
-          {medianIQRData && medianIQRData.length > 0 && (
-            <foreignObject
-              x={width + margin.left - 3}
-              y={lastLower}
-              width={margin.right + 60}
-              height={20}
-            >
-              <Text px={2} size={10} color={darkGrayColor}>
-                Median - 1.5 IQR
-              </Text>
-            </foreignObject>
-          )}
+              Median
+            </Text>
+          </foreignObject>
         </>
-      )}
-      {medianIQRClosestPaths && (
-      <>
-        <path
-          d={medianIQRClosestPaths.medianPath ?? undefined}
-          fill="none"
-          stroke={darkGrayColor}
-          strokeDasharray="4,1"
-          strokeWidth={1.0}
-        />
-        <path
-          d={medianIQRClosestPaths.upperPath ?? undefined}
-          fill="none"
-          stroke={darkGrayColor}
-          strokeDasharray="2,2"
-          strokeWidth={1.0}
-        />
-        <path
-          d={medianIQRClosestPaths.lowerPath ?? undefined}
-          fill="none"
-          stroke={darkGrayColor}
-          strokeDasharray="2,2"
-          strokeWidth={1.0}
-        />
-
-        {/* <foreignObject
-          x={width + margin.left - 3}
-          y={yScale(medianIQRClosestPaths.labelPositions.median[parameters.y_var]) - 7}
-          width={margin.right + 60}
-          height={20}
-        >
-          <Text px={2} size={10} color="silver">
-            {medianIQRClosestPaths.names.median}
-          </Text>
-        </foreignObject> */}
-
-        {/* <foreignObject
-          x={width + margin.left - 3}
-          y={yScale(medianIQRClosestPaths.labelPositions.upper[parameters.y_var]) - 7}
-          width={margin.right + 60}
-          height={20}
-        >
-          <Text px={2} size={10} color="silver">
-            {medianIQRClosestPaths.names.upper}
-          </Text>
-        </foreignObject> */}
-
-        {/* <foreignObject
-          x={width + margin.left - 3}
-          y={yScale(medianIQRClosestPaths.labelPositions.lower[parameters.y_var]) - 7}
-          width={margin.right + 60}
-          height={20}
-        >
-          <Text px={2} size={10} color="silver">
-            {medianIQRClosestPaths.names.lower}
-          </Text>
-        </foreignObject> */}
-      </>
-      )}
-
-      {percentilePaths && percentilePaths.map((path, i) => (
-        path ? (
+        )}
+        {medianLineClosest && (
+        <>
           <path
-            key={`percentile-line-${i}`}
-            d={path}
+            d={medianLineClosest.path}
+            fill="none"
+            stroke={darkGrayColor}
+            strokeDasharray="4,1"
+            strokeWidth={1.0}
+          />
+          {/* <foreignObject
+            x={width + margin.left - 3}
+            y={medianLineClosest ? yScale(medianLineClosest.labelPosition[parameters.y_var]) - 7 : 0}
+            width={margin.right + 60}
+            height={20}
+          >
+            <Text
+              px={2}
+              size={10}
+              color="silver"
+              onMouseOver={() => setHover([medianLineClosest.name])}
+              onMouseOut={() => setHover([])}
+            >
+              {medianLineClosest.name}
+            </Text>
+          </foreignObject> */}
+        </>
+        )}
+        {medianIQRPaths && medianIQRData && (
+          <>
+            {/* <path
+              d={medianIQRPaths.iqrAreaPath}
+              fill="silver"
+              opacity={0.2}
+              stroke="none"
+            /> */}
+
+            <path
+              d={medianIQRPaths.medianPath}
+              fill="none"
+              stroke={darkGrayColor}
+              strokeDasharray="4,1"
+              strokeWidth={1.0}
+            />
+
+            <path
+              d={medianIQRPaths.upperPath}
+              fill="none"
+              stroke={darkGrayColor}
+              strokeDasharray="2,2"
+              strokeWidth={1.0}
+            />
+            <path
+              d={medianIQRPaths.lowerPath}
+              fill="none"
+              stroke={darkGrayColor}
+              strokeDasharray="2,2"
+              strokeWidth={1.0}
+            />
+
+            {medianIQRData && medianIQRData.length > 0 && (
+              <foreignObject
+                x={width + margin.left - 3}
+                y={lastMedian}
+                width={margin.right + 60}
+                height={20}
+              >
+                <Text px={2} size={10} color={darkGrayColor}>
+                  Median
+                </Text>
+              </foreignObject>
+            )}
+
+            {medianIQRData && medianIQRData.length > 0 && (
+              <foreignObject
+                x={width + margin.left - 3}
+                y={lastUpper}
+                width={margin.right + 60}
+                height={20}
+              >
+                <Text px={2} size={10} color={darkGrayColor}>
+                  Median + 1.5 IQR
+                </Text>
+              </foreignObject>
+            )}
+
+            {medianIQRData && medianIQRData.length > 0 && (
+              <foreignObject
+                x={width + margin.left - 3}
+                y={lastLower}
+                width={margin.right + 60}
+                height={20}
+              >
+                <Text px={2} size={10} color={darkGrayColor}>
+                  Median - 1.5 IQR
+                </Text>
+              </foreignObject>
+            )}
+          </>
+        )}
+        {medianIQRClosestPaths && (
+        <>
+          <path
+            d={medianIQRClosestPaths.medianPath ?? undefined}
+            fill="none"
+            stroke={darkGrayColor}
+            strokeDasharray="4,1"
+            strokeWidth={1.0}
+          />
+          <path
+            d={medianIQRClosestPaths.upperPath ?? undefined}
             fill="none"
             stroke={darkGrayColor}
             strokeDasharray="2,2"
             strokeWidth={1.0}
           />
-        ) : null
-      ))}
-
-      {percentileClosestPaths && percentileClosestPaths.map((line, i) => (line && line.path ? (
-        <path
-          key={`percentile-closest-line-${i}`}
-          d={line.path}
-          fill="none"
-          stroke={darkGrayColor}
-          strokeDasharray="2,2"
-          strokeWidth={1.0}
-        />
-      ) : null))}
-
-      {clusterLines?.map((line) => (line ? (
-        <g key={line.name}>
           <path
+            d={medianIQRClosestPaths.lowerPath ?? undefined}
+            fill="none"
+            stroke={darkGrayColor}
+            strokeDasharray="2,2"
+            strokeWidth={1.0}
+          />
+
+          {/* <foreignObject
+            x={width + margin.left - 3}
+            y={yScale(medianIQRClosestPaths.labelPositions.median[parameters.y_var]) - 7}
+            width={margin.right + 60}
+            height={20}
+          >
+            <Text px={2} size={10} color="silver">
+              {medianIQRClosestPaths.names.median}
+            </Text>
+          </foreignObject> */}
+
+          {/* <foreignObject
+            x={width + margin.left - 3}
+            y={yScale(medianIQRClosestPaths.labelPositions.upper[parameters.y_var]) - 7}
+            width={margin.right + 60}
+            height={20}
+          >
+            <Text px={2} size={10} color="silver">
+              {medianIQRClosestPaths.names.upper}
+            </Text>
+          </foreignObject> */}
+
+          {/* <foreignObject
+            x={width + margin.left - 3}
+            y={yScale(medianIQRClosestPaths.labelPositions.lower[parameters.y_var]) - 7}
+            width={margin.right + 60}
+            height={20}
+          >
+            <Text px={2} size={10} color="silver">
+              {medianIQRClosestPaths.names.lower}
+            </Text>
+          </foreignObject> */}
+        </>
+        )}
+
+        {percentilePaths && percentilePaths.map((path, i) => (
+          path ? (
+            <path
+              key={`percentile-line-${i}`}
+              d={path}
+              fill="none"
+              stroke={darkGrayColor}
+              strokeDasharray="2,2"
+              strokeWidth={1.0}
+            />
+          ) : null
+        ))}
+
+        {percentileClosestPaths && percentileClosestPaths.map((line, i) => (line && line.path ? (
+          <path
+            key={`percentile-closest-line-${i}`}
             d={line.path}
             fill="none"
             stroke={darkGrayColor}
-            strokeWidth={1.0}
             strokeDasharray="2,2"
+            strokeWidth={1.0}
           />
-          {/* <foreignObject
-              x={width + margin.left - 3}
-              y={yScale(line.lastPoint[1]) - 7}
-              width={margin.right + 60}
-              height={20}
-            >
+        ) : null))}
+
+        {clusterLines?.map((line) => (line ? (
+          <g key={line.name}>
+            <path
+              d={line.path}
+              fill="none"
+              stroke={darkGrayColor}
+              strokeWidth={1.0}
+              strokeDasharray="2,2"
+            />
+            {/* <foreignObject
+                x={width + margin.left - 3}
+                y={yScale(line.lastPoint[1]) - 7}
+                width={margin.right + 60}
+                height={20}
+              >
               <Text px={2} size={10} color="silver">
                 {line.name}
               </Text>
             </foreignObject> */}
-        </g>
-      ) : null))}
-      {allBackgroundLines && (
-      <>
-        {allBackgroundLines.map((x) => (x.path ? (
-          <path
-            key={`bg_${x.name}`}
-            d={x.path}
-            fill="none"
-            stroke="gray"
-            strokeWidth={0.5}
-            opacity={0.6}
-          />
+          </g>
         ) : null))}
-      </>
-      )}
-      {allLabelPositions.map((x, i) => (
-        <foreignObject
-          key={`label_${x.label}_${i}`}
-          x={width + margin.left - 3}
-          y={x.y - 7}
-          width={margin.right + 120}
-          height={20}
+        {allBackgroundLines && (
+        <>
+          {allBackgroundLines.map((x) => (x.path ? (
+            <path
+              key={`bg_${x.name}`}
+              d={x.path}
+              fill="none"
+              stroke="gray"
+              strokeWidth={0.5}
+              opacity={0.6}
+            />
+          ) : null))}
+        </>
+        )}
+      </svg>
+      {labelHtmlPositions.map((x) => (
+        <Tooltip
+          key={`label_html_${x.label}_${x.idx}`}
+          label={x.tooltip}
+          disabled={!x.tooltip}
+          position="right"
+          withArrow
+          withinPortal={false}
         >
-          <Text px={2} size={10} color={x.color ?? darkGrayColor}>
+          <span
+            style={{
+              position: 'absolute',
+              left: x.left + 2,
+              top: x.top - 8,
+              fontSize: 10,
+              color: x.color,
+              background: 'transparent',
+              cursor: x.tooltip ? 'pointer' : 'default',
+              zIndex: 2,
+              userSelect: 'none',
+              padding: 0,
+              lineHeight: 1,
+            }}
+          >
             {x.label}
-          </Text>
-        </foreignObject>
+          </span>
+        </Tooltip>
       ))}
-    </svg>
+    </div>
   );
 }
 
