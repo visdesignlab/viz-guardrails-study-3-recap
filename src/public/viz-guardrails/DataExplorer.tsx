@@ -77,7 +77,6 @@ export function DataExplorer({ parameters, setAnswer }: StimulusParams<ChartPara
     setSelection(parameters.initial_selection ?? []);
     setMetadataFiltered(false);
     setGuardrail(parameters.guardrail);
-    setNumRandomSamples(2);
   }, [dataname, parameters]);
 
   const filteredData = useMemo(() => {
