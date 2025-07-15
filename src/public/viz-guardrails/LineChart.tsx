@@ -1032,11 +1032,11 @@ export function LineChart({
 
   // ---------------------------- Render ----------------------------
   return selection?.length === 0 ? (
-    <Center style={{ width: `${(guardrail === 'cluster') ? '900px' : '800px'}`, height: '400px' }}>
+    <Center style={{ width: '850px', height: '400px' }}>
       <Text fs="italic" c="dimmed">Select an item to view the chart.</Text>
     </Center>
   ) : (
-    <svg id="baseLineChart" style={{ height: '400px', width: `${(guardrail === 'cluster') ? '900px' : '800px'}`, fontFamily: '"Helvetica Neue", "Helvetica", "Arial", sans-serif' }}>
+    <svg id="baseLineChart" style={{ height: '400px', width: '850px', fontFamily: '"Helvetica Neue", "Helvetica", "Arial", sans-serif' }}>
       <g id="axes">
         <XAxis
           isDate
