@@ -90,6 +90,16 @@
                     ],
                     "required": true
 
+                },
+                {
+                  "id": "investment-likelihood",
+                  "type": "likert",
+                  "location": "belowStimulus",
+                  "prompt": "Imagine you've signed up for a stock market brokerage account, and they've provided you with $100 that you must invest in a single stock listed on the New York Stock Exchange (NYSE). Based on the visualization shown above, how likely are you to choose this stock for your investment?",
+                  "leftLabel": "Not at all likely",
+                  "rightLabel": "Extremely likely",
+                  "preset": 7,
+                  "required": true
                 }
             ]
         },
