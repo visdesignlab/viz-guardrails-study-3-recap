@@ -48,7 +48,7 @@ export function Selector({
           { value: 'medianIQR', label: 'Median of All Lines +-1.5IQR At Each Timestamp' },
           { value: 'medianIQRClosest', label: 'Actual Median +-1.5IQR Closest' },
           { value: 'percentiles', label: 'Percentiles of All Lines At Each Timestamp' },
-          // { value: 'percentileClosest', label: 'Actual Percentiles Closest' },
+          { value: 'percentileClosest', label: 'Actual Percentiles Closest' },
           { value: 'cluster', label: 'Cluster Rep' },
           { value: 'all', label: 'All' },
         ]}
