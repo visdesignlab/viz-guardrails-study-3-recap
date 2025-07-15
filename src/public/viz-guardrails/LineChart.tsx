@@ -32,6 +32,7 @@ export function LineChart({
   guardrail,
   metadataFiltered,
   numRandomSamples,
+  numQuantiles,
 }: {
   parameters: ChartParams,
   data: any[],
@@ -42,6 +43,7 @@ export function LineChart({
   guardrail: string,
   metadataFiltered: boolean,
   numRandomSamples: number,
+  numQuantiles: number,
 }) {
   // Handle hovering
   const [hover, setHover] = useState<string[] | null>(null);
@@ -264,7 +266,6 @@ export function LineChart({
   }, [data, parameters, guardrail]);
 
   // ---------------------------- Dynamic Quantiles for Percentile Lines ---------------------------- //
-  const numQuantiles = 6; // number of regions
   const percentileData = useMemo(() => {
     if (guardrail !== 'percentiles') return null;
 
