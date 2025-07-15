@@ -87,6 +87,8 @@ export function LineChart({
 
   const height = 400 - margin.top - margin.bottom;
 
+  const darkGrayColor = '#555';
+
   /// ////////// Setting scales
   const allCountries = useMemo(() => Array.from(new Set(data.map((val) => val[parameters.cat_var]))), [data, parameters.cat_var]);
 
@@ -893,7 +895,7 @@ export function LineChart({
           return {
             label,
             y: data.filter((val) => val[parameters.cat_var] === country).slice(-1).map((val) => yScale(val[parameters.y_var]))[0],
-            color: shouldBeColor(country) ? colorScale(country) : 'silver',
+            color: shouldBeColor(country) ? colorScale(country) : darkGrayColor,
           };
         }),
       );
@@ -904,7 +906,7 @@ export function LineChart({
         randomCountries.map((country) => ({
           label: dataname === 'clean_data' ? `${country} (${getPolicyLabel(country)})` : country,
           y: data.filter((val) => val[parameters.cat_var] === country).slice(-1).map((val) => yScale(val[parameters.y_var]))[0],
-          color: 'gray',
+          color: darkGrayColor,
         })),
       );
     }
@@ -913,7 +915,7 @@ export function LineChart({
       labels.push({
         label: averageLabel,
         y: yScale(superimposeSummary.data[superimposeSummary.data.length - 1].mean),
-        color: 'gray',
+        color: darkGrayColor,
       });
     }
 
@@ -921,7 +923,7 @@ export function LineChart({
       labels.push({
         label: medianLineClosest.name,
         y: yScale(medianLineClosest.labelPosition[parameters.y_var]),
-        color: 'silver',
+        color: darkGrayColor,
       });
     }
     if (medianIQRClosestPaths && guardrail === 'medianIQRClosest') {
@@ -929,17 +931,17 @@ export function LineChart({
         {
           label: medianIQRClosestPaths.names.median,
           y: yScale(medianIQRClosestPaths.labelPositions.median[parameters.y_var]),
-          color: 'silver',
+          color: darkGrayColor,
         },
         {
           label: medianIQRClosestPaths.names.upper,
           y: yScale(medianIQRClosestPaths.labelPositions.upper[parameters.y_var]),
-          color: 'silver',
+          color: darkGrayColor,
         },
         {
           label: medianIQRClosestPaths.names.lower,
           y: yScale(medianIQRClosestPaths.labelPositions.lower[parameters.y_var]),
-          color: 'silver',
+          color: darkGrayColor,
         },
       );
     }
@@ -954,7 +956,7 @@ export function LineChart({
             labels.push({
               label: `${percentile}th Percentile`,
               y: yScale(lastPoint.quantiles[i]),
-              color: 'silver',
+              color: darkGrayColor,
             });
           }
         }
@@ -968,7 +970,7 @@ export function LineChart({
           labels.push({
             label: `${line.name} (${percentile}th Percentile)`,
             y: yScale(line.lastPoint[parameters.y_var]),
-            color: 'silver',
+            color: darkGrayColor,
           });
         }
       });
@@ -986,7 +988,7 @@ export function LineChart({
             return {
               label: `${line.name}${sector}${subregion}`,
               y: yScale(line.lastPoint[1]),
-              color: 'silver',
+              color: darkGrayColor,
             };
           })
           .filter((label): label is { label: string; y: number; color: string } => label !== null),
@@ -1064,7 +1066,7 @@ export function LineChart({
               id={`${x.country}`}
               key={`${x.country}_key`}
               fill="none"
-              stroke={shouldBeColor(x.country) ? colorScale(x.country) : 'gray'}
+              stroke={shouldBeColor(x.country) ? colorScale(x.country) : darkGrayColor}
               strokeDasharray="4,1"
               strokeWidth={0.5}
               d={x.path}
@@ -1080,7 +1082,7 @@ export function LineChart({
               id="meanLine"
               key="meanLine_key"
               fill="none"
-              stroke="gray"
+              stroke={darkGrayColor}
               strokeDasharray="4,1"
               strokeWidth={0.5}
               d={superimposeSummary.meanLine}
@@ -1096,7 +1098,7 @@ export function LineChart({
               id={`${x.country}`}
               key={`${x.country}_key`}
               fill="none"
-              stroke={shouldBeColor(x.country) ? colorScale(x.country) : 'silver'}
+              stroke={shouldBeColor(x.country) ? colorScale(x.country) : darkGrayColor}
               strokeWidth={hover?.includes(x.country) ? 2 : 1.5}
               d={x.path}
             />
@@ -1108,7 +1110,7 @@ export function LineChart({
         <path
           d={medianLinePath.path}
           fill="none"
-          stroke="silver"
+          stroke={darkGrayColor}
           strokeDasharray="4,1"
           strokeWidth={1.5}
         />
@@ -1121,7 +1123,7 @@ export function LineChart({
           <Text
             px={2}
             size={10}
-            color="silver"
+            color={darkGrayColor}
             onMouseOver={() => setHover(['Median Country'])}
             onMouseOut={() => setHover([])}
           >
@@ -1135,7 +1137,7 @@ export function LineChart({
         <path
           d={medianLineClosest.path}
           fill="none"
-          stroke="silver"
+          stroke={darkGrayColor}
           strokeDasharray="4,1"
           strokeWidth={1.5}
         />
@@ -1169,7 +1171,7 @@ export function LineChart({
           <path
             d={medianIQRPaths.medianPath}
             fill="none"
-            stroke="silver"
+            stroke={darkGrayColor}
             strokeDasharray="4,1"
             strokeWidth={1.5}
           />
@@ -1177,14 +1179,14 @@ export function LineChart({
           <path
             d={medianIQRPaths.upperPath}
             fill="none"
-            stroke="silver"
+            stroke={darkGrayColor}
             strokeDasharray="2,2"
             strokeWidth={1.5}
           />
           <path
             d={medianIQRPaths.lowerPath}
             fill="none"
-            stroke="silver"
+            stroke={darkGrayColor}
             strokeDasharray="2,2"
             strokeWidth={1.5}
           />
@@ -1196,7 +1198,7 @@ export function LineChart({
               width={margin.right + 60}
               height={20}
             >
-              <Text px={2} size={10} color="silver">
+              <Text px={2} size={10} color={darkGrayColor}>
                 Median
               </Text>
             </foreignObject>
@@ -1209,7 +1211,7 @@ export function LineChart({
               width={margin.right + 60}
               height={20}
             >
-              <Text px={2} size={10} color="silver">
+              <Text px={2} size={10} color={darkGrayColor}>
                 Median + 1.5 IQR
               </Text>
             </foreignObject>
@@ -1222,7 +1224,7 @@ export function LineChart({
               width={margin.right + 60}
               height={20}
             >
-              <Text px={2} size={10} color="silver">
+              <Text px={2} size={10} color={darkGrayColor}>
                 Median - 1.5 IQR
               </Text>
             </foreignObject>
@@ -1234,21 +1236,21 @@ export function LineChart({
         <path
           d={medianIQRClosestPaths.medianPath ?? undefined}
           fill="none"
-          stroke="silver"
+          stroke={darkGrayColor}
           strokeDasharray="4,1"
           strokeWidth={1.5}
         />
         <path
           d={medianIQRClosestPaths.upperPath ?? undefined}
           fill="none"
-          stroke="silver"
+          stroke={darkGrayColor}
           strokeDasharray="2,2"
           strokeWidth={1.5}
         />
         <path
           d={medianIQRClosestPaths.lowerPath ?? undefined}
           fill="none"
-          stroke="silver"
+          stroke={darkGrayColor}
           strokeDasharray="2,2"
           strokeWidth={1.5}
         />
@@ -1294,7 +1296,7 @@ export function LineChart({
             key={`percentile-line-${i}`}
             d={path}
             fill="none"
-            stroke="silver"
+            stroke={darkGrayColor}
             strokeDasharray="2,2"
             strokeWidth={1.5}
           />
@@ -1306,7 +1308,7 @@ export function LineChart({
           key={`percentile-closest-line-${i}`}
           d={line.path}
           fill="none"
-          stroke="silver"
+          stroke={darkGrayColor}
           strokeDasharray="2,2"
           strokeWidth={1.5}
         />
@@ -1317,7 +1319,7 @@ export function LineChart({
           <path
             d={line.path}
             fill="none"
-            stroke="silver"
+            stroke={darkGrayColor}
             strokeWidth={1}
             strokeDasharray="2,2"
           />
@@ -1340,7 +1342,7 @@ export function LineChart({
             key={`bg_${x.name}`}
             d={x.path}
             fill="none"
-            stroke="lightgray"
+            stroke="gray"
             strokeWidth={1}
             opacity={0.6}
           />
@@ -1355,7 +1357,7 @@ export function LineChart({
           width={margin.right + 120}
           height={20}
         >
-          <Text px={2} size={10} color={x.color ?? 'silver'}>
+          <Text px={2} size={10} color={x.color ?? darkGrayColor}>
             {x.label}
           </Text>
         </foreignObject>
