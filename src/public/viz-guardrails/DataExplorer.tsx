@@ -48,7 +48,7 @@ export function DataExplorer({ parameters, setAnswer }: StimulusParams<ChartPara
   const [range, setRange] = useState<[Date, Date] | null>([new Date(parameters.start_date), new Date(parameters.end_date)]);
   const [metadataFiltered, setMetadataFiltered] = useState<boolean>(false);
   const [guardrail, setGuardrail] = useState<string>(parameters.guardrail);
-  const [numRandomSamples, setNumRandomSamples] = useState<number>(2);
+  const [numRandomSamples, setNumRandomSamples] = useState<number>(5);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [numQuantiles, setNumQuantiles] = useState<number>(parameters.num_Quantiles ?? 6); // number of regions for percentiles guardrail
 
