@@ -952,7 +952,7 @@ export function LineChart({
           const percentile = Math.round(((i + 1) * 100) / (numQuantiles + 1));
           if (lastPoint && lastPoint.quantiles && lastPoint.quantiles[i] != null) {
             labels.push({
-              label: `${percentile}th percentile`,
+              label: `${percentile}th Percentile`,
               y: yScale(lastPoint.quantiles[i]),
               color: 'silver',
             });
@@ -966,7 +966,7 @@ export function LineChart({
         if (line && line.lastPoint) {
           const percentile = Math.round((quantiles[i] ?? 0) * 100);
           labels.push({
-            label: `${line.name} (${percentile}th)`,
+            label: `${line.name} (${percentile}th Percentile)`,
             y: yScale(line.lastPoint[parameters.y_var]),
             color: 'silver',
           });
