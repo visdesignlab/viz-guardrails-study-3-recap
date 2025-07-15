@@ -540,8 +540,7 @@
       "introduction",
       "consent",
       {
-        "order": "latinSquare",
-        "numSamples": 1,
+        "order": "random",
         "components": [
           "stock-a-control",
           "stock-a-random",
