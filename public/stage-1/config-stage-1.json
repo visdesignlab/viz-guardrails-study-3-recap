@@ -297,10 +297,10 @@
         "guardrail": "percentiles"
       }
     },
-    "stock-a-medianIQRClosest": {
+    "stock-a-percentileClosest": {
       "baseComponent": "stock-a",
       "parameters": {
-        "guardrail": "medianIQRClosest"
+        "guardrail": "percentileClosest"
       }
     },
     "stock-a-cluster": {
@@ -535,8 +535,8 @@
         "components": [
           "stock-a-control",
           "stock-a-random",
-          "stock-a-medianIQR",
-          "stock-a-medianIQRClosest",
+          "stock-a-stats",
+          "stock-a-percentileClosest",
           "stock-a-cluster"
         ]
       },
