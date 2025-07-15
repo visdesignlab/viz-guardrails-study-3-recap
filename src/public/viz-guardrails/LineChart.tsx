@@ -951,16 +951,20 @@ export function LineChart({
       );
     }
     if (percentileData && guardrail === 'percentiles' && percentileData.length > 0) {
-      const numQuantiles = percentileData[0].quantiles.length;
+      const numQuantiles = percentileData[0]?.quantiles?.length;
       const lastPoint = percentileData[percentileData.length - 1];
 
-      for (let i = 0; i < numQuantiles; i += 1) {
-        const percentile = Math.round(((i + 1) * 100) / (numQuantiles + 1));
-        labels.push({
-          label: `${percentile}th percentile`,
-          y: yScale(lastPoint.quantiles[i]),
-          color: 'silver',
-        });
+      if (numQuantiles && numQuantiles > 0) {
+        for (let i = 0; i < numQuantiles; i += 1) {
+          const percentile = Math.round(((i + 1) * 100) / (numQuantiles + 1));
+          if (lastPoint && lastPoint.quantiles && lastPoint.quantiles[i] != null) {
+            labels.push({
+              label: `${percentile}th percentile`,
+              y: yScale(lastPoint.quantiles[i]),
+              color: 'silver',
+            });
+          }
+        }
       }
     }
     // if (percentileClosestPaths && guardrail === 'percentileClosest') {
