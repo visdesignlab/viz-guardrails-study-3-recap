@@ -36,6 +36,7 @@ export interface ChartParams {
   cat_var: string,
   group_var: string,
   guardrail: string,
+  num_Quantiles?: number,
 }
 
 export function DataExplorer({ parameters, setAnswer }: StimulusParams<ChartParams>) {
@@ -48,6 +49,8 @@ export function DataExplorer({ parameters, setAnswer }: StimulusParams<ChartPara
   const [metadataFiltered, setMetadataFiltered] = useState<boolean>(false);
   const [guardrail, setGuardrail] = useState<string>(parameters.guardrail);
   const [numRandomSamples, setNumRandomSamples] = useState<number>(2);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [numQuantiles, setNumQuantiles] = useState<number>(parameters.num_Quantiles ?? 6); // number of regions for percentiles guardrail
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   useEffect(() => {
@@ -231,6 +234,7 @@ export function DataExplorer({ parameters, setAnswer }: StimulusParams<ChartPara
                     guardrail={guardrail}
                     metadataFiltered={metadataFiltered}
                     numRandomSamples={numRandomSamples}
+                    numQuantiles={numQuantiles}
                   />
                 </Group>
                 {parameters.allow_time_slider && dataname === 'clean_data' ? (
