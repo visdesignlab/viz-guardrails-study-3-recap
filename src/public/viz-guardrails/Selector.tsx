@@ -65,12 +65,12 @@ export function Selector({
           value={numRandomSamples}
           onChange={(val) => typeof val === 'number' && setNumRandomSamples(val)}
           min={1}
-          max={5}
+          max={15}
           step={1}
           style={{ marginTop: '10px', width: '200px' }}
         />
         <Text size="xs" color="dimmed" mt={4} style={{ marginLeft: '2px' }}>
-          Maximum of 5
+          Maximum of 15
         </Text>
       </div>
       )}
