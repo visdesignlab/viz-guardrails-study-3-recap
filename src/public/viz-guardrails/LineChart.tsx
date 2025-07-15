@@ -1112,7 +1112,7 @@ export function LineChart({
           fill="none"
           stroke={darkGrayColor}
           strokeDasharray="4,1"
-          strokeWidth={1.5}
+          strokeWidth={1.0}
         />
         <foreignObject
           x={width + margin.left - 3}
@@ -1139,7 +1139,7 @@ export function LineChart({
           fill="none"
           stroke={darkGrayColor}
           strokeDasharray="4,1"
-          strokeWidth={1.5}
+          strokeWidth={1.0}
         />
         {/* <foreignObject
           x={width + margin.left - 3}
@@ -1173,7 +1173,7 @@ export function LineChart({
             fill="none"
             stroke={darkGrayColor}
             strokeDasharray="4,1"
-            strokeWidth={1.5}
+            strokeWidth={1.0}
           />
 
           <path
@@ -1181,14 +1181,14 @@ export function LineChart({
             fill="none"
             stroke={darkGrayColor}
             strokeDasharray="2,2"
-            strokeWidth={1.5}
+            strokeWidth={1.0}
           />
           <path
             d={medianIQRPaths.lowerPath}
             fill="none"
             stroke={darkGrayColor}
             strokeDasharray="2,2"
-            strokeWidth={1.5}
+            strokeWidth={1.0}
           />
 
           {medianIQRData && medianIQRData.length > 0 && (
@@ -1238,21 +1238,21 @@ export function LineChart({
           fill="none"
           stroke={darkGrayColor}
           strokeDasharray="4,1"
-          strokeWidth={1.5}
+          strokeWidth={1.0}
         />
         <path
           d={medianIQRClosestPaths.upperPath ?? undefined}
           fill="none"
           stroke={darkGrayColor}
           strokeDasharray="2,2"
-          strokeWidth={1.5}
+          strokeWidth={1.0}
         />
         <path
           d={medianIQRClosestPaths.lowerPath ?? undefined}
           fill="none"
           stroke={darkGrayColor}
           strokeDasharray="2,2"
-          strokeWidth={1.5}
+          strokeWidth={1.0}
         />
 
         {/* <foreignObject
@@ -1298,7 +1298,7 @@ export function LineChart({
             fill="none"
             stroke={darkGrayColor}
             strokeDasharray="2,2"
-            strokeWidth={1.5}
+            strokeWidth={1.0}
           />
         ) : null
       ))}
@@ -1310,7 +1310,7 @@ export function LineChart({
           fill="none"
           stroke={darkGrayColor}
           strokeDasharray="2,2"
-          strokeWidth={1.5}
+          strokeWidth={1.0}
         />
       ) : null))}
 
@@ -1320,7 +1320,7 @@ export function LineChart({
             d={line.path}
             fill="none"
             stroke={darkGrayColor}
-            strokeWidth={1}
+            strokeWidth={1.0}
             strokeDasharray="2,2"
           />
           {/* <foreignObject
@@ -1343,7 +1343,7 @@ export function LineChart({
             d={x.path}
             fill="none"
             stroke="gray"
-            strokeWidth={1}
+            strokeWidth={0.5}
             opacity={0.6}
           />
         ) : null))}
