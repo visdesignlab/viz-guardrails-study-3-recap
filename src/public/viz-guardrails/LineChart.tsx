@@ -343,7 +343,7 @@ export function LineChart({
 
   // ---------------------------- Cluster Representatives ----------------------------
   const [clusterReps, setClusterReps] = useState<any[]>([]);
-  const hardcodedClusterReps = ['FTV', 'PPL', 'UPS', 'JPM'];
+  const hardcodedClusterReps = ['CTAS', 'DAY', 'NDSN', 'BA', 'LMT'];
   const hardCodedSubregionReps = ['Europe', 'Low-income countries', 'South Korea', 'Iran', 'North America'];
   const clusterRepsDataPath = '/sandbox/data/cluster_representatives.csv';
   const subregionRepsDataPath = '/sandbox/data/subregion_representatives.csv';
