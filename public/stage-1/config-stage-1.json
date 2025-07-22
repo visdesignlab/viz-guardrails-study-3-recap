@@ -65,7 +65,7 @@
                     "id": "accuracy",
                     "type": "slider",
                     "location": "belowStimulus",
-                    "prompt": "Where do you think this stock ranks in performance compared to all other stocks in the S&P500 for 2024?",
+                    "prompt": "Where do you think this stock ranks in performance compared to all other stocks in the market for 2024?",
                     "options": [
                         {
                             "value": 1,
@@ -95,7 +95,7 @@
                   "id": "investment-likelihood",
                   "type": "likert",
                   "location": "belowStimulus",
-                  "prompt": "Imagine you've signed up for a stock market brokerage account, and they've provided you with $100 that you must invest in a single stock listed on the New York Stock Exchange (NYSE). Based on the visualization shown above, how likely are you to choose this stock for your investment?",
+                  "prompt": "Imagine you've signed up for a stock market brokerage account, and they've provided you with $100 that you must invest in a single stock listed in the market. Based on the visualization shown above, how likely are you to choose this stock for your investment?",
                   "leftLabel": "Not at all likely",
                   "rightLabel": "Extremely likely",
                   "preset": 7,
