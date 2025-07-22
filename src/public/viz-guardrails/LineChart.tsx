@@ -1397,6 +1397,7 @@ export function LineChart({
               userSelect: 'none',
               padding: 0,
               lineHeight: 1,
+              fontFamily: '"Helvetica Neue", "Helvetica", "Arial", sans-serif',
             }}
           >
             {x.label}
