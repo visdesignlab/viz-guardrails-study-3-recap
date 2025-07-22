@@ -29,7 +29,7 @@
   ],
   "baseComponents": {
     "stock-a" : {
-            "instruction": "<br><br><br><br>A financial advisor claimed in 2023 that this stock was one of the best investment for that year. The visualization depicts how it pans out. Please review the visualization of stock performance below and answer the following questions.",
+            "instruction": "<br><br><br><br>A financial advisor claimed in 2024 that this stock was one of the best investment for that year. The visualization depicts how it pans out. Please review the visualization of stock performance below and answer the following questions.",
             "instructionLocation": "aboveStimulus",
             "type": "react-component",
             "path": "viz-guardrails/DataExplorer.tsx",
@@ -37,7 +37,7 @@
                 "dataset": "sp500_stocks",
                 "start_date": "2024-01-01",
                 "end_date": "2024-12-31",
-                "initial_selection": ["EXPD"],
+                "initial_selection": ["VZ"],
                 "allow_time_slider": false,
                 "allow_guardrail_selector": false,
                 "allow_selection": false,
@@ -65,7 +65,7 @@
                     "id": "accuracy",
                     "type": "slider",
                     "location": "belowStimulus",
-                    "prompt": "Where do you think this stock ranks in performance compared to all other stocks in the S&P500 for 2023?",
+                    "prompt": "How well do you think this stock performed compared to all other stocks in the market for 2024? Please use the slider below to show your answer, where 1 means 'worst' and 99 means 'best.'",
                     "options": [
                         {
                             "value": 1,
@@ -95,7 +95,7 @@
                   "id": "investment-likelihood",
                   "type": "likert",
                   "location": "belowStimulus",
-                  "prompt": "Imagine you've signed up for a stock market brokerage account, and they've provided you with $100 that you must invest in a single stock listed on the New York Stock Exchange (NYSE). Based on the visualization shown above, how likely are you to choose this stock for your investment?",
+                  "prompt": "Imagine you've signed up for a stock market brokerage account, and they've provided you with $100 that you must invest in a single stock listed in the market. Based on the visualization shown above, how likely are you to choose this stock for your investment?",
                   "leftLabel": "Not at all likely",
                   "rightLabel": "Extremely likely",
                   "preset": 7,
