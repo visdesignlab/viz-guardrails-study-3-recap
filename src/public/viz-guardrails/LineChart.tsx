@@ -1071,10 +1071,22 @@ export function LineChart({
             yRange={yScale.range() as [number, number]}
             vertPosition={height + margin.top}
             showLines={false}
-            ticks={xScale.ticks(6).map((value) => ({
-              value: value.toString(),
-              offset: xScale(value),
-            }))}
+            ticks={(() => {
+              const defaultTicks = xScale.ticks(6);
+              const domain = xScale.domain();
+              const endDate = domain[1];
+              const lastTick = defaultTicks[defaultTicks.length - 1];
+              if (lastTick.getTime() !== endDate.getTime()) {
+                return [...defaultTicks, endDate].map((value) => ({
+                  value: value.toString(),
+                  offset: xScale(value),
+                }));
+              }
+              return defaultTicks.map((value) => ({
+                value: value.toString(),
+                offset: xScale(value),
+              }));
+            })()}
           />
           <YAxis
             dataset={dataname}
