@@ -65,7 +65,7 @@
                     "id": "accuracy",
                     "type": "slider",
                     "location": "belowStimulus",
-                    "prompt": "Where do you think this stock ranks in performance compared to all other stocks in the market for 2024?",
+                    "prompt": "How well do you think this stock performed compared to all other stocks in the market for 2024? Please use the slider below to show your answer, where 1 means 'worst' and 99 means 'best.'",
                     "options": [
                         {
                             "value": 1,
