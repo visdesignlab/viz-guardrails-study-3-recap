@@ -24,7 +24,8 @@ export function useRandomGuardrail({
     } else {
       setRandomCountries([]);
     }
-  }, [guardrail, selection, allCountries, numRandomSamples]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return randomCountries;
 }
