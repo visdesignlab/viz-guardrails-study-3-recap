@@ -274,7 +274,8 @@ export function LineChart({
   const percentileData = useMemo(() => {
     if (guardrail !== 'percentiles') return null;
 
-    const quantiles = Array.from({ length: numQuantiles - 1 }, (_, i) => (i + 1) / numQuantiles);
+    // Hardcoded quantiles for n = 5
+    const quantiles = [0.05, 0.25, 0.5, 0.75, 0.95];
 
     const groupedData = d3.group(data, (d) => d[parameters.x_var]);
 
@@ -287,7 +288,7 @@ export function LineChart({
         quantiles: quantileValues,
       };
     }).filter((d) => d !== null);
-  }, [data, parameters, guardrail, numQuantiles]);
+  }, [data, parameters, guardrail]);
 
   // ---------------------------- Percentile Closest Lines ---------------------------- //
   const percentileClosestData = useMemo(() => {
@@ -949,19 +950,16 @@ export function LineChart({
       );
     }
     if (percentileData && guardrail === 'percentiles' && percentileData.length > 0) {
-      const numQuantiles = percentileData[0]?.quantiles?.length;
+      // Hardcoded percentiles: n = 5
+      const percentiles = [5, 25, 50, 75, 95];
       const lastPoint = percentileData[percentileData.length - 1];
-
-      if (numQuantiles && numQuantiles > 0) {
-        for (let i = 0; i < numQuantiles; i += 1) {
-          const percentile = Math.round(((i + 1) * 100) / (numQuantiles + 1));
-          if (lastPoint && lastPoint.quantiles && lastPoint.quantiles[i] != null) {
-            labels.push({
-              label: `${percentile}th Percentile`,
-              y: yScale(lastPoint.quantiles[i]),
-              color: darkGrayColor,
-            });
-          }
+      for (let i = 0; i < percentiles.length; i += 1) {
+        if (lastPoint && lastPoint.quantiles && lastPoint.quantiles[i] != null) {
+          labels.push({
+            label: `${percentiles[i]}th Percentile`,
+            y: yScale(lastPoint.quantiles[i]),
+            color: darkGrayColor,
+          });
         }
       }
     }
