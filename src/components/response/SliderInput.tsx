@@ -37,7 +37,7 @@ export default function SliderInput({
         <Slider
           disabled={disabled}
           labelAlwaysOn={(answer as any).value !== ''}
-          label={(x) => `${x}`}
+          label={(x) => `Better than ${x}% of stocks`}
           sx={{ marginTop: '15px', marginBottom: '15px', width: '400px' }}
           marks={options as SliderProps['marks']}
           {...answer}
