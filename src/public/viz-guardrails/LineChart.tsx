@@ -294,7 +294,8 @@ export function LineChart({
   const percentileClosestData = useMemo(() => {
     if (guardrail !== 'percentileClosest') return null;
 
-    const quantiles = Array.from({ length: numQuantiles - 1 }, (_, i) => (i + 1) / numQuantiles);
+    // Hardcoded quantiles for n = 5
+    const quantiles = [0.05, 0.25, 0.5, 0.75, 0.95];
 
     const groupedByDate = d3.group(data, (d) => d[parameters.x_var]);
     const groupedByCountry = d3.group(data, (d) => d[parameters.cat_var]);
@@ -340,7 +341,7 @@ export function LineChart({
       quantiles,
       closest,
     };
-  }, [data, parameters, guardrail, numQuantiles]);
+  }, [data, parameters, guardrail]);
 
   // ---------------------------- Cluster Representatives ----------------------------
   const [clusterReps, setClusterReps] = useState<any[]>([]);
@@ -964,10 +965,11 @@ export function LineChart({
       }
     }
     if (percentileClosestPaths && guardrail === 'percentileClosest') {
-      const quantiles = percentileClosestData?.quantiles ?? [];
+      // Hardcoded percentiles: n = 5
+      const percentiles = [5, 25, 50, 75, 95];
       percentileClosestPaths.forEach((line, i) => {
         if (line && line.lastPoint) {
-          const percentile = Math.round((quantiles[i] ?? 0) * 100);
+          const percentile = percentiles[i];
           labels.push({
             label: `${line.name} (${percentile}th Percentile)`,
             y: yScale(line.lastPoint[parameters.y_var]),
