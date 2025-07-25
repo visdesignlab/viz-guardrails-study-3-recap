@@ -52,14 +52,14 @@
             "nextButtonLocation": "belowStimulus",
             "response": [
                 {
-                    "id": "completeness",
-                    "type": "likert",
-                    "location": "belowStimulus",
-                    "prompt": "If you were considering investing in this stock, do you feel that you were provided with appropriate context to make an informed decision?",
-                    "leftLabel": "Not at all",
-                    "rightLabel": "Definitely",
-                    "preset": 7,
-                    "required": true
+                  "id": "investment-likelihood",
+                  "type": "likert",
+                  "location": "belowStimulus",
+                  "prompt": "Imagine you've signed up for a stock market brokerage account, and they've provided you with $100 that you must invest in a single stock listed in the market. Based on the visualization shown above, how likely are you to choose this stock for your investment?",
+                  "leftLabel": "Not at all likely",
+                  "rightLabel": "Extremely likely",
+                  "preset": 7,
+                  "required": true
                 },
                 {
                     "id": "accuracy",
@@ -92,14 +92,14 @@
 
                 },
                 {
-                  "id": "investment-likelihood",
-                  "type": "likert",
-                  "location": "belowStimulus",
-                  "prompt": "Imagine you've signed up for a stock market brokerage account, and they've provided you with $100 that you must invest in a single stock listed in the market. Based on the visualization shown above, how likely are you to choose this stock for your investment?",
-                  "leftLabel": "Not at all likely",
-                  "rightLabel": "Extremely likely",
-                  "preset": 7,
-                  "required": true
+                    "id": "completeness",
+                    "type": "likert",
+                    "location": "belowStimulus",
+                    "prompt": "If you were considering investing in this stock, do you feel that you were provided with appropriate context to make an informed decision?",
+                    "leftLabel": "Not at all",
+                    "rightLabel": "Definitely",
+                    "preset": 7,
+                    "required": true
                 }
             ]
         },
