@@ -29,7 +29,7 @@
   ],
   "baseComponents": {
     "stock-a" : {
-            "instruction": "<br><br><br><br>A financial advisor claimed in 2024 that this stock was one of the best investment for that year. The visualization depicts how it pans out. Please review the visualization of stock performance below and answer the following questions.",
+            "instruction": "<br><br><br><br>A financial advisor claims in 2024 that this stock was one of the best investment for that year. The visualization depicts how it pans out. Please review the visualization of stock performance below and answer the following questions.",
             "instructionLocation": "aboveStimulus",
             "type": "react-component",
             "path": "viz-guardrails/DataExplorer.tsx",
