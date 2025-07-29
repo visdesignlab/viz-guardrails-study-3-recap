@@ -29,7 +29,7 @@
   ],
   "baseComponents": {
     "stock-a" : {
-            "instruction": "<br><br><br><br>A financial advisor claimed in 2024 that this stock was one of the best investment for that year. The visualization depicts how it pans out. Please review the visualization of stock performance below and answer the following questions.",
+            "instruction": "<br><br><br><br>A financial advisor claims in 2024 that this stock was one of the best investment for that year. The visualization depicts how it pans out. Please review the visualization of stock performance below and answer the following questions.",
             "instructionLocation": "aboveStimulus",
             "type": "react-component",
             "path": "viz-guardrails/DataExplorer.tsx",
@@ -52,14 +52,14 @@
             "nextButtonLocation": "belowStimulus",
             "response": [
                 {
-                    "id": "completeness",
-                    "type": "likert",
-                    "location": "belowStimulus",
-                    "prompt": "If you were considering investing in this stock, do you feel that you were provided with appropriate context to make an informed decision?",
-                    "leftLabel": "Not at all",
-                    "rightLabel": "Definitely",
-                    "preset": 7,
-                    "required": true
+                  "id": "investment-likelihood",
+                  "type": "likert",
+                  "location": "belowStimulus",
+                  "prompt": "Imagine you've signed up for a stock market brokerage account, and they've provided you with $100 that you must invest in a single stock listed in the market. Based on the visualization shown above, how likely are you to choose this stock for your investment?",
+                  "leftLabel": "Not at all likely",
+                  "rightLabel": "Extremely likely",
+                  "preset": 7,
+                  "required": true
                 },
                 {
                     "id": "accuracy",
@@ -92,14 +92,14 @@
 
                 },
                 {
-                  "id": "investment-likelihood",
-                  "type": "likert",
-                  "location": "belowStimulus",
-                  "prompt": "Imagine you've signed up for a stock market brokerage account, and they've provided you with $100 that you must invest in a single stock listed in the market. Based on the visualization shown above, how likely are you to choose this stock for your investment?",
-                  "leftLabel": "Not at all likely",
-                  "rightLabel": "Extremely likely",
-                  "preset": 7,
-                  "required": true
+                    "id": "completeness",
+                    "type": "likert",
+                    "location": "belowStimulus",
+                    "prompt": "If you were considering investing in this stock, do you feel that you were provided with appropriate context to make an informed decision?",
+                    "leftLabel": "Not at all",
+                    "rightLabel": "Definitely",
+                    "preset": 7,
+                    "required": true
                 }
             ]
         },
